@@ -1,0 +1,342 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#000"
+    android:orientation="vertical"
+    android:stretchColumns="0,1,2">
+
+    <TableRow android:padding="20dp">
+
+        <TextView
+            android:id="@+id/land1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_column="0"
+            android:layout_marginLeft="10dp"
+            android:layout_weight="0.4"
+            android:gravity="center"
+            android:text="Land 1 / Tower\nP1"
+            android:textColor="#fff"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/road1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_column="1"
+            android:layout_marginLeft="10dp"
+            android:layout_weight="0.2"
+            android:gravity="center"
+            android:text="Creature 1"
+            android:textColor="#fff"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/land2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_column="2"
+            android:layout_marginLeft="10dp"
+            android:layout_weight="0.4"
+            android:gravity="center"
+            android:text="Land 2 \n"
+            android:textColor="#fff"
+            android:textSize="16sp" />
+
+    </TableRow>
+
+    <TableRow android:padding="20dp">
+
+        <TextView
+            android:id="@+id/road6"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_column="0"
+            android:layout_marginLeft="10dp"
+            android:layout_weight="0.4"
+            android:gravity="center"
+            android:text="Creature 6"
+            android:textColor="#fff"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/quest1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_column="1"
+            android:layout_marginLeft="10dp"
+            android:layout_weight="0.2"
+            android:gravity="center"
+            android:text="Quest 1"
+            android:textColor="#fff"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/road2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_column="2"
+            android:layout_marginLeft="10dp"
+            android:layout_weight="0.4"
+            android:gravity="center"
+            android:text="Creature 2"
+            android:textColor="#fff"
+            android:textSize="14sp" />
+
+    </TableRow>
+
+    <TableRow android:padding="20dp">
+
+        <TextView
+            android:id="@+id/land6"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_column="0"
+            android:layout_marginLeft="10dp"
+            android:layout_weight="0.4"
+            android:gravity="center"
+            android:text="Land 6 \n  P2"
+            android:textColor="#fff"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/road7"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_column="1"
+            android:layout_marginLeft="10dp"
+            android:layout_weight="0.2"
+            android:gravity="center"
+            android:text="Creature 7"
+            android:textColor="#fff"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/land3"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_column="2"
+            android:layout_marginLeft="10dp"
+            android:layout_weight="0.4"
+            android:gravity="center"
+            android:text="Land 3\n"
+            android:textColor="#fff"
+            android:textSize="16sp" />
+
+    </TableRow>
+
+    <TableRow android:padding="20dp">
+
+        <TextView
+            android:id="@+id/road5"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_column="0"
+            android:layout_marginLeft="10dp"
+            android:layout_weight="0.4"
+            android:gravity="center"
+            android:text="Creature 5"
+            android:textColor="#fff"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/quest2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_column="1"
+            android:layout_marginLeft="10dp"
+            android:layout_weight="0.2"
+            android:gravity="center"
+            android:text="Quest 2"
+            android:textColor="#fff"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/road3"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_column="2"
+            android:layout_marginLeft="10dp"
+            android:layout_weight="0.4"
+            android:gravity="center"
+            android:text="Creature 3"
+            android:textColor="#fff"
+            android:textSize="14sp" />
+
+    </TableRow>
+
+    <TableRow android:padding="20dp">
+
+        <TextView
+            android:id="@+id/land5"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_column="0"
+            android:layout_marginLeft="10dp"
+            android:layout_weight="0.4"
+            android:gravity="center"
+            android:text="Land 5\n"
+            android:textColor="#fff"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/road4"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_column="1"
+            android:layout_marginLeft="10dp"
+            android:layout_weight="0.2"
+            android:gravity="center"
+            android:text="Creature 4"
+            android:textColor="#fff"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/land4"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_column="2"
+            android:layout_marginLeft="10dp"
+            android:layout_weight="0.4"
+            android:gravity="center"
+            android:text="Land 4 \n P3"
+            android:textColor="#fff"
+            android:textSize="16sp" />
+    </TableRow>
+    <TableRow>
+
+        <Button
+            android:id="@+id/buttonMove"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onClick"
+            android:text="Move" />
+
+        <Button
+            android:id="@+id/button2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Button" />
+
+        <Button
+            android:id="@+id/button3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Button" />
+    </TableRow>
+    <TableRow android:padding="10dp">
+
+        <TextView
+            android:id="@+id/hand1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_column="0"
+            android:layout_marginLeft="10dp"
+            android:layout_weight="0.4"
+            android:gravity="center"
+            android:textColor="#fff"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/hand2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_column="1"
+            android:layout_marginLeft="10dp"
+            android:layout_weight="0.4"
+            android:gravity="center"
+            android:textColor="#fff"
+            android:textSize="12sp" />
+        <TextView
+            android:id="@+id/hand3"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_column="2"
+            android:layout_marginLeft="10dp"
+            android:layout_weight="0.4"
+            android:gravity="center"
+            android:textColor="#fff"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/hand4"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_column="3"
+            android:layout_marginLeft="10dp"
+            android:layout_weight="0.4"
+            android:gravity="center"
+            android:textColor="#fff"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/hand5"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_column="4"
+            android:layout_marginLeft="10dp"
+            android:layout_weight="0.4"
+            android:gravity="center"
+            android:textColor="#fff"
+            android:textSize="12sp" />
+    </TableRow>
+    <TableRow android:padding="10dp">
+
+        <TextView
+            android:id="@+id/hand6"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_column="0"
+            android:layout_marginLeft="10dp"
+            android:layout_weight="0.4"
+            android:gravity="center"
+            android:textColor="#fff"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/hand7"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_column="1"
+            android:layout_marginLeft="10dp"
+            android:layout_weight="0.4"
+            android:gravity="center"
+            android:textColor="#fff"
+            android:textSize="12sp" />
+        <TextView
+            android:id="@+id/hand8"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_column="2"
+            android:layout_marginLeft="10dp"
+            android:layout_weight="0.4"
+            android:gravity="center"
+            android:textColor="#fff"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/hand9"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_column="3"
+            android:layout_marginLeft="10dp"
+            android:layout_weight="0.4"
+            android:gravity="center"
+            android:textColor="#fff"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/hand10"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_column="4"
+            android:layout_marginLeft="10dp"
+            android:layout_weight="0.4"
+            android:gravity="center"
+            android:textColor="#fff"
+            android:textSize="12sp" />
+    </TableRow>
+</TableLayout>
