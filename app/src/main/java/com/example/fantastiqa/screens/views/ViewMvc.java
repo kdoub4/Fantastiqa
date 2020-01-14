@@ -50,6 +50,8 @@ public interface ViewMvc {
     interface ViewMvcListener {
 
         void onMoveClick();
+        void onLandClick(View v);
+
     }
 
     public void setListener(ViewMvcListener listner);

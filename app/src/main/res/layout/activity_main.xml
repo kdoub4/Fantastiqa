@@ -20,7 +20,9 @@
             android:gravity="center"
             android:text="Land 1 / Tower\nP1"
             android:textColor="#fff"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:tag="6"
+            />
 
         <TextView
             android:id="@+id/road1"
@@ -42,9 +44,11 @@
             android:layout_marginLeft="10dp"
             android:layout_weight="0.35"
             android:gravity="center"
+            android:tag="1"
             android:text="Land 2 \n"
             android:textColor="#fff"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            />
 
     </TableRow>
 
@@ -100,7 +104,9 @@
             android:gravity="center"
             android:text="Land 6 \n  P2"
             android:textColor="#fff"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:tag="5"
+            />
 
         <TextView
             android:id="@+id/road7"
@@ -122,9 +128,11 @@
             android:layout_marginLeft="10dp"
             android:layout_weight="0.35"
             android:gravity="center"
+            android:tag="2"
             android:text="Land 3\n"
             android:textColor="#fff"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            />
 
     </TableRow>
 
@@ -180,7 +188,9 @@
             android:gravity="center"
             android:text="Land 5\n"
             android:textColor="#fff"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:tag="4"
+            />
 
         <TextView
             android:id="@+id/road4"
@@ -204,7 +214,9 @@
             android:gravity="center"
             android:text="Land 4 \n P3"
             android:textColor="#fff"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:tag="3"
+            />
     </TableRow>
     <TableRow>
 

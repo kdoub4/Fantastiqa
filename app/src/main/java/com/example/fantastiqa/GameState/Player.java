@@ -75,4 +75,19 @@ public class Player {
     public void setTrophies(int trophies) {
         this.trophies = trophies;
     }
+
+    public void subdue(Symbol toSubdue) {
+        for (Card aCard : hand
+        ) {
+            if (aCard instanceof CreatureCard) {
+                CreatureCard handCreature = (CreatureCard) aCard;
+                //Toast.makeText(MainActivity.this, handCreature.values.get(0).toString(), Toast.LENGTH_SHORT).show();
+                if (toSubdue == handCreature.values.get(0)) {
+                    hand.remove(handCreature);
+                    break;
+                }
+            }
+            //TODO other methods of subdue
+        }
+    }
 }

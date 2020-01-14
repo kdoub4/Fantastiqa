@@ -33,6 +33,11 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
     private Button buttonMove;
     private Game theGame;
     private com.example.fantastiqa.screens.views.ViewMvc rootView;
+    private Player currentPlayer;
+    private Region currentLocation;
+    private String gameState;
+    private List<Pair<Symbol,Region>> moveTargets = new LinkedList<>();
+    private List<Integer> moveTargetIds = new LinkedList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +53,7 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 
             for (Region anArea: theGame.board.regions()
                  ) {
-                    rootView.bindLand(theGame.board.regions().indexOf(anArea)+1, anArea);
+                rootView.bindLand(theGame.board.regions().indexOf(anArea)+1, anArea);
             }
 
             for (Road aRoad: theGame.board.roads()) {
@@ -87,16 +92,15 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
             nextLocation.setText(nextLocation.getText().toString().contains("P") ?
                     nextLocation.getText().toString().concat(" P1"):
                     nextLocation.getText().toString().concat("P1"));
-
         }
 
     }
 
-    public List<Region> getMoves(){
-        List<Region> results = new LinkedList<>();
+    public List<Pair<Symbol,Region>> getMoves(){
+        List<Pair<Symbol,Region>> results = new LinkedList<>();
         for (Pair<Road, Region> adjPair: getAdjacentLands(theGame.players.get(0))){
             if (canSubdue(adjPair.first.creature)) {
-                results.add(adjPair.second);
+                results.add(new Pair(adjPair.first.creature.subduedBy, adjPair.second));
             }
         }
         return results;
@@ -115,8 +119,7 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 
     private Boolean canSubdue(CreatureCard aCreature){
         if (aCreature.values.size()>1) {
-            return false;
-            //return canSubdueDouble(aCreature);
+            return canSubdueDouble(aCreature);
         }
         else {
             return canSubdueSingle(aCreature);
@@ -129,14 +132,14 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
         Boolean hasTwoCards = false;
 
         List<Symbol> handSymbols = new ArrayList<>();
-        Toast.makeText(MainActivity.this, aCreature.subduedBy.toString(), Toast.LENGTH_SHORT).show();
+        //Toast.makeText(MainActivity.this, aCreature.subduedBy.toString(), Toast.LENGTH_SHORT).show();
         //Check hand for first symbol
-        Toast.makeText(MainActivity.this, Integer.toString(theGame.players.get(0).hand.size()),Toast.LENGTH_SHORT);
+        //Toast.makeText(MainActivity.this, Integer.toString(theGame.players.get(0).hand.size()),Toast.LENGTH_SHORT);
         for (Card aCard:theGame.players.get(0).hand
         ) {
             if (aCard instanceof CreatureCard) {
                 CreatureCard handCreature = (CreatureCard) aCard;
-                Toast.makeText(MainActivity.this, handCreature.values.get(0).toString(), Toast.LENGTH_SHORT).show();
+                //Toast.makeText(MainActivity.this, handCreature.values.get(0).toString(), Toast.LENGTH_SHORT).show();
                 if (aCreature.subduedBy == handCreature.values.get(0)) {
                     matchFirst = true;
                     break;
@@ -169,12 +172,12 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
             if(aCard instanceof CreatureCard) {
                 CreatureCard handCreature = (CreatureCard)aCard;
                 //Match double symbol first
-                if (handCreature.values.size()>0 && aCreature.subduedBy == handCreature.values.get(0))
+                if (handCreature.values.size()>1 && aCreature.subduedBy == handCreature.values.get(0))
                 {
                         symbolCount = 2;
                         break;
                 }
-                if (handCreature.values.size() > 0 && handCreature.values.get(0) == handCreature.values.get(1)) {
+                if (handCreature.values.size() > 1 && handCreature.values.get(0) == handCreature.values.get(1)) {
                     symbolCount+=2;
                 }
                 else {
@@ -199,9 +202,36 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 
     @Override
     public void onMoveClick() {
-        for (Region aRegion:getMoves()
+        for (Pair<Symbol,Region> aPair:getMoves()
              ) {
-            rootView.highlightLand(theGame.board.regions().indexOf(aRegion)+1);
+            Integer regionId = theGame.board.regions().indexOf(aPair.second) + 1;
+            rootView.highlightLand(regionId);
+            moveTargets.add(aPair);
+            moveTargetIds.add(regionId);
         }
+        if (moveTargets.size() > 0)
+            gameState =  "moving";
+    }
+
+    @Override
+    public void onLandClick(View v) {
+        Toast.makeText(MainActivity.this, v.getTag().toString(), Toast.LENGTH_SHORT).show();
+        if (gameState == "moving" && moveTargetIds.contains(Integer.parseInt((String)v.getTag()))) {
+            for (Region currentLocation : theGame.board.regions()
+            ) {
+                if (currentLocation.players.contains(theGame.players.get(0))) {
+                    currentLocation.players.remove(theGame.players.get(0));
+                }
+            }
+            theGame.board.regions().get(Integer.parseInt((String)v.getTag())-1).players.add(theGame.players.get(0));
+            theGame.players.get(0).subdue(moveTargets.get(moveTargetIds.indexOf(Integer.parseInt((String)v.getTag()))).first);
+            rootView.bindHand(theGame.players.get(0).hand);
+            for (Region anArea : theGame.board.regions()
+            ) {
+                rootView.bindLand(theGame.board.regions().indexOf(anArea) + 1, anArea);
+            }
+            gameState="open";
+        }
+
     }
 }

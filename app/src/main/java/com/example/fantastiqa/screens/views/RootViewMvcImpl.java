@@ -69,6 +69,54 @@ public class RootViewMvcImpl implements ViewMvc  {
         land5 = (TextView) mRootView.findViewById(R.id.land5);
         land6 = (TextView) mRootView.findViewById(R.id.land6);
 
+        land1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mListener != null) {
+                    mListener.onLandClick(view);
+                }
+            }
+        });
+        land2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mListener != null) {
+                    mListener.onLandClick(view);
+                }
+            }
+        });
+        land3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mListener != null) {
+                    mListener.onLandClick(view);
+                }
+            }
+        });
+        land4.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mListener != null) {
+                    mListener.onLandClick(view);
+                }
+            }
+        });
+        land5.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mListener != null) {
+                    mListener.onLandClick(view);
+                }
+            }
+        });
+        land6.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mListener != null) {
+                    mListener.onLandClick(view);
+                }
+            }
+        });
         road1 = mRootView.findViewById(R.id.road1);
         road2 = mRootView.findViewById(R.id.road2);
         road3 = mRootView.findViewById(R.id.road3);
@@ -127,24 +175,29 @@ public class RootViewMvcImpl implements ViewMvc  {
         }
         switch (location) {
             case 1:
-                land1.setText(details.name.toString() + "\n" + details.tower.toString() + "\n" + strPlayers);
+                setLandText(details, strPlayers, land1);
                 break;
             case 2:
-                land2.setText(details.name.toString() + "\n" + details.tower.toString() + "\n" + strPlayers);
+                setLandText(details, strPlayers, land2);
                 break;
             case 3:
-                land3.setText(details.name.toString() + "\n" + details.tower.toString() + "\n" + strPlayers);
+                setLandText(details, strPlayers, land3);
                 break;
             case 4:
-                land4.setText(details.name.toString() + "\n" + details.tower.toString() + "\n" + strPlayers);
+                setLandText(details, strPlayers, land4);
                 break;
             case 5:
-                land5.setText(details.name.toString() + "\n" + details.tower.toString() + "\n" + strPlayers);
+                setLandText(details, strPlayers, land5);
                 break;
             case 6:
-                land6.setText(details.name.toString() + "\n" + details.tower.toString() + "\n" + strPlayers);
+                setLandText(details, strPlayers, land6);
                 break;
         }
+    }
+
+    private void setLandText(Region details, String strPlayers, TextView land) {
+        land.setTextColor(Color.WHITE);
+        land.setText(details.name.toString() + "\n" + details.tower.toString() + "\n" + strPlayers);
     }
 
     @Override
@@ -180,11 +233,14 @@ public class RootViewMvcImpl implements ViewMvc  {
     @Override
     public void bindHand(List<Card> hand) {
         ListIterator<View> listIter = theHand.listIterator(0);
+        while (listIter.hasNext()) {
+            ((TextView)listIter.next()).setText("");
+        }
+        listIter = theHand.listIterator(0);
         for (Card aCard: hand
              ) {
             ((TextView)listIter.next()).setText(aCard.toString());
         }
-//        ((TextView)theHand.getFirst()).setText(hand.get(0).toString());
     }
 
     @Override
