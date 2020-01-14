@@ -22,7 +22,7 @@ public class Game {
         for (CreatureCards aCard: CreatureCards.values()) {
             if (aCard.getValue2()== Symbol.NONE) {
                 for (int j = 0; j < 2; j++) {
-                    tempDeck.add(new CreatureCard(aCard.name(), aCard.isGem(), aCard.isGem() ? Ability.NONE : aCard.getAbility(), aCard.getValue1()));
+                    tempDeck.add(new CreatureCard(aCard.name(), aCard.getSubduedBy(), aCard.isGem(), aCard.isGem() ? Ability.NONE : aCard.getAbility(), aCard.getValue1()));
                 }
             }
         }
@@ -34,13 +34,13 @@ public class Game {
         //BeastBazaar
         for (CreatureCards aCard: CreatureCards.values()) {
             if (aCard.getValue2() ==Symbol.NONE) {
-                tempDeck.add(new CreatureCard(aCard.name(), aCard.isGem(), aCard.isGem() ? Ability.NONE : aCard.getAbility(), aCard.getValue1()));
+                tempDeck.add(new CreatureCard(aCard.name(), aCard.getSubduedBy(), aCard.isGem(), aCard.isGem() ? Ability.NONE : aCard.getAbility(), aCard.getValue1()));
             }
             else {
-                tempDeck.add(new CreatureCard(aCard.name(), aCard.isGem(), aCard.isGem() ? Ability.NONE : aCard.getAbility(), aCard.getValue1(), aCard.getValue2()));
-                tempDeck.add(new CreatureCard(aCard.name(), aCard.isGem(), aCard.isGem() ? Ability.NONE : aCard.getAbility(), aCard.getValue1(), aCard.getValue2()));
+                tempDeck.add(new CreatureCard(aCard.name(), aCard.getSubduedBy(),aCard.isGem(), aCard.isGem() ? Ability.NONE : aCard.getAbility(), aCard.getValue1(), aCard.getValue2()));
+                tempDeck.add(new CreatureCard(aCard.name(), aCard.getSubduedBy(), aCard.isGem(), aCard.isGem() ? Ability.NONE : aCard.getAbility(), aCard.getValue1(), aCard.getValue2()));
                 for (int i = 0; i < 3;i++){
-                    bazaarDeck.add(new CreatureCard(aCard.name(), false, aCard.getAbility(), aCard.getValue1(), aCard.getValue2()));
+                    bazaarDeck.add(new CreatureCard(aCard.name(), aCard.getSubduedBy(), false, aCard.getAbility(), aCard.getValue1(), aCard.getValue2()));
                 }
             }
         }
@@ -108,15 +108,17 @@ public class Game {
             board.quests.add(questDeck.remove(random.nextInt(questDeck.size())));
         }
 
-        for (int i =0;i<7;i++){
+        for (int i =0;i<13;i+=2){
             CreatureCard roadCreature = creatureDeck.remove(0);
-            board.roads.add(new Road(roadCreature,roadCreature.gem));
+            Road aRoad = (Road)board.locations.get(i);
+            aRoad.creature= roadCreature;
+            aRoad.gem = roadCreature.gem;
         }
 
         players.add(new Player("P1"));
         players.add(new Player("P2"));
         for (Player someone: players) {
-            board.locations.get(0).players.add(someone);
+            ((Region)board.locations.get(1)).players.add(someone);
             someone.drawCards(5);
         }
 

@@ -1,15 +1,18 @@
 package com.example.fantastiqa.screens.views;
+
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
-import com.example.fantastiqa.GameState.Area;
 import com.example.fantastiqa.GameState.Card;
 import com.example.fantastiqa.GameState.Player;
 import com.example.fantastiqa.GameState.Quest;
+import com.example.fantastiqa.GameState.Region;
 import com.example.fantastiqa.GameState.Road;
 import com.example.fantastiqa.R;
 
@@ -20,9 +23,12 @@ import java.util.ListIterator;
 /**
  * Very simple MVC view containing just single FrameLayout
  */
-public class RootViewMvcImpl implements ViewMvc {
+public class RootViewMvcImpl implements ViewMvc  {
 
     private View mRootView;
+    private ViewMvcListener mListener;
+
+    private Button moveButton;
     private TextView land1;
     private TextView land2;
     private TextView land3;
@@ -45,6 +51,17 @@ public class RootViewMvcImpl implements ViewMvc {
 
     public RootViewMvcImpl(Context context, ViewGroup container) {
         mRootView = LayoutInflater.from(context).inflate(R.layout.activity_main, container);
+
+        moveButton = mRootView.findViewById(R.id.buttonMove);
+        moveButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mListener != null) {
+                    mListener.onMoveClick();
+                }
+            }
+        });
+
         land1 = (TextView) mRootView.findViewById(R.id.land1);
         land2 = (TextView) mRootView.findViewById(R.id.land2);
         land3 = (TextView) mRootView.findViewById(R.id.land3);
@@ -75,8 +92,6 @@ public class RootViewMvcImpl implements ViewMvc {
             add(mRootView.findViewById(R.id.hand9));
             add(mRootView.findViewById(R.id.hand10));
         }};
-
-
     }
 
     @Override
@@ -91,7 +106,19 @@ public class RootViewMvcImpl implements ViewMvc {
     }
 
     @Override
-    public void bindLand(int location, Area details) {
+    public void highlightLand(int location) {
+        switch (location) {
+            case 1: land1.setTextColor(Color.YELLOW);break;
+            case 2: land2.setTextColor(Color.YELLOW);break;
+            case 3: land3.setTextColor(Color.YELLOW);break;
+            case 4: land4.setTextColor(Color.YELLOW);break;
+            case 5: land5.setTextColor(Color.YELLOW);break;
+            case 6: land6.setTextColor(Color.YELLOW);break;
+        }
+    }
+
+    @Override
+    public void bindLand(int location, Region details) {
 
         String strPlayers = "";
         for (Player p : details.players
@@ -100,17 +127,23 @@ public class RootViewMvcImpl implements ViewMvc {
         }
         switch (location) {
             case 1:
-                land1.setText(details.land.toString() + " / " + details.tower.toString() + "\n" + strPlayers);
+                land1.setText(details.name.toString() + "\n" + details.tower.toString() + "\n" + strPlayers);
+                break;
             case 2:
-                land2.setText(details.land.toString() + " / " + details.tower.toString() + "\n" + strPlayers);
+                land2.setText(details.name.toString() + "\n" + details.tower.toString() + "\n" + strPlayers);
+                break;
             case 3:
-                land3.setText(details.land.toString() + " / " + details.tower.toString() + "\n" + strPlayers);
+                land3.setText(details.name.toString() + "\n" + details.tower.toString() + "\n" + strPlayers);
+                break;
             case 4:
-                land4.setText(details.land.toString() + " / " + details.tower.toString() + "\n" + strPlayers);
+                land4.setText(details.name.toString() + "\n" + details.tower.toString() + "\n" + strPlayers);
+                break;
             case 5:
-                land5.setText(details.land.toString() + " / " + details.tower.toString() + "\n" + strPlayers);
+                land5.setText(details.name.toString() + "\n" + details.tower.toString() + "\n" + strPlayers);
+                break;
             case 6:
-                land6.setText(details.land.toString() + " / " + details.tower.toString() + "\n" + strPlayers);
+                land6.setText(details.name.toString() + "\n" + details.tower.toString() + "\n" + strPlayers);
+                break;
         }
     }
 
@@ -118,19 +151,19 @@ public class RootViewMvcImpl implements ViewMvc {
     public void bindRoad(int location, Road details) {
         switch (location) {
             case 1:
-                road1.setText(details.creature.toString());
+                road1.setText(details.creature.toString());break;
             case 2:
-                road2.setText(details.creature.toString());
+                road2.setText(details.creature.toString());break;
             case 3:
-                road3.setText(details.creature.toString());
+                road3.setText(details.creature.toString());break;
             case 4:
-                road4.setText(details.creature.toString());
+                road4.setText(details.creature.toString());break;
             case 5:
-                road5.setText(details.creature.toString());
+                road5.setText(details.creature.toString());break;
             case 6:
-                road6.setText(details.creature.toString());
+                road6.setText(details.creature.toString());break;
             case 7:
-                road7.setText(details.creature.toString());
+                road7.setText(details.creature.toString());break;
         }
     }
 
@@ -138,9 +171,9 @@ public class RootViewMvcImpl implements ViewMvc {
     public void bindQuest(int location, Quest details) {
         switch (location) {
             case 1:
-                quest1.setText(details.name);
+                quest1.setText(details.name);break;
             case 2:
-                quest2.setText(details.name);
+                quest2.setText(details.name);break;
         }
     }
 
@@ -152,6 +185,11 @@ public class RootViewMvcImpl implements ViewMvc {
             ((TextView)listIter.next()).setText(aCard.toString());
         }
 //        ((TextView)theHand.getFirst()).setText(hand.get(0).toString());
+    }
+
+    @Override
+    public void setListener(ViewMvcListener listner) {
+        mListener = listner;
     }
 
 }

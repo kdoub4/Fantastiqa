@@ -6,6 +6,7 @@ import android.view.View;
 import com.example.fantastiqa.GameState.Area;
 import com.example.fantastiqa.GameState.Card;
 import com.example.fantastiqa.GameState.Quest;
+import com.example.fantastiqa.GameState.Region;
 import com.example.fantastiqa.GameState.Road;
 
 import java.util.List;
@@ -39,8 +40,17 @@ public interface ViewMvc {
      */
     public Bundle getViewState();
 
-    void bindLand(int location, Area details);
+    void bindLand(int location, Region details);
     void bindRoad(int location, Road details);
     void bindQuest(int location, Quest details);
     void bindHand(List<Card> theHand);
+
+    void highlightLand(int location);
+
+    interface ViewMvcListener {
+
+        void onMoveClick();
+    }
+
+    public void setListener(ViewMvcListener listner);
 }

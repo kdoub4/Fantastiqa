@@ -2,7 +2,6 @@ package com.example.fantastiqa.GameState;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 
 public class Player {
@@ -21,11 +20,11 @@ public class Player {
         for (CreatureCards aCard: CreatureCards.values()
              ) {
             if (aCard.getValue2()==Symbol.NONE) {
-                deck.add(new CreatureCard(aCard.name(), false, Ability.NONE, aCard.getValue1()));
+                deck.add(new CreatureCard(aCard.name(), Symbol.NONE, false, Ability.NONE, aCard.getValue1()));
             }
         }
-        deck.add(new CreatureCard("Peaceful Dragon", false, Ability.DRAGON, Symbol.NONE));
-        deck.add(new CreatureCard("Dog", false, Ability.GEM, Symbol.NONE));
+        deck.add(new CreatureCard("Peaceful Dragon", Symbol.NONE,false, Ability.DRAGON, Symbol.NONE));
+        deck.add(new CreatureCard("Dog", Symbol.NONE,false, Ability.GEM, Symbol.NONE));
 
         shuffleDeck();
     }

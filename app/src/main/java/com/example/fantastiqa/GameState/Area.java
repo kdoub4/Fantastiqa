@@ -1,14 +1,14 @@
 package com.example.fantastiqa.GameState;
 
 import java.util.ArrayList;
+import java.util.List;
 
-public class Area {
-    public RegionName land;
-    public ArrayList<Player> players = new ArrayList<Player>();
-    public TowerName tower;
+public abstract class Area {
+    private int Id;
 
-    Area(RegionName newland, TowerName newtower){
-        land = newland;
-        tower = newtower;
-    }
+    public List<Area> adjacenies = new ArrayList<>();
+    public Area(){}
+
+
+    public abstract String getName();
 }
