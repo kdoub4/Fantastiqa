@@ -50,8 +50,11 @@ public interface ViewMvc {
     interface ViewMvcListener {
 
         void onMoveClick();
+        void onTowerVisitClick();
+        void onStoreCardsClick();
+        
         void onLandClick(View v);
-
+		void onHandClick(View v);
     }
 
     public void setListener(ViewMvcListener listner);

@@ -212,6 +212,24 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
         if (moveTargets.size() > 0)
             gameState =  "moving";
     }
+    
+    @Override
+    public void onTowerVisitClick() {
+		for (Region aLocation : theGame.board.regions()
+            ) {
+				//TODO check for enough gems
+                if (aLocation.players.contains(theGame.players.get(0))) {
+					Region matchingRegion = getMatchingTowerRegion(aLocation);
+					matchingRegion.players.add(theGame.players.get(0));
+					aLocation.players.remove(theGame.players.get(0));
+					rootView.bindLand(theGame.board.regions().indexOf(matchingRegion) + 1, matchingRegion);
+					rootView.bindLand(theGame.board.regions().indexOf(aLocation) + 1, aLocation);
+					theGame.players.get(0).gems-=2;
+					return;
+             }
+		 }
+		
+	}
 
     @Override
     public void onLandClick(View v) {
@@ -234,4 +252,29 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
         }
 
     }
+    
+    @Override
+    public void onHandClick(View  v) {
+		if (gameState == "storingPublic") {
+		
+		}
+		else if (gameState == "storingPrivate") {
+			Toast.makeText(MainActivity.this, "storingPrivate", Toast.LENGTH_SHORT).show();
+		}
+	}
+	
+	private Region getMatchingTowerRegion(Region startingRegion) {
+		for (Region aLocation : theGame.board.regions()
+            ) {
+				if (startingRegion!=aLocation && aLocation.tower == startingRegion.tower) {
+					return aLocation;
+				}
+			}
+		return startingRegion;
+	}
+	
+	@Override
+	public void onStoreCardsClick() {
+		gameState = "storingPrivate";
+	}
 }

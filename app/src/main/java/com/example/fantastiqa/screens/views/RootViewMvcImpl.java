@@ -29,6 +29,9 @@ public class RootViewMvcImpl implements ViewMvc  {
     private ViewMvcListener mListener;
 
     private Button moveButton;
+    private Button towerButton;
+    private Button storeCardsButton;
+    
     private TextView land1;
     private TextView land2;
     private TextView land3;
@@ -58,6 +61,26 @@ public class RootViewMvcImpl implements ViewMvc  {
             public void onClick(View view) {
                 if (mListener != null) {
                     mListener.onMoveClick();
+                }
+            }
+        });
+        
+        towerButton = mRootView.findViewById(R.id.buttonTower);
+        towerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mListener != null) {
+                    mListener.onTowerVisitClick();
+                }
+            }
+        });
+
+        storeCardsButton = mRootView.findViewById(R.id.buttonStoreCards);
+        storeCardsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mListener != null) {
+                    mListener.onStoreCardsClick();
                 }
             }
         });
@@ -140,6 +163,18 @@ public class RootViewMvcImpl implements ViewMvc  {
             add(mRootView.findViewById(R.id.hand9));
             add(mRootView.findViewById(R.id.hand10));
         }};
+        
+        ListIterator<View> listIter = theHand.listIterator(0);
+        while (listIter.hasNext()) {
+			((TextView)listIter.next()).setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					if (mListener != null) {
+						mListener.onHandClick(v);
+					}
+				}
+			});
+		}
     }
 
     @Override
@@ -247,5 +282,21 @@ public class RootViewMvcImpl implements ViewMvc  {
     public void setListener(ViewMvcListener listner) {
         mListener = listner;
     }
-
+	
+	public void onStoreCards() {
+		setHandColor(Color.BLACK);
+	}
+	
+	public void onDone() {
+		setHandColor(Color.WHITE);
+	}
+	
+	private void setHandColor(Integer aColor) {
+		ListIterator<View> listIter = theHand.listIterator(0);
+        while (listIter.hasNext()) {
+            ((TextView)listIter.next()).setTextColor(aColor);
+        }
+	}
+	
+	
 }

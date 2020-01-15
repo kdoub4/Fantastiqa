@@ -14,6 +14,7 @@ public class Player {
     private int flyingCarpets = 3;
     private int tents = 3;
     public String name;
+    public int gems = 3;
 
     public Player(String thename) {
         name= thename;
