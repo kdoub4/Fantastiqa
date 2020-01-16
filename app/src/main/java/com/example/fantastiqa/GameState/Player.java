@@ -5,10 +5,10 @@ import java.util.Collections;
 import java.util.List;
 
 public class Player {
-    List<Quest> quests = new ArrayList<Quest>();
+    public List<Quest> quests = new ArrayList<Quest>();
     public List<Card> deck = new ArrayList<Card>();
     List<Card> discard = new ArrayList<Card>();
-    List<Card> publicQuest = new ArrayList<>();
+    public List<Card> publicQuest = new ArrayList<>();
     public List<Card> hand = new ArrayList<>();
     private int trophies = 0;
     private int flyingCarpets = 3;

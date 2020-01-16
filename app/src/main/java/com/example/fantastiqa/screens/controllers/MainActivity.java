@@ -256,10 +256,23 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
     @Override
     public void onHandClick(View  v) {
 		if (gameState == "storingPublic") {
-		
+			
 		}
 		else if (gameState == "storingPrivate") {
 			Toast.makeText(MainActivity.this, "storingPrivate", Toast.LENGTH_SHORT).show();
+			Card transferCard = null;
+			for (Card aHandCard : theGame.players.get(0).hand) {
+				if (((TextView)v).getText() == aHandCard.name) {
+					transferCard = aHandCard;
+					break;
+				}
+			}
+			if (transferCard != null) {
+				theGame.players.get(0).hand.remove(transferCard);
+				theGame.players.get(0).publicQuest.add(transferCard);
+				rootView.bindHand(theGame.players.get(0).hand);
+				rootView.bindStorage(theGame.players.get(0).publicQuest);
+			}
 		}
 	}
 	
@@ -276,5 +289,13 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 	@Override
 	public void onStoreCardsClick() {
 		gameState = "storingPrivate";
+		rootView.gameStateChange(gameState);
+	}
+	
+	@Override
+	public void onDoneClick() {
+			Toast.makeText(MainActivity.this, "onDone Main", Toast.LENGTH_SHORT).show();
+		gameState = "open";
+		rootView.gameStateChange(gameState);
 	}
 }

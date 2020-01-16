@@ -31,6 +31,7 @@ public class RootViewMvcImpl implements ViewMvc  {
     private Button moveButton;
     private Button towerButton;
     private Button storeCardsButton;
+    private Button doneButton;
     
     private TextView land1;
     private TextView land2;
@@ -51,6 +52,7 @@ public class RootViewMvcImpl implements ViewMvc  {
     private TextView road7;
 
     LinkedList<View> theHand;
+    LinkedList<TextView> storage;
 
     public RootViewMvcImpl(Context context, ViewGroup container) {
         mRootView = LayoutInflater.from(context).inflate(R.layout.activity_main, container);
@@ -81,6 +83,16 @@ public class RootViewMvcImpl implements ViewMvc  {
             public void onClick(View view) {
                 if (mListener != null) {
                     mListener.onStoreCardsClick();
+                }
+            }
+        });
+        
+        doneButton = mRootView.findViewById(R.id.buttonDone);
+        doneButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mListener != null) {
+                    mListener.onDoneClick();
                 }
             }
         });
@@ -162,6 +174,14 @@ public class RootViewMvcImpl implements ViewMvc  {
             add(mRootView.findViewById(R.id.hand8));
             add(mRootView.findViewById(R.id.hand9));
             add(mRootView.findViewById(R.id.hand10));
+        }};
+        
+        storage = new LinkedList<TextView>() { {
+			add((TextView)mRootView.findViewById(R.id.stored0));
+			add((TextView)mRootView.findViewById(R.id.stored1));
+        	add((TextView)mRootView.findViewById(R.id.stored2));
+        	add((TextView)mRootView.findViewById(R.id.stored3));
+        	add((TextView)mRootView.findViewById(R.id.stored4));
         }};
         
         ListIterator<View> listIter = theHand.listIterator(0);
@@ -277,18 +297,30 @@ public class RootViewMvcImpl implements ViewMvc  {
             ((TextView)listIter.next()).setText(aCard.toString());
         }
     }
+    
+    @Override
+    public void bindStorage(List<Card> hand) {
+        ListIterator<TextView> listIter = storage.listIterator(0);
+        while (listIter.hasNext()) {
+            listIter.next().setText("");
+        }
+        listIter = storage.listIterator(0);
+        for (Card aCard: hand
+             ) {
+            listIter.next().setText(aCard.toString());
+        }
+    }
 
     @Override
     public void setListener(ViewMvcListener listner) {
         mListener = listner;
     }
 	
-	public void onStoreCards() {
-		setHandColor(Color.BLACK);
-	}
-	
-	public void onDone() {
-		setHandColor(Color.WHITE);
+	public void onDone(String state) {
+		switch (state) {
+			case "storingPrivate" : setHandColor(Color.WHITE);
+				break;
+		}
 	}
 	
 	private void setHandColor(Integer aColor) {
@@ -296,6 +328,19 @@ public class RootViewMvcImpl implements ViewMvc  {
         while (listIter.hasNext()) {
             ((TextView)listIter.next()).setTextColor(aColor);
         }
+	}
+	
+	@Override
+	public void gameStateChange(String newState) {
+		switch (newState) {
+		case "storingPrivate":
+			setHandColor(Color.YELLOW);
+			break;
+		
+		case "open":
+			setHandColor(Color.WHITE);
+			break;
+		}
 	}
 	
 	

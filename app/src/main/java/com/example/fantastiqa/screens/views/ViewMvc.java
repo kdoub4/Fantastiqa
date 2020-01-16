@@ -44,6 +44,7 @@ public interface ViewMvc {
     void bindRoad(int location, Road details);
     void bindQuest(int location, Quest details);
     void bindHand(List<Card> theHand);
+	void bindStorage(List<Card> theHand);
 
     void highlightLand(int location);
 
@@ -52,10 +53,13 @@ public interface ViewMvc {
         void onMoveClick();
         void onTowerVisitClick();
         void onStoreCardsClick();
+        void onDoneClick();
         
         void onLandClick(View v);
 		void onHandClick(View v);
     }
 
     public void setListener(ViewMvcListener listner);
+    
+    public void gameStateChange(String newState);
 }
