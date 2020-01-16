@@ -7,7 +7,7 @@ import java.util.List;
 public class Player {
     public List<Card> quests = new ArrayList<>();
     public List<Card> deck = new ArrayList<Card>();
-    List<Card> discard = new ArrayList<Card>();
+    public List<Card> discard = new ArrayList<Card>();
     public List<Card> publicQuest = new ArrayList<>();
     public List<Card> hand = new ArrayList<>();
     private int trophies = 0;

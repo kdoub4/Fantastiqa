@@ -10,6 +10,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.graphics.Color;
 
+import com.example.fantastiqa.GameState.Ability;
 import com.example.fantastiqa.GameState.Area;
 import com.example.fantastiqa.GameState.Card;
 import com.example.fantastiqa.GameState.CreatureCard;
@@ -38,8 +39,9 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
     private Player currentPlayer;
     private Region currentLocation;
     private String gameState;
-    private List<Pair<Symbol,Region>> moveTargets = new LinkedList<>();
+    private List<Pair<Road,Region>> moveTargets = new LinkedList<>();
     private List<Integer> moveTargetIds = new LinkedList<>();
+    private CreatureCard emptyRoadCard = new CreatureCard("",Symbol.NONE, false, Ability.NONE ,Symbol.NONE);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,7 +54,11 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
         //setContentView(R.layout.activity_main);
 
         theGame = new Game();
-		theGame.players.get(0).setPlayerListener(this);
+        for (Player aPlayer : theGame.players) {
+			aPlayer.setPlayerListener(this);
+		}
+		currentPlayer = theGame.players.get(0);
+		
             for (Region anArea: theGame.board.regions()
                  ) {
                 rootView.bindLand(theGame.board.regions().indexOf(anArea)+1, anArea);
@@ -66,9 +72,9 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
                 rootView.bindQuest(theGame.board.quests.indexOf(aQuest)+1, aQuest);
             }
 
-            rootView.bindHand(theGame.players.get(0).hand);
-            Toast.makeText(MainActivity.this, theGame.players.get(0).hand.get(0).name, Toast.LENGTH_SHORT);
-            rootView.bindPlayerQuest(theGame.players.get(0).quests);
+            rootView.bindHand(currentPlayer.hand);
+            Toast.makeText(MainActivity.this, currentPlayer.hand.get(0).name, Toast.LENGTH_SHORT);
+            rootView.bindPlayerQuest(currentPlayer.quests);
     }
 
 
@@ -100,11 +106,11 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 
     }
 
-    public List<Pair<Symbol,Region>> getMoves(){
-        List<Pair<Symbol,Region>> results = new LinkedList<>();
-        for (Pair<Road, Region> adjPair: getAdjacentLands(theGame.players.get(0))){
+    public List<Pair<Road,Region>> getMoves(){
+        List<Pair<Road,Region>> results = new LinkedList<>();
+        for (Pair<Road, Region> adjPair: getAdjacentLands(currentPlayer)){
             if (canSubdue(adjPair.first.creature)) {
-                results.add(new Pair(adjPair.first.creature.subduedBy, adjPair.second));
+                results.add(adjPair);
             }
         }
         return results;
@@ -122,6 +128,9 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
     }
 
     private Boolean canSubdue(CreatureCard aCreature){
+        if (aCreature.subduedBy == Symbol.NONE) {
+			return false;
+		}
         if (aCreature.values.size()>1) {
             return canSubdueDouble(aCreature);
         }
@@ -138,8 +147,8 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
         List<Symbol> handSymbols = new ArrayList<>();
         //Toast.makeText(MainActivity.this, aCreature.subduedBy.toString(), Toast.LENGTH_SHORT).show();
         //Check hand for first symbol
-        //Toast.makeText(MainActivity.this, Integer.toString(theGame.players.get(0).hand.size()),Toast.LENGTH_SHORT);
-        for (Card aCard:theGame.players.get(0).hand
+        //Toast.makeText(MainActivity.this, Integer.toString(currentPlayer.hand.size()),Toast.LENGTH_SHORT);
+        for (Card aCard:currentPlayer.hand
         ) {
             if (aCard instanceof CreatureCard) {
                 CreatureCard handCreature = (CreatureCard) aCard;
@@ -171,7 +180,7 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
         List<Symbol> handSymbols = new ArrayList<>();
 
         //Check hand for first symbol
-        for (Card aCard:theGame.players.get(0).hand
+        for (Card aCard:currentPlayer.hand
         ) {
             if(aCard instanceof CreatureCard) {
                 CreatureCard handCreature = (CreatureCard)aCard;
@@ -206,7 +215,7 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 
     @Override
     public void onMoveClick() {
-        for (Pair<Symbol,Region> aPair:getMoves()
+        for (Pair<Road,Region> aPair:getMoves()
              ) {
             Integer regionId = theGame.board.regions().indexOf(aPair.second) + 1;
             rootView.highlightLand(regionId);
@@ -222,13 +231,13 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 		for (Region aLocation : theGame.board.regions()
             ) {
 				//TODO check for enough gems
-                if (aLocation.players.contains(theGame.players.get(0))) {
+                if (aLocation.players.contains(currentPlayer)) {
 					Region matchingRegion = getMatchingTowerRegion(aLocation);
-					matchingRegion.players.add(theGame.players.get(0));
-					aLocation.players.remove(theGame.players.get(0));
+					matchingRegion.players.add(currentPlayer);
+					aLocation.players.remove(currentPlayer);
 					rootView.bindLand(theGame.board.regions().indexOf(matchingRegion) + 1, matchingRegion);
 					rootView.bindLand(theGame.board.regions().indexOf(aLocation) + 1, aLocation);
-					theGame.players.get(0).changeGems(-2);
+					currentPlayer.changeGems(-2);
 					return;
              }
 		 }
@@ -237,21 +246,23 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 
     @Override
     public void onLandClick(View v) {
+		Pair<Road,Region> moveTarget = moveTargets.get(moveTargetIds.indexOf(Integer.parseInt((String)v.getTag())));
         Toast.makeText(MainActivity.this, v.getTag().toString(), Toast.LENGTH_SHORT).show();
         if (gameState == "moving" && moveTargetIds.contains(Integer.parseInt((String)v.getTag()))) {
             for (Region currentLocation : theGame.board.regions()
             ) {
-                if (currentLocation.players.contains(theGame.players.get(0))) {
-                    currentLocation.players.remove(theGame.players.get(0));
+                if (currentLocation.players.contains(currentPlayer)) {
+                    currentLocation.players.remove(currentPlayer);
                 }
             }
-            theGame.board.regions().get(Integer.parseInt((String)v.getTag())-1).players.add(theGame.players.get(0));
-            theGame.players.get(0).subdue(moveTargets.get(moveTargetIds.indexOf(Integer.parseInt((String)v.getTag()))).first);
-            rootView.bindHand(theGame.players.get(0).hand);
+            theGame.board.regions().get(Integer.parseInt((String)v.getTag())-1).players.add(currentPlayer);
+            subdue(moveTarget.first);
+            rootView.bindHand(currentPlayer.hand);
             for (Region anArea : theGame.board.regions()
             ) {
                 rootView.bindLand(theGame.board.regions().indexOf(anArea) + 1, anArea);
             }
+            rootView.bindRoad(theGame.board.roads().indexOf(moveTarget.first)+1, moveTarget.first);
             gameState="open";
         }
 
@@ -266,12 +277,12 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 			 {
 				transferCard = getTransferCard(v);
 				if (transferCard !=null) {
-					theGame.players.get(0).hand.remove(transferCard);
-					rootView.bindHand(theGame.players.get(0).hand);
+					currentPlayer.hand.remove(transferCard);
+					rootView.bindHand(currentPlayer.hand);
 					((TextView)v).setTextColor(Color.WHITE);
 					//TODO Clear card highlighting
-					((Quest)theGame.players.get(0).quests.get(0)).stored.add(transferCard);
-					rootView.bindQuestStorage((Quest)theGame.players.get(0).quests.get(0), ((Quest)theGame.players.get(0).quests.get(0)).stored);
+					((Quest)currentPlayer.quests.get(0)).stored.add(transferCard);
+					rootView.bindQuestStorage((Quest)currentPlayer.quests.get(0), ((Quest)currentPlayer.quests.get(0)).stored);
 				}
 			}
 		}
@@ -279,16 +290,16 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 			Toast.makeText(MainActivity.this, "storingPrivate", Toast.LENGTH_SHORT).show();
 			transferCard = getTransferCard(v);
 			if (transferCard != null) {
-				theGame.players.get(0).hand.remove(transferCard);
-				theGame.players.get(0).publicQuest.add(transferCard);
-				rootView.bindHand(theGame.players.get(0).hand);
-				rootView.bindStorage(theGame.players.get(0).publicQuest);
+				currentPlayer.hand.remove(transferCard);
+				currentPlayer.publicQuest.add(transferCard);
+				rootView.bindHand(currentPlayer.hand);
+				rootView.bindStorage(currentPlayer.publicQuest);
 			}
 		}
 	}
 	
 	private Card getTransferCard(View v) {
-				for (Card aHandCard : theGame.players.get(0).hand) {
+				for (Card aHandCard : currentPlayer.hand) {
 				if (((TextView)v).getText() == aHandCard.name) {
 					return aHandCard;
 				}
@@ -315,8 +326,8 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 	public void onStoreQuestClick() {
 		gameState = "storingQuestCards";
 		List<Card> matchQuest = new ArrayList<>();
-		for (Card questCard : theGame.players.get(0).quests) {
-		for (Card handCard : theGame.players.get(0).hand) {
+		for (Card questCard : currentPlayer.quests) {
+		for (Card handCard : currentPlayer.hand) {
 			if (handCard instanceof CreatureCard) {
 				 ListIterator<Symbol> questIter = ((Quest)questCard).requirements.listIterator(0);
 				 while (questIter.hasNext()) {
@@ -350,5 +361,23 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 			rootView.setTowerTeleport(false);
 		}
 		
+	}
+	
+	private void subdue(Road toSubdue) {
+	        for (Card aCard : currentPlayer.hand
+        ) {
+            if (aCard instanceof CreatureCard) {
+                CreatureCard handCreature = (CreatureCard) aCard;
+                //Toast.makeText(MainActivity.this, handCreature.values.get(0).toString(), Toast.LENGTH_SHORT).show();
+                if (toSubdue.creature.subduedBy == handCreature.values.get(0)) {
+                    currentPlayer.hand.remove(handCreature);
+                    currentPlayer.discard.add(handCreature);
+                    currentPlayer.discard.add(toSubdue.creature);
+                    toSubdue.creature = emptyRoadCard;
+                    break;
+                }
+            }
+            //TODO other methods of subdue
+        }
 	}
 }

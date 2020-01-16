@@ -127,4 +127,5 @@ public class Game {
         for (CreatureCard aCard: creatureDeck)
             Log.v(aCard.name, aCard.values.toString());
     }
+    
 }
