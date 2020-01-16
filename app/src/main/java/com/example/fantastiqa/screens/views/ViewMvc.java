@@ -50,6 +50,8 @@ public interface ViewMvc {
 
     void highlightLand(int location);
     void validCardsForQuest(List<Card> matches);
+    
+    void setTowerTeleport(Boolean value);
 
     interface ViewMvcListener {
 

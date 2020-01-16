@@ -31,7 +31,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 
-public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcListener {
+public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcListener, Player.playerListener {
     private Button buttonMove;
     private Game theGame;
     private com.example.fantastiqa.screens.views.ViewMvc rootView;
@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
         //setContentView(R.layout.activity_main);
 
         theGame = new Game();
-
+		theGame.players.get(0).setPlayerListener(this);
             for (Region anArea: theGame.board.regions()
                  ) {
                 rootView.bindLand(theGame.board.regions().indexOf(anArea)+1, anArea);
@@ -228,7 +228,7 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 					aLocation.players.remove(theGame.players.get(0));
 					rootView.bindLand(theGame.board.regions().indexOf(matchingRegion) + 1, matchingRegion);
 					rootView.bindLand(theGame.board.regions().indexOf(aLocation) + 1, aLocation);
-					theGame.players.get(0).gems-=2;
+					theGame.players.get(0).changeGems(-2);
 					return;
              }
 		 }
@@ -339,5 +339,16 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 			Toast.makeText(MainActivity.this, "onDone Main", Toast.LENGTH_SHORT).show();
 		gameState = "open";
 		rootView.gameStateChange(gameState);
+	}
+	
+	@Override
+	public void onGemChange(int newGems, int oldGems) {
+		if (oldGems < 2 && newGems > 2) {
+			rootView.setTowerTeleport(true);
+		}
+		else if (oldGems > 2 && newGems < 2) {
+			rootView.setTowerTeleport(false);
+		}
+		
 	}
 }

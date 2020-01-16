@@ -140,7 +140,7 @@
             android:id="@+id/buttonMove"
             style="@style/buttonLayout"
             android:layout_column="0"
-            android:text="Move\n"
+            android:text="Move"
             android:textSize="8sp"
             android:layout_weight="1"/>
             
@@ -181,7 +181,7 @@
             android:id="@+id/buttonDone"
             style="@style/buttonLayout"
             android:layout_column="5"
-            android:text="Done\n" 
+            android:text="Done" 
             android:textSize="8sp"
             android:layout_weight="1"/>
     </TableRow>

@@ -14,7 +14,8 @@ public class Player {
     private int flyingCarpets = 3;
     private int tents = 3;
     public String name;
-    public int gems = 3;
+    private int gems = 3;
+    private playerListener mListener = null;
 
     public Player(String thename) {
         name= thename;
@@ -29,6 +30,15 @@ public class Player {
 
         shuffleDeck();
     }
+    
+    //TODO event framework
+    public interface playerListener {
+		public void onGemChange(int newGems, int oldGems);
+	}
+	
+	public void setPlayerListener(playerListener aListener) {
+		mListener = aListener;
+	}
 
     @Override
     public String toString() {
@@ -52,7 +62,21 @@ public class Player {
             amount--;
         }
     }
-
+	
+	public int getGems() {
+		return gems;
+	}
+	
+	public void setGems(int gems) {
+		if (mListener != null ) 
+			mListener.onGemChange(gems, this.gems);
+		this.gems = gems;
+	}
+	
+	public void changeGems(int gems) {
+		setGems(this.gems + gems);
+	}
+	
     public int getFlyingCarpets() {
         return flyingCarpets;
     }

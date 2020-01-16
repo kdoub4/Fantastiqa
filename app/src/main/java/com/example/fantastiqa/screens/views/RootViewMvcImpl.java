@@ -427,4 +427,10 @@ public class RootViewMvcImpl implements ViewMvc  {
 		}
 	}
 	*/
+
+	@Override
+	public void setTowerTeleport(Boolean value) {
+		towerButton.setEnabled(value);
+		//towerButton.setVisibility(value ? View.VISIBLE : View.GONE);
+	}
 }
