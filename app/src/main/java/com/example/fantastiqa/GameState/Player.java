@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class Player {
-    public List<Quest> quests = new ArrayList<Quest>();
+    public List<Card> quests = new ArrayList<>();
     public List<Card> deck = new ArrayList<Card>();
     List<Card> discard = new ArrayList<Card>();
     public List<Card> publicQuest = new ArrayList<>();

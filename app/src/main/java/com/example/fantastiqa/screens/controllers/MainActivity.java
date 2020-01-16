@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.graphics.Color;
 
 import com.example.fantastiqa.GameState.Area;
 import com.example.fantastiqa.GameState.Card;
@@ -28,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 
 public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcListener {
     private Button buttonMove;
@@ -65,6 +67,8 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
             }
 
             rootView.bindHand(theGame.players.get(0).hand);
+            Toast.makeText(MainActivity.this, theGame.players.get(0).hand.get(0).name, Toast.LENGTH_SHORT);
+            rootView.bindPlayerQuest(theGame.players.get(0).quests);
     }
 
 
@@ -255,18 +259,25 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
     
     @Override
     public void onHandClick(View  v) {
-		if (gameState == "storingPublic") {
-			
+		Card transferCard = null;
+		if (gameState == "storingQuestCards") {
+			//TODO check if legal card
+			//if (((TextView)v).getTextColor == Color.YELLOW)
+			 {
+				transferCard = getTransferCard(v);
+				if (transferCard !=null) {
+					theGame.players.get(0).hand.remove(transferCard);
+					rootView.bindHand(theGame.players.get(0).hand);
+					((TextView)v).setTextColor(Color.WHITE);
+					//TODO Clear card highlighting
+					((Quest)theGame.players.get(0).quests.get(0)).stored.add(transferCard);
+					rootView.bindQuestStorage((Quest)theGame.players.get(0).quests.get(0), ((Quest)theGame.players.get(0).quests.get(0)).stored);
+				}
+			}
 		}
 		else if (gameState == "storingPrivate") {
 			Toast.makeText(MainActivity.this, "storingPrivate", Toast.LENGTH_SHORT).show();
-			Card transferCard = null;
-			for (Card aHandCard : theGame.players.get(0).hand) {
-				if (((TextView)v).getText() == aHandCard.name) {
-					transferCard = aHandCard;
-					break;
-				}
-			}
+			transferCard = getTransferCard(v);
 			if (transferCard != null) {
 				theGame.players.get(0).hand.remove(transferCard);
 				theGame.players.get(0).publicQuest.add(transferCard);
@@ -276,6 +287,14 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 		}
 	}
 	
+	private Card getTransferCard(View v) {
+				for (Card aHandCard : theGame.players.get(0).hand) {
+				if (((TextView)v).getText() == aHandCard.name) {
+					return aHandCard;
+				}
+			}
+		return null;
+	}
 	private Region getMatchingTowerRegion(Region startingRegion) {
 		for (Region aLocation : theGame.board.regions()
             ) {
@@ -289,6 +308,29 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 	@Override
 	public void onStoreCardsClick() {
 		gameState = "storingPrivate";
+		rootView.gameStateChange(gameState);
+	}
+	
+	@Override
+	public void onStoreQuestClick() {
+		gameState = "storingQuestCards";
+		List<Card> matchQuest = new ArrayList<>();
+		for (Card questCard : theGame.players.get(0).quests) {
+		for (Card handCard : theGame.players.get(0).hand) {
+			if (handCard instanceof CreatureCard) {
+				 ListIterator<Symbol> questIter = ((Quest)questCard).requirements.listIterator(0);
+				 while (questIter.hasNext()) {
+					if (((CreatureCard)handCard).values.get(0) == questIter.next()) {
+						if (!matchQuest.contains(handCard)) {
+							matchQuest.add(handCard);
+						}
+						break;
+					}
+				}
+			}
+		}
+		}
+		rootView.validCardsForQuest(matchQuest);
 		rootView.gameStateChange(gameState);
 	}
 	

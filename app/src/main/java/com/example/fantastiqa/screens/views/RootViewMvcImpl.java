@@ -32,6 +32,7 @@ public class RootViewMvcImpl implements ViewMvc  {
     private Button towerButton;
     private Button storeCardsButton;
     private Button doneButton;
+    private Button storeQuestButton;
     
     private TextView land1;
     private TextView land2;
@@ -40,8 +41,8 @@ public class RootViewMvcImpl implements ViewMvc  {
     private TextView land5;
     private TextView land6;
 
-    private TextView quest1;
-    private TextView quest2;
+    private TextView publicQuest1;
+    private TextView publicQuest2;
 
     private TextView road1;
     private TextView road2;
@@ -53,6 +54,9 @@ public class RootViewMvcImpl implements ViewMvc  {
 
     LinkedList<View> theHand;
     LinkedList<TextView> storage;
+    LinkedList<TextView> quests;
+    LinkedList<TextView> quest1Storage;
+    LinkedList<TextView> quest0Storage;
 
     public RootViewMvcImpl(Context context, ViewGroup container) {
         mRootView = LayoutInflater.from(context).inflate(R.layout.activity_main, container);
@@ -83,6 +87,16 @@ public class RootViewMvcImpl implements ViewMvc  {
             public void onClick(View view) {
                 if (mListener != null) {
                     mListener.onStoreCardsClick();
+                }
+            }
+        });
+        
+        storeQuestButton = mRootView.findViewById(R.id.buttonStoreQuestCards);
+        storeQuestButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mListener != null) {
+                    mListener.onStoreQuestClick();
                 }
             }
         });
@@ -160,8 +174,8 @@ public class RootViewMvcImpl implements ViewMvc  {
         road6 = mRootView.findViewById(R.id.road6);
         road7 = mRootView.findViewById(R.id.road7);
 
-        quest1 = mRootView.findViewById(R.id.quest1);
-        quest2 = mRootView.findViewById(R.id.quest2);
+        publicQuest1 = mRootView.findViewById(R.id.publicQuest1);
+        publicQuest2 = mRootView.findViewById(R.id.publicQuest2);
 
         theHand = new LinkedList<View>(){ {
             add(mRootView.findViewById(R.id.hand1));
@@ -183,7 +197,29 @@ public class RootViewMvcImpl implements ViewMvc  {
         	add((TextView)mRootView.findViewById(R.id.stored3));
         	add((TextView)mRootView.findViewById(R.id.stored4));
         }};
+
         
+        quests = new LinkedList<TextView>() { {
+			add((TextView)mRootView.findViewById(R.id.quest0));
+			add((TextView)mRootView.findViewById(R.id.quest1));
+		}};
+                
+        quest0Storage = new LinkedList<TextView>() { {
+			add((TextView)mRootView.findViewById(R.id.quest00));
+			add((TextView)mRootView.findViewById(R.id.quest01));
+			add((TextView)mRootView.findViewById(R.id.quest02));
+			add((TextView)mRootView.findViewById(R.id.quest03));
+			add((TextView)mRootView.findViewById(R.id.quest04));
+		}};
+        
+        quest1Storage = new LinkedList<TextView>() { {
+			add((TextView)mRootView.findViewById(R.id.quest10));
+			add((TextView)mRootView.findViewById(R.id.quest11));
+			add((TextView)mRootView.findViewById(R.id.quest12));
+			add((TextView)mRootView.findViewById(R.id.quest13));
+			add((TextView)mRootView.findViewById(R.id.quest14));
+		}};
+		
         ListIterator<View> listIter = theHand.listIterator(0);
         while (listIter.hasNext()) {
 			((TextView)listIter.next()).setOnClickListener(new View.OnClickListener() {
@@ -279,9 +315,9 @@ public class RootViewMvcImpl implements ViewMvc  {
     public void bindQuest(int location, Quest details) {
         switch (location) {
             case 1:
-                quest1.setText(details.name);break;
+                publicQuest1.setText(details.name);break;
             case 2:
-                quest2.setText(details.name);break;
+                publicQuest2.setText(details.name);break;
         }
     }
 
@@ -310,6 +346,24 @@ public class RootViewMvcImpl implements ViewMvc  {
             listIter.next().setText(aCard.toString());
         }
     }
+    
+    @Override
+    public void bindPlayerQuest(List<Card> theHand) {
+		quests.get(0).setText(theHand.get(0).name);
+	}
+	
+	@Override
+	public void bindQuestStorage(Quest theQuest, List<Card> theCards) {
+		//TODO confirm the quest to use
+		for (Card aCard : theCards) {
+		for (TextView questStorage : quest0Storage) {
+			if (questStorage.getText()=="") {
+				questStorage.setText(aCard.name);
+				break;
+			}
+		}
+		}
+	}
 
     @Override
     public void setListener(ViewMvcListener listner) {
@@ -336,12 +390,41 @@ public class RootViewMvcImpl implements ViewMvc  {
 		case "storingPrivate":
 			setHandColor(Color.YELLOW);
 			break;
-		
+		case "storingQuestCards":
+			break;
 		case "open":
 			setHandColor(Color.WHITE);
 			break;
 		}
 	}
 	
-	
+	@Override
+	public void validCardsForQuest(List<Card> matches) {
+		for (Card questCard : matches) {
+			for (View handCardText : theHand) {
+				if (((TextView)handCardText).getText()==questCard.name) {
+					((TextView)handCardText).setTextColor(Color.YELLOW);
+					break;
+				}
+			} 
+		}
+	}
+	/*
+	public void addQuestStorage() {
+			//TODO multiple quests
+		for (Card questCard : theHand) {
+			//for (TextView questText : quests)
+			TextView questText = quests.get(0); {
+				//if match add to next blank quest card spot
+				if (questCard.name = questText.getText()) {
+					for (TextView questCardText : quest0Storage) {
+						if (questCardText.getText()=="") {
+							questCardText.setText(questCard.name);
+							break;
+					}
+				}
+			}
+		}
+	}
+	*/
 }

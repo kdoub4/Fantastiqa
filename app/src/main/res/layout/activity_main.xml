@@ -48,7 +48,7 @@
             />
 
         <TextView
-            android:id="@+id/quest1"
+            android:id="@+id/publicQuest1"
             style="@style/textLayout"
             android:layout_column="1"
             android:layout_weight="0.3"
@@ -96,7 +96,7 @@
             />
 
         <TextView
-            android:id="@+id/quest2"
+            android:id="@+id/publicQuest2"
             style="@style/textLayout"
             android:layout_column="1"
             android:layout_weight="0.3"
@@ -258,7 +258,7 @@
             android:layout_weight="0.4"
             />
     </TableRow>
-        <TableRow android:layout_margin="10dp">
+        <TableRow android:layout_margin="5dp">
         <TextView
             android:id="@+id/storageCards"
             style="@style/textLayout"
@@ -297,6 +297,83 @@
             android:layout_weight="0.4"
             />
     </TableRow>
+	<TableRow android:layout_margin="2dp">
+        <TextView
+            android:id="@+id/quest0"
+            style="@style/textLayout"
+            android:layout_column="0"
+            android:layout_weight="0.4"
+            />
 
+        <TextView
+            android:id="@+id/quest00"
+            style="@style/textLayout"
+            android:layout_column="1"
+            android:layout_weight="0.4"
+            />
+        <TextView
+            android:id="@+id/quest01"
+            style="@style/textLayout"
+            android:layout_column="2"
+            android:layout_weight="0.4"
+            />
+        <TextView
+            android:id="@+id/quest02"
+            style="@style/textLayout"
+            android:layout_column="3"
+            android:layout_weight="0.4"
+            />
+        <TextView
+            android:id="@+id/quest03"
+            style="@style/textLayout"
+            android:layout_column="4"
+            android:layout_weight="0.4"
+            />
+        <TextView
+            android:id="@+id/quest04"
+            style="@style/textLayout"
+            android:layout_column="5"
+            android:layout_weight="0.4"
+            />
+    </TableRow>
+    <TableRow android:layout_margin="2dp">
+        <TextView
+            android:id="@+id/quest1"
+            style="@style/textLayout"
+            android:layout_column="0"
+            android:layout_weight="0.4"
+            android:text="EmptyQuest:" />
+
+        <TextView
+            android:id="@+id/quest10"
+            style="@style/textLayout"
+            android:layout_column="1"
+            android:layout_weight="0.4"
+            />
+        <TextView
+            android:id="@+id/quest11"
+            style="@style/textLayout"
+            android:layout_column="2"
+            android:layout_weight="0.4"
+            />
+        <TextView
+            android:id="@+id/quest12"
+            style="@style/textLayout"
+            android:layout_column="3"
+            android:layout_weight="0.4"
+            />
+        <TextView
+            android:id="@+id/quest13"
+            style="@style/textLayout"
+            android:layout_column="4"
+            android:layout_weight="0.4"
+            />
+        <TextView
+            android:id="@+id/quest14"
+            style="@style/textLayout"
+            android:layout_column="5"
+            android:layout_weight="0.4"
+            />
+    </TableRow>
 </TableLayout>
 </ScrollView>

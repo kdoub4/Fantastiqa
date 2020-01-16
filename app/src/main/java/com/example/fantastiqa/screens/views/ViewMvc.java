@@ -45,14 +45,18 @@ public interface ViewMvc {
     void bindQuest(int location, Quest details);
     void bindHand(List<Card> theHand);
 	void bindStorage(List<Card> theHand);
+	void bindPlayerQuest(List<Card> theHand);
+	void bindQuestStorage(Quest theQuest, List<Card> theCards);
 
     void highlightLand(int location);
+    void validCardsForQuest(List<Card> matches);
 
     interface ViewMvcListener {
 
         void onMoveClick();
         void onTowerVisitClick();
         void onStoreCardsClick();
+        void onStoreQuestClick();
         void onDoneClick();
         
         void onLandClick(View v);

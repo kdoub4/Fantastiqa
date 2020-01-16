@@ -120,6 +120,7 @@ public class Game {
         for (Player someone: players) {
             ((Region)board.locations.get(1)).players.add(someone);
             someone.drawCards(5);
+            someone.quests.add(questDeck.remove(random.nextInt(questDeck.size())));
         }
 
         Log.v("DeckSize", Integer.toString(creatureDeck.size()));
