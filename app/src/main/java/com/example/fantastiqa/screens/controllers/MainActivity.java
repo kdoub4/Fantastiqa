@@ -401,6 +401,9 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 		}
 		//rootView.validCardsForQuest(matchQuest);
 		//rootView.gameStateChange(gameState);
+		if (matchQuest.size()==0) {
+			changeGameState("open");
+		}
 		return matchQuest;
 	}
 	
