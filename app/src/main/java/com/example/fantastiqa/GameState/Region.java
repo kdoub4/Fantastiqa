@@ -20,6 +20,14 @@ public class Region extends Area {
     public String getName(){
         return name.toString();
     }
+    
+    public String getPlayersString(){
+		String results="";
+		for (Player aPlayer : players) {
+			results +=aPlayer.toString() + " ";
+		}
+		return results;
+	}
 
 }
 

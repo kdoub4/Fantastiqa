@@ -9,8 +9,11 @@ import com.example.fantastiqa.GameState.Quest;
 import com.example.fantastiqa.GameState.Region;
 import com.example.fantastiqa.GameState.Road;
 
-import java.util.List;
+import com.example.fantastiqa.screens.deckCards;
+import com.example.fantastiqa.screens.spaceRoad;
+import com.example.fantastiqa.screens.spaceRegion;
 
+import java.util.List;
 
 /**
  * MVC view interface.
@@ -40,7 +43,7 @@ public interface ViewMvc {
      */
     public Bundle getViewState();
 
-    void bindLand(int location, Region details);
+    void bindLand(spaceRegion location, Region details);
     void bindRoad(int location, Road details);
     void bindQuest(int location, Quest details);
     void bindHand(List<Card> theHand);
@@ -52,17 +55,29 @@ public interface ViewMvc {
     void validCardsForQuest(List<Card> matches);
     
     void setTowerTeleport(Boolean value);
+	
+	void onMoveClick(View v);
+	void onDoneClick();
+	void onTowerVisitClick();
+    void onLandClick(View v);
+    void onStoreCardsClick();
+    void onHandClick(View v);
+    void onStoreQuestClick();
 
+	
     interface ViewMvcListener {
-
-        void onMoveClick();
-        void onTowerVisitClick();
-        void onStoreCardsClick();
-        void onStoreQuestClick();
-        void onDoneClick();
-        
-        void onLandClick(View v);
-		void onHandClick(View v);
+		List<spaceRegion> getValidAdventuring();
+		spaceRegion towerTeleport();
+		Boolean doMove(spaceRegion newSpace);
+		void finishPhase();
+		void beginStoreCardsPrivate();
+		void storeCard(Card theCard);
+		void storeCardPrivate(Card theCard);
+		void storeCardQuest(Card theCard);
+		List<Card> getValidQuestCards();
+		void beginStoreCardsQuest();
+		void Toast(String text);
+    
     }
 
     public void setListener(ViewMvcListener listner);
