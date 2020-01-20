@@ -115,4 +115,14 @@ public class Player {
             //TODO other methods of subdue
         }
     }
+    
+    public List<Card> handContains(Ability ability) {
+		List<Card> results = new ArrayList<>();
+		for (Card aHandCard : hand) {
+			if (aHandCard instanceof CreatureCard && ((CreatureCard)aHandCard).ability == ability) {
+				results.add(aHandCard);
+			}
+		}
+		return results;
+	} 
 }

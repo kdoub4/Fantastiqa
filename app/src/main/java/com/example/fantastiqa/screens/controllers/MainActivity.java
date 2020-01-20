@@ -51,6 +51,7 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
     private CreatureCard emptyRoadCard = new CreatureCard("",Symbol.NONE, false, Ability.NONE ,Symbol.NONE);
     private Map<spaceRegion,Region> spaceRegionMap = new EnumMap<>(spaceRegion.class);
     private Map<Region,spaceRegion> regionSpaceMap = new HashMap<>();
+	private List<Card> playerChoices = new ArrayList<>(5);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -434,5 +435,44 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
             }
             //TODO other methods of subdue
         }
+	}
+	
+	@Override
+	public List<Card> beginVisitBazaar() {
+		int keyCardCount = 0;
+		List<Card> selectableCards = currentPlayer.handContains(Ability.PLUS_CARD);
+		for (Card selectedCard : rootView.selectKeyCards(selectableCards)) {
+			keyCardCount++;
+			currentPlayer.discard.add(selectedCard);
+			currentPlayer.hand.remove(selectedCard);
+		}
+		
+		for (int i = 0;i < 3 +keyCardCount ; i++) {
+			if (theGame.bazaarDeck.size() > 0) {
+				playerChoices.add(theGame.bazaarDeck.remove(0));
+			}
+		}
+		changeGameState("TowerBuy");
+		rootView.bindHand(currentPlayer.hand);
+		return playerChoices;
+	}
+	
+	@Override
+	public void endVisitBazaar(int buy) {
+		//TODO in Game possiblePurchase list
+		Toast.makeText(MainActivity.this, "endBazaar", Toast.LENGTH_SHORT).show();
+		changeGameState("open");
+		currentPlayer.discard.add( playerChoices.remove(buy));
+		ListIterator<Card> cardIter = playerChoices.listIterator();
+		while (cardIter.hasNext()) {
+			
+			theGame.bazaarDeck.add((CreatureCard)cardIter.next());
+			cardIter.remove();
+		}
+	}
+	
+	@Override
+	public Boolean canTowerTeleport() {
+		return currentPlayer.getGems() >= 2;
 	}
 }

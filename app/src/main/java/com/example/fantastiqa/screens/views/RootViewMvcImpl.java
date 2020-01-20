@@ -8,18 +8,22 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 
 import com.example.fantastiqa.GameState.Card;
 import com.example.fantastiqa.GameState.Player;
 import com.example.fantastiqa.GameState.Quest;
 import com.example.fantastiqa.GameState.Region;
 import com.example.fantastiqa.GameState.Road;
+import com.example.fantastiqa.GameState.CreatureCard;
 import com.example.fantastiqa.R;
 
 import com.example.fantastiqa.screens.deckCards;
 import com.example.fantastiqa.screens.spaceRoad;
 import com.example.fantastiqa.screens.spaceRegion;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
@@ -252,8 +256,37 @@ public class RootViewMvcImpl implements ViewMvc  {
 
 	@Override
 	public void onTowerVisitClick() {
-		mListener.towerTeleport();
+		AlertDialog.Builder builder = new AlertDialog.Builder(mRootView.getContext());
+		CharSequence[] items = {"Teleport","Cards","Remove"}; 
+		builder.setItems(items, new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int which) {
+				switch (which) {
+					case 0: mListener.towerTeleport(); break;
+					case 1: drawTowerCards(); break;// mListener.beginVisitBazaar(); break;
+					case 2: //purge
+					break;
+				}
+			}
+		}
+		);
+		builder.show();
 	} 
+	
+	private void drawTowerCards() {
+		List<Card> towerCards = mListener.beginVisitBazaar();
+		CharSequence[] dialogItems = new CharSequence[towerCards.size()];
+		for (int i=0; i<towerCards.size(); i++) {
+			dialogItems[i]=towerCards.get(i).name;
+		}
+		AlertDialog.Builder buyDialog = new AlertDialog.Builder(mRootView.getContext());
+		buyDialog.setItems(dialogItems, new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int which) {
+				mListener.endVisitBazaar(which);
+			}
+		  }
+		);
+		buyDialog.show();
+	}
 	
 	@Override
 	public void onStoreCardsClick() {
@@ -514,7 +547,43 @@ public class RootViewMvcImpl implements ViewMvc  {
 
 	@Override
 	public void setTowerTeleport(Boolean value) {
-		towerButton.setEnabled(value);
+		//towerButton.setEnabled(value);
 		//towerButton.setVisibility(value ? View.VISIBLE : View.GONE);
 	}
+	
+	@Override
+	public List<Card> selectKeyCards (List<Card> selectFrom) {
+		List<Card> results = new ArrayList<>();
+		CharSequence[] dialogItems = new CharSequence[selectFrom.size()];
+		for (int i=0; i<selectFrom.size(); i++) {
+			dialogItems[i]=selectFrom.get(i).name;
+		}
+		AlertDialog.Builder selectDialog = new AlertDialog.Builder(mRootView.getContext());
+		final ArrayList<Integer> selectedItems = new ArrayList<Integer>();
+		selectDialog.setMultiChoiceItems(dialogItems, null,
+			new DialogInterface.OnMultiChoiceClickListener() {
+			public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+				if (isChecked) {
+					selectedItems.add(which);
+				}
+				else if (selectedItems.contains(which)) {
+					selectedItems.remove(Integer.valueOf(which));
+				}
+			}
+		  }
+		)
+		.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+		@Override
+		public void onClick(DialogInterface dialog, int id) {
+			for (Integer selection : selectedItems) {
+				//results.add(selectFrom.get((int)selection));
+			}
+			
+		}	
+		});
+		
+		selectDialog.show();
+		return results;
+	}
+
 }

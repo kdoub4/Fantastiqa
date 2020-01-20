@@ -2,6 +2,8 @@ package com.example.fantastiqa.GameState;
 
 import android.util.Pair;
 
+import com.google.common.graph.MutableNetwork;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -11,7 +13,8 @@ import java.util.Random;
 public class Board {
     public List<Area> locations = Arrays.asList(new Road(), new Region(), new Road(), new Region(), new Road(), new Region(),
             new Road(), new Region(), new Road(), new Region(), new Road(), new Region(), new Road());
-    public List<Quest> quests = new ArrayList<>(2);
+    public final List<Quest> quests = new ArrayList<>(2);
+    public MutableNetwork<Region,Road> regionsRoads;
 
     public Board() {
         Random  r = new Random();

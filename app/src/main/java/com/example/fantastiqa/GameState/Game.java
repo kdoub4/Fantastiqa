@@ -5,6 +5,7 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.Collections;
 
 public class Game {
     public Board board;
@@ -13,7 +14,9 @@ public class Game {
     public List<CreatureCard> bazaarDeck = new ArrayList<>();
     public List<Quest> questDeck = new ArrayList<>();
     public List<Player> players = new ArrayList<>();
-
+	public List<Card> selectCards = new ArrayList<>(5);
+//	public deckType selectType;
+	
     public Game() {
         Random random = new Random();
         //Create creatureDeck
@@ -44,6 +47,7 @@ public class Game {
                 }
             }
         }
+        Collections.shuffle(bazaarDeck);
         while (!tempDeck.isEmpty()) {
             creatureDeck.add(tempDeck.remove(random.nextInt(tempDeck.size())));
         }
@@ -124,8 +128,47 @@ public class Game {
         }
 
         Log.v("DeckSize", Integer.toString(creatureDeck.size()));
-        for (CreatureCard aCard: creatureDeck)
+        for (CreatureCard aCard: bazaarDeck)
             Log.v(aCard.name, aCard.values.toString());
     }
-    
+/*
+	public List<T extends Card> getCardChoices (int number, deckTypes theDeck) {
+		for (int i=0; i < number; i++) {
+			switch (theDeck) {
+				case BAZAAR:
+					selectCards.add(bazaarDeck.remove(0);
+					break;
+				case QUEST:
+					selectCards.add(questDeck.remove(0);
+					break;
+				case ARTIFACT:
+					selectCards.add(artifactDeck.remove(0);
+					break;
+			}
+		}
+		selectType = theDeck;
+	}
+	
+	public void selectCardChoice(Card selection) {
+		for (Card aDiscard : selectCards) {
+			if (aDiscard == selection) break;
+			switch (selectType) {
+				case BAZAAR:
+					bazaarDeck.add(aDiscard);
+					break;
+				case QUEST:
+					questDeck.add(aDiscard);
+					break;
+				case ARTIFACT:
+					artifactDeck.add(aDiscard);
+					break;
+			}
+		}
+		selectCards.clear();
+	}
+	* */
+}
+
+enum deckTypes {
+	QUEST, BAZAAR, ARTIFACT, CREATURE
 }

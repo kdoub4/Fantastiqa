@@ -8,6 +8,7 @@ import com.example.fantastiqa.GameState.Card;
 import com.example.fantastiqa.GameState.Quest;
 import com.example.fantastiqa.GameState.Region;
 import com.example.fantastiqa.GameState.Road;
+import com.example.fantastiqa.GameState.CreatureCard;
 
 import com.example.fantastiqa.screens.deckCards;
 import com.example.fantastiqa.screens.spaceRoad;
@@ -63,6 +64,7 @@ public interface ViewMvc {
     void onStoreCardsClick();
     void onHandClick(View v);
     void onStoreQuestClick();
+    List<Card> selectKeyCards(List<Card> selectFrom);
 
 	
     interface ViewMvcListener {
@@ -77,7 +79,9 @@ public interface ViewMvc {
 		List<Card> getValidQuestCards();
 		void beginStoreCardsQuest();
 		void Toast(String text);
-    
+		List<Card> beginVisitBazaar();
+		Boolean canTowerTeleport();
+		void endVisitBazaar(int selection);
     }
 
     public void setListener(ViewMvcListener listner);
