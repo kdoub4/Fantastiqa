@@ -22,6 +22,7 @@ import com.example.fantastiqa.R;
 import com.example.fantastiqa.screens.deckCards;
 import com.example.fantastiqa.screens.spaceRoad;
 import com.example.fantastiqa.screens.spaceRegion;
+import com.example.fantastiqa.screens.gameStatus;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -43,6 +44,7 @@ public class RootViewMvcImpl implements ViewMvc  {
     private Button storeCardsButton;
     private Button doneButton;
     private Button storeQuestButton;
+    private Button carpetButton;
     
     private TextView land1;
     private TextView land2;
@@ -119,6 +121,14 @@ public class RootViewMvcImpl implements ViewMvc  {
             }
         });
 
+		carpetButton = mRootView.findViewById(R.id.buttonFlyingCarpet);
+        carpetButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onFlyingCarpetClick();
+            }
+        });
+        
         land1 = (TextView) mRootView.findViewById(R.id.land1);
         regionTextView.put(spaceRegion.NE,land1);
         textViewRegion.put(land1,spaceRegion.NE);
@@ -253,6 +263,13 @@ public class RootViewMvcImpl implements ViewMvc  {
 			regionTextView.get(aRegion).setTextColor(Color.YELLOW);
 		}
 	}
+	
+	@Override
+	public void onFlyingCarpetClick() {
+		for (spaceRegion aRegion : mListener.beginFlyingCarpet()) {
+			regionTextView.get(aRegion).setTextColor(Color.YELLOW);
+		}
+	}
 
 	@Override
 	public void onTowerVisitClick() {
@@ -317,16 +334,16 @@ public class RootViewMvcImpl implements ViewMvc  {
 	}
 	
 	@Override
-	public void gameStateChange(String newState) {
+	public void gameStateChange(gameStatus newState) {
 		switch (newState) {
-		case "moving" :
+		case MOVING:
 			moveButton.setEnabled(false);
 			towerButton.setEnabled(false);
 			storeCardsButton.setEnabled(false);
 			storeQuestButton.setEnabled(false);
 			doneButton.setEnabled(true);
 			break;
-		case "open" :
+		case OPEN :
 			moveButton.setEnabled(true);
 			towerButton.setEnabled(true);
 			storeCardsButton.setEnabled(true);
@@ -335,11 +352,11 @@ public class RootViewMvcImpl implements ViewMvc  {
 			setHandColor(Color.WHITE);
 			setLandColor(Color.WHITE);
 			break;
-		case "storingPrivate":
+		case STORING_PRIVATE:
 			//TODO is this controller logic
 			setHandColor(Color.YELLOW);
 			break;
-		case "storingQuestCards":
+		case STORING_QUESTCARDS:
 			for (Card aCard : mListener.getValidQuestCards()) {
 				for (TextView tv : theHandViews) {
 					if (tv.getTag() instanceof Card &&

@@ -13,6 +13,7 @@ import android.graphics.Color;
 import com.example.fantastiqa.screens.deckCards;
 import com.example.fantastiqa.screens.spaceRoad;
 import com.example.fantastiqa.screens.spaceRegion;
+import com.example.fantastiqa.screens.gameStatus;
 
 import com.example.fantastiqa.GameState.Ability;
 import com.example.fantastiqa.GameState.Area;
@@ -45,7 +46,7 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
     private com.example.fantastiqa.screens.views.ViewMvc rootView;
     private Player currentPlayer;
     private Region currentLocation;
-    private String gameState;
+    private gameStatus gameState;
     private List<Pair<Road,Region>> moveTargets = new LinkedList<>();
     private List<spaceRegion> moveTargetIds = new LinkedList<>();
     private CreatureCard emptyRoadCard = new CreatureCard("",Symbol.NONE, false, Ability.NONE ,Symbol.NONE);
@@ -79,7 +80,6 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 				spaceRegion compassRegion =spaceRegion.values()[theGame.board.regions().indexOf(anArea)]; 
 				spaceRegionMap.put(compassRegion, anArea);
 				regionSpaceMap.put(anArea, compassRegion);
-				toast(compassRegion.toString() + anArea.name.toString());
 				rootView.bindLand(compassRegion, anArea);
             }
 			
@@ -107,7 +107,6 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
             }
 
             rootView.bindHand(currentPlayer.hand);
-            Toast.makeText(MainActivity.this, currentPlayer.hand.get(0).name, Toast.LENGTH_SHORT);
             rootView.bindPlayerQuest(currentPlayer.quests);
     }
 
@@ -116,61 +115,91 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 		Toast.makeText(MainActivity.this,text,Toast.LENGTH_SHORT).show();
 	}
 
-/*    //@Override
-    public void onClick(View v) {
-        TextView currentLocation= null;
-        TextView nextLocation = null;
-        LinkedList<View> locations = new LinkedList<View>(){ {
-            add(findViewById(R.id.land1));
-            add(findViewById(R.id.land2));
-            add(findViewById(R.id.land3));
-            add(findViewById(R.id.land4));
-            add(findViewById(R.id.land5));
-            add(findViewById(R.id.land6));
-        }};
-        currentLocation = (TextView)locations.getFirst();
-        int i = 1;
-        while (!currentLocation.getText().toString().contains("P1") && i<6) {
-            currentLocation = (TextView) locations.get(i);
-            i++;
-        }
-        if (currentLocation.getText().toString().contains("P1")) {
-            currentLocation.setText(currentLocation.getText().toString().replace("P1",""));
-            nextLocation = (TextView) locations.get(i<6 ? i : 0);
-            nextLocation.setText(nextLocation.getText().toString().contains("P") ?
-                    nextLocation.getText().toString().concat(" P1"):
-                    nextLocation.getText().toString().concat("P1"));
-        }
-
-    }
-*/
-    public List<Pair<Road,Region>> getMoves(){
-        List<Pair<Road,Region>> results = new LinkedList<>();
-        for (Pair<Road, Region> adjPair: getAdjacentLands(currentPlayer)){
-            if (canSubdue(adjPair.first.creature)) {
-                results.add(adjPair);
-            }
-        }
-        return results;
-    }
-
-    private List<Pair<Road, Region>> getAdjacentLands(Player thePlayer){
-        Region playerArea=null;
-        if (thePlayer == currentPlayer) {
-			playerArea=currentLocation;
+    @Override
+    public void finishPhase() {
+		changeGameState(gameStatus.OPEN);
+	}
+	
+    private void changeGameState(gameStatus newState) {
+		rootView.gameStateChange(newState);
+		gameState = newState;
+	}
+ 	
+	@Override
+	public void onGemChange(int newGems, int oldGems) {
+		if (oldGems < 2 && newGems > 2) {
+			rootView.setTowerTeleport(true);
 		}
-		else {
-          for (Region aRegion : theGame.board.regions()) {
-            if (aRegion.players.contains(thePlayer)){
-                playerArea = aRegion;
-                break;
-            }
-          }
+		else if (oldGems > 2 && newGems < 2) {
+			rootView.setTowerTeleport(false);
 		}
-		if (playerArea == null) return null;
-        return theGame.board.getAdjacentAreas(playerArea);
+		
+	}
+	
+	private void movePlayer(Player thePlayer, Region newRegion) {
+		currentLocation.players.remove(currentPlayer);
+        newRegion.players.add(currentPlayer);
+            currentLocation= newRegion;
+            for (Region anArea : theGame.board.regions()
+            ) {
+                rootView.bindLand(regionSpaceMap.get(anArea),anArea);
+            }
+	}
+
+	//Go Adventuring
+	@Override
+    public Boolean doMove(spaceRegion newSpace) {
+		Toast.makeText(MainActivity.this, newSpace.toString(), Toast.LENGTH_SHORT).show();
+        if (gameState == gameStatus.MOVING && moveTargetIds.contains(newSpace)){
+			Pair<Road,Region> moveTarget = moveTargets.get(moveTargetIds.indexOf(newSpace));
+            movePlayer(currentPlayer, moveTarget.second);
+            subdue(moveTarget.first);
+            rootView.bindHand(currentPlayer.hand);
+            rootView.bindRoad(roadSpaceMap.get(moveTarget.first), moveTarget.first);
+            changeGameState(gameStatus.OPEN);
+            moveTargets.clear();
+            moveTargetIds.clear();
+            return true;
+        }
+        else if (gameState == gameStatus.FLYING_CARPET && moveTargetIds.contains(newSpace)) {
+			endFlyingCarpet(newSpace);
+			return true;
+		}
+		return false;
     }
 
+	private void subdue(Road toSubdue) {
+	        for (Card aCard : currentPlayer.hand
+        ) {
+            if (aCard instanceof CreatureCard) {
+                CreatureCard handCreature = (CreatureCard) aCard;
+                //Toast.makeText(MainActivity.this, handCreature.values.get(0).toString(), Toast.LENGTH_SHORT).show();
+                if (toSubdue.creature.subduedBy == handCreature.values.get(0)) {
+                    currentPlayer.hand.remove(handCreature);
+                    currentPlayer.discard.add(handCreature);
+                    currentPlayer.discard.add(toSubdue.creature);
+                    toSubdue.creature = emptyRoadCard;
+                    break;
+                }
+            }
+            //TODO other methods of subdue
+        }
+	}
+    @Override
+    public List<spaceRegion> getValidAdventuring() {
+        for (Pair<Road,Region> aPair:getMoves()
+             ) {
+            //Integer regionId = theGame.board.regions().indexOf(aPair.second);
+            //rootView.highlightLand(regionId);
+            moveTargets.add(aPair);
+            moveTargetIds.add(regionSpaceMap.get(aPair.second));    
+        }
+        if (moveTargets.size() > 0){
+            changeGameState(gameStatus.MOVING);
+		}
+        return moveTargetIds;
+    }
+    
     private Boolean canSubdue(CreatureCard aCreature){
         if (aCreature.subduedBy == Symbol.NONE) {
 			return false;
@@ -217,6 +246,7 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 			Toast.makeText(MainActivity.this, hasDoubleSymbol?"double":hasTwoCards?"two":"mustbeFirst", Toast.LENGTH_SHORT).show();
             return true;
         }
+        toast("false");
         return  false;
     }
     private Boolean canSubdueDouble(CreatureCard aCreature){
@@ -257,36 +287,45 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
         if (symbolCount>=2) return  true;
         return  false;
     }
-
-    @Override
-    public List<spaceRegion> getValidAdventuring() {
-        for (Pair<Road,Region> aPair:getMoves()
-             ) {
-            //Integer regionId = theGame.board.regions().indexOf(aPair.second);
-            //rootView.highlightLand(regionId);
-            moveTargets.add(aPair);
-            moveTargetIds.add(regionSpaceMap.get(aPair.second));    
+    public List<Pair<Road,Region>> getMoves(){
+        List<Pair<Road,Region>> results = new LinkedList<>();
+        for (Pair<Road, Region> adjPair: getAdjacentLands(currentPlayer)){
+            if (canSubdue(adjPair.first.creature)) {
+                results.add(adjPair);
+            }
         }
-        if (moveTargets.size() > 0){
-            changeGameState("moving");
-		}
-        return moveTargetIds;
+        return results;
     }
-    
-    @Override
-    public void finishPhase() {
-		changeGameState("open");
+
+    private List<Pair<Road, Region>> getAdjacentLands(Player thePlayer){
+        Region playerArea=null;
+        if (thePlayer == currentPlayer) {
+			playerArea=currentLocation;
+		}
+		else {
+          for (Region aRegion : theGame.board.regions()) {
+            if (aRegion.players.contains(thePlayer)){
+                playerArea = aRegion;
+                break;
+            }
+          }
+		}
+		if (playerArea == null) return null;
+        return theGame.board.getAdjacentAreas(playerArea);
+    }
+
+	//Visit Tower
+	//Tower Teleport
+		
+	@Override
+	public Boolean canTowerTeleport() {
+		return currentPlayer.getGems() >= 2;
 	}
-	
-    private void changeGameState(String newState) {
-		rootView.gameStateChange(newState);
-		gameState = newState;
-	}
- 
+
     @Override
     public spaceRegion towerTeleport() {
 				//TODO check for enough gems
-                	Region matchingRegion = getMatchingTowerRegion(currentLocation);
+                	Region matchingRegion = theGame.board.getTowerMatch(currentLocation);
 					matchingRegion.players.add(currentPlayer);
 					currentLocation.players.remove(currentPlayer);
 					rootView.bindLand(regionSpaceMap.get(matchingRegion), matchingRegion);
@@ -296,104 +335,60 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 					return regionSpaceMap.get(currentLocation);
 	}
 
-    @Override
-    public Boolean doMove(spaceRegion newSpace) {
-		Toast.makeText(MainActivity.this, newSpace.toString(), Toast.LENGTH_SHORT).show();
-        if (gameState == "moving" && moveTargetIds.contains(newSpace)){
-			Pair<Road,Region> moveTarget = moveTargets.get(moveTargetIds.indexOf(newSpace));
-            currentLocation.players.remove(currentPlayer);
-            moveTarget.second.players.add(currentPlayer);
-            subdue(moveTarget.first);
-            rootView.bindHand(currentPlayer.hand);
-            //TODO make bindLands
-            for (Region anArea : theGame.board.regions()
-            ) {
-                rootView.bindLand(regionSpaceMap.get(anArea),anArea);
-            }
-            rootView.bindRoad(roadSpaceMap.get(moveTarget.first), moveTarget.first);
-            currentLocation= moveTarget.second;
-            changeGameState("open");
-            moveTargets.clear();
-            moveTargetIds.clear();
-            return true;
-        }
-		return false;
-    }
-
+	//New cards
+	//Beast Bazaar
 	@Override
-	public void storeCardQuest(Card aCard) {
-		if (gameState == "storingQuestCards") {
-			//TODO check if legal card
-			//TODO other quests
-			//if (((TextView)v).getTextColor == Color.YELLOW)
-			 {
-				//transferCard = getTransferCard(v);
-				if (aCard !=null) {
-					currentPlayer.hand.remove(aCard);
-					//TODO single card bind
-					rootView.bindHand(currentPlayer.hand);
-					//((TextView)v).setTextColor(Color.WHITE);
-					//TODO Clear card highlighting
-					((Quest)currentPlayer.quests.get(0)).stored.add(aCard);
-					rootView.bindQuestStorage((Quest)currentPlayer.quests.get(0), ((Quest)currentPlayer.quests.get(0)).stored);
-				}
-			}
+	public void beginVisitBazaar() {
+		List<Card> selectableCards = currentPlayer.handContains(Ability.PLUS_CARD);
+		if (selectableCards.size()>0) {
+			rootView.selectKeyCards(selectableCards);
 		}
-	}
-	
-    @Override
-    public void storeCardPrivate(Card aCard) {
-		Card transferCard = aCard;
-		if (gameState == "storingPrivate") {
-			Toast.makeText(MainActivity.this, "storingPrivate", Toast.LENGTH_SHORT).show();
-			//transferCard = getTransferCard(v);
-			if (transferCard != null) {
-				currentPlayer.hand.remove(transferCard);
-				currentPlayer.publicQuest.add(transferCard);
-				rootView.bindHand(currentPlayer.hand);
-				rootView.bindStorage(currentPlayer.publicQuest);
-			}
-		}
+		else 
+			onSelectedKeyCards(new ArrayList<Card>());
+		changeGameState(gameStatus.TOWER_BUY);
 	}
 
 	@Override
-	public void storeCard(Card aCard) {
-		Toast.makeText(MainActivity.this, gameState, Toast.LENGTH_SHORT);
-		if (gameState == "storingPrivate") {
-			storeCardPrivate(aCard);
+	public void onSelectedKeyCards(List<Card> selections) {
+		int keyCardCount = 0;
+		for (Card selectedCard : selections) {
+			keyCardCount++;
+			currentPlayer.discard.add(selectedCard);
+			currentPlayer.hand.remove(selectedCard);
 		}
-		else if (gameState == "storingQuestCards") {
-			storeCardQuest(aCard);
+		for (int i = 0;i < 3 +keyCardCount ; i++) {
+			if (theGame.bazaarDeck.size() > 0) {
+				playerChoices.add(theGame.bazaarDeck.remove(0));
+			}
 		}
-	}
-	/*
-	private Card getTransferCard(View v) {
-				for (Card aHandCard : currentPlayer.hand) {
-				if (((TextView)v).getText() == aHandCard.name) {
-					return aHandCard;
-				}
-			}
-		return null;
-	}
-	*/
-	private Region getMatchingTowerRegion(Region startingRegion) {
-		for (Region aLocation : theGame.board.regions()
-            ) {
-				if (startingRegion!=aLocation && aLocation.tower == startingRegion.tower) {
-					return aLocation;
-				}
-			}
-		return startingRegion;
+		rootView.bindHand(currentPlayer.hand);
+		rootView.selectCard(playerChoices);
 	}
 	
+	@Override
+	public void endVisitBazaar(int buy) {
+		//TODO in Game possiblePurchase list
+		Toast.makeText(MainActivity.this, "endBazaar", Toast.LENGTH_SHORT).show();
+		changeGameState(gameStatus.OPEN);
+		currentPlayer.discard.add( playerChoices.remove(buy));
+		ListIterator<Card> cardIter = playerChoices.listIterator();
+		while (cardIter.hasNext()) {
+			
+			theGame.bazaarDeck.add((CreatureCard)cardIter.next());
+			cardIter.remove();
+		}
+	}
+
+	//Free Actions
+	//Store cards
 	@Override
 	public void beginStoreCardsPrivate() {
-		changeGameState("storingPrivate");
+		changeGameState(gameStatus.STORING_PRIVATE);
 	}
 	
 	@Override
 	public void beginStoreCardsQuest() {
-		changeGameState("storingQuestCards");
+		changeGameState(gameStatus.STORING_QUESTCARDS);
 	}
 
 	@Override
@@ -419,84 +414,79 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 		//rootView.validCardsForQuest(matchQuest);
 		//rootView.gameStateChange(gameState);
 		if (matchQuest.size()==0) {
-			changeGameState("open");
+			changeGameState(gameStatus.OPEN);
 		}
 		return matchQuest;
 	}
-	
+
 	@Override
-	public void onGemChange(int newGems, int oldGems) {
-		if (oldGems < 2 && newGems > 2) {
-			rootView.setTowerTeleport(true);
+	public void storeCardQuest(Card aCard) {
+		if (gameState == gameStatus.STORING_QUESTCARDS) {
+			//TODO check if legal card
+			//TODO other quests
+			//if (((TextView)v).getTextColor == Color.YELLOW)
+			 {
+				//transferCard = getTransferCard(v);
+				if (aCard !=null) {
+					currentPlayer.hand.remove(aCard);
+					//TODO single card bind
+					rootView.bindHand(currentPlayer.hand);
+					//((TextView)v).setTextColor(Color.WHITE);
+					//TODO Clear card highlighting
+					((Quest)currentPlayer.quests.get(0)).stored.add(aCard);
+					rootView.bindQuestStorage((Quest)currentPlayer.quests.get(0), ((Quest)currentPlayer.quests.get(0)).stored);
+				}
+			}
 		}
-		else if (oldGems > 2 && newGems < 2) {
-			rootView.setTowerTeleport(false);
-		}
-		
 	}
 	
-	private void subdue(Road toSubdue) {
-	        for (Card aCard : currentPlayer.hand
-        ) {
-            if (aCard instanceof CreatureCard) {
-                CreatureCard handCreature = (CreatureCard) aCard;
-                //Toast.makeText(MainActivity.this, handCreature.values.get(0).toString(), Toast.LENGTH_SHORT).show();
-                if (toSubdue.creature.subduedBy == handCreature.values.get(0)) {
-                    currentPlayer.hand.remove(handCreature);
-                    currentPlayer.discard.add(handCreature);
-                    currentPlayer.discard.add(toSubdue.creature);
-                    toSubdue.creature = emptyRoadCard;
-                    break;
-                }
-            }
-            //TODO other methods of subdue
-        }
-	}
-	
-	@Override
-	public void beginVisitBazaar() {
-		List<Card> selectableCards = currentPlayer.handContains(Ability.PLUS_CARD);
-		if (selectableCards.size()>0) {
-			rootView.selectKeyCards(selectableCards);
+    @Override
+    public void storeCardPrivate(Card aCard) {
+		Card transferCard = aCard;
+		if (gameState == gameStatus.STORING_PRIVATE) {
+			if (transferCard != null) {
+				currentPlayer.hand.remove(transferCard);
+				currentPlayer.publicQuest.add(transferCard);
+				rootView.bindHand(currentPlayer.hand);
+				rootView.bindStorage(currentPlayer.publicQuest);
+			}
 		}
-		else 
-			onSelectedKeyCards(new ArrayList<Card>());
-		changeGameState("TowerBuy");
 	}
 
 	@Override
-	public void onSelectedKeyCards(List<Card> selections) {
-		int keyCardCount = 0;
-		for (Card selectedCard : selections) {
-			keyCardCount++;
-			currentPlayer.discard.add(selectedCard);
-			currentPlayer.hand.remove(selectedCard);
+	public void storeCard(Card aCard) {
+		Toast.makeText(MainActivity.this, gameState.toString(), Toast.LENGTH_SHORT);
+		if (gameState == gameStatus.STORING_PRIVATE) {
+			storeCardPrivate(aCard);
 		}
-		for (int i = 0;i < 3 +keyCardCount ; i++) {
-			if (theGame.bazaarDeck.size() > 0) {
-				playerChoices.add(theGame.bazaarDeck.remove(0));
+		else if (gameState == gameStatus.STORING_QUESTCARDS) {
+			storeCardQuest(aCard);
+		}
+	}
+	
+	//Flying Carpet
+	@Override
+	public List<spaceRegion> beginFlyingCarpet() {
+		if (currentPlayer.getFlyingCarpets()>0) {
+			changeGameState(gameStatus.FLYING_CARPET);
+			for(Pair<Road,Region> aRegion : theGame.board.getAdjacentAreas(currentLocation)) {
+				moveTargetIds.add(regionSpaceMap.get(aRegion.second));
 			}
 		}
-		rootView.bindHand(currentPlayer.hand);
-		rootView.selectCard(playerChoices);
-	}
-	
-	@Override
-	public void endVisitBazaar(int buy) {
-		//TODO in Game possiblePurchase list
-		Toast.makeText(MainActivity.this, "endBazaar", Toast.LENGTH_SHORT).show();
-		changeGameState("open");
-		currentPlayer.discard.add( playerChoices.remove(buy));
-		ListIterator<Card> cardIter = playerChoices.listIterator();
-		while (cardIter.hasNext()) {
-			
-			theGame.bazaarDeck.add((CreatureCard)cardIter.next());
-			cardIter.remove();
+		else {
+			//TODO message can't do
 		}
+		return moveTargetIds;
 	}
 	
 	@Override
-	public Boolean canTowerTeleport() {
-		return currentPlayer.getGems() >= 2;
+	public void endFlyingCarpet(spaceRegion newSpace) {
+		Region moveTarget = spaceRegionMap.get(newSpace);
+		movePlayer(currentPlayer, moveTarget);
+		currentPlayer.useFlyingCarpet();
+		changeGameState(gameStatus.OPEN);
+		moveTargets.clear();
+        moveTargetIds.clear();
+            
 	}
 }

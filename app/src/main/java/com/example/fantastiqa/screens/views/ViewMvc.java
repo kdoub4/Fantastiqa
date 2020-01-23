@@ -13,6 +13,7 @@ import com.example.fantastiqa.GameState.CreatureCard;
 import com.example.fantastiqa.screens.deckCards;
 import com.example.fantastiqa.screens.spaceRoad;
 import com.example.fantastiqa.screens.spaceRegion;
+import com.example.fantastiqa.screens.gameStatus;
 
 import java.util.List;
 
@@ -66,6 +67,7 @@ public interface ViewMvc {
     void onStoreQuestClick();
     void selectKeyCards(List<Card> selectFrom);
 	void selectCard(final List<Card> selectFrom);
+	void onFlyingCarpetClick();
 	
     interface ViewMvcListener {
 		List<spaceRegion> getValidAdventuring();
@@ -83,9 +85,11 @@ public interface ViewMvc {
 		Boolean canTowerTeleport();
 		void endVisitBazaar(int selection);
 		void onSelectedKeyCards(List<Card> selections);
+		List<spaceRegion> beginFlyingCarpet();
+		public void endFlyingCarpet(spaceRegion newSpace);
     }
 
     public void setListener(ViewMvcListener listner);
     
-    public void gameStateChange(String newState);
+    public void gameStateChange(gameStatus newState);
 }

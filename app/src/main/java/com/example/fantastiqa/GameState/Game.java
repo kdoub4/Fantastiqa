@@ -131,6 +131,12 @@ public class Game {
         for (CreatureCard aCard: bazaarDeck)
             Log.v(aCard.name, aCard.values.toString());
     }
+    
+    public void useShuffleToken (Player thePlayer) {
+		thePlayer.deck.shuffle(true);
+	}
+	
+	
 /*
 	public List<T extends Card> getCardChoices (int number, deckTypes theDeck) {
 		for (int i=0; i < number; i++) {

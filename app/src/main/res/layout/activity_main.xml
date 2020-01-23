@@ -153,10 +153,10 @@
             android:layout_weight="1"/>
 
         <Button
-            android:id="@+id/buttonTowerCards"
+            android:id="@+id/buttonFlyingCarpet"
             style="@style/buttonLayout"
             android:layout_column="2"
-            android:text="Tower Cards"
+            android:text="Flying Carpet"
             android:textSize="8sp"
             android:layout_weight="1"/>
             

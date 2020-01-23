@@ -72,6 +72,10 @@ public class Player {
     public void setFlyingCarpets(int flyingCarpets) {
         this.flyingCarpets = flyingCarpets;
     }
+    
+    public void useFlyingCarpet() {
+		this.flyingCarpets--;
+	}
 
     public int getTents() {
         return tents;
