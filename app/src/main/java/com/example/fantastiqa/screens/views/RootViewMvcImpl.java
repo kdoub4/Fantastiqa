@@ -262,7 +262,7 @@ public class RootViewMvcImpl implements ViewMvc  {
 			public void onClick(DialogInterface dialog, int which) {
 				switch (which) {
 					case 0: mListener.towerTeleport(); break;
-					case 1: drawTowerCards(); break;// mListener.beginVisitBazaar(); break;
+					case 1: beginTowerCards(); break;// mListener.beginVisitBazaar(); break;
 					case 2: //purge
 					break;
 				}
@@ -272,8 +272,12 @@ public class RootViewMvcImpl implements ViewMvc  {
 		builder.show();
 	} 
 	
-	private void drawTowerCards() {
-		List<Card> towerCards = mListener.beginVisitBazaar();
+	private void beginTowerCards() {
+		mListener.beginVisitBazaar();
+	}
+	
+	@Override
+	public void selectCard(List<Card> towerCards) {
 		CharSequence[] dialogItems = new CharSequence[towerCards.size()];
 		for (int i=0; i<towerCards.size(); i++) {
 			dialogItems[i]=towerCards.get(i).name;
@@ -407,21 +411,21 @@ public class RootViewMvcImpl implements ViewMvc  {
     }
 
     @Override
-    public void bindRoad(int location, Road details) {
+    public void bindRoad(spaceRoad location, Road details) {
         switch (location) {
-            case 1:
+            case N:
                 road1.setText(details.creature.toString());break;
-            case 2:
+            case NE:
                 road2.setText(details.creature.toString());break;
-            case 3:
+            case SE:
                 road3.setText(details.creature.toString());break;
-            case 4:
+            case S:
                 road4.setText(details.creature.toString());break;
-            case 5:
+            case SW:
                 road5.setText(details.creature.toString());break;
-            case 6:
+            case NW:
                 road6.setText(details.creature.toString());break;
-            case 7:
+            case MID:
                 road7.setText(details.creature.toString());break;
         }
     }
@@ -552,8 +556,8 @@ public class RootViewMvcImpl implements ViewMvc  {
 	}
 	
 	@Override
-	public List<Card> selectKeyCards (List<Card> selectFrom) {
-		List<Card> results = new ArrayList<>();
+	public void selectKeyCards (final List<Card> selectFrom) {
+
 		CharSequence[] dialogItems = new CharSequence[selectFrom.size()];
 		for (int i=0; i<selectFrom.size(); i++) {
 			dialogItems[i]=selectFrom.get(i).name;
@@ -573,17 +577,18 @@ public class RootViewMvcImpl implements ViewMvc  {
 		  }
 		)
 		.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-		@Override
-		public void onClick(DialogInterface dialog, int id) {
-			for (Integer selection : selectedItems) {
-				//results.add(selectFrom.get((int)selection));
+		  @Override
+		  public void onClick(DialogInterface dialog, int id) {
+			List<Card> selectedCards = new ArrayList<>();
+			for (Integer item : selectedItems) {
+				selectedCards.add(selectFrom.get(item));
 			}
-			
-		}	
+			mListener.onSelectedKeyCards(selectedCards);
+		  }	
 		});
 		
 		selectDialog.show();
-		return results;
+		
 	}
 
 }

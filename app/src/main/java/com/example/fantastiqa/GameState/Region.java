@@ -8,9 +8,6 @@ public class Region extends Area {
     public List<Player> players = new ArrayList<Player>();
     public TowerName tower;
 
-    public Region(){
-
-    }
     public Region(RegionName newland, TowerName newtower){
         name = newland;
         tower = newtower;
@@ -21,7 +18,12 @@ public class Region extends Area {
         return name.toString();
     }
     
-    public String getPlayersString(){
+    @Override
+    public String toString() {
+		return name.toString() + "\n" + tower.toString() + "\n" + getPlayersString();
+	}
+	
+    private String getPlayersString(){
 		String results="";
 		for (Player aPlayer : players) {
 			results +=aPlayer.toString() + " ";

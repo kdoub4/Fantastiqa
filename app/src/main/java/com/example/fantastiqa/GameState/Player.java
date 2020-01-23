@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.example.fantastiqa.GameState.Deck;
+
 public class Player {
     public List<Card> quests = new ArrayList<>();
-    public List<Card> deck = new ArrayList<Card>();
+    public Deck deck;
     public List<Card> discard = new ArrayList<Card>();
     public List<Card> publicQuest = new ArrayList<>();
     public List<Card> hand = new ArrayList<>();
@@ -19,16 +21,16 @@ public class Player {
 
     public Player(String thename) {
         name= thename;
+		ArrayList<Card> deckSetup = new ArrayList<>();
         for (CreatureCards aCard: CreatureCards.values()
              ) {
             if (aCard.getValue2()==Symbol.NONE) {
-                deck.add(new CreatureCard(aCard.name(), Symbol.NONE, false, Ability.NONE, aCard.getValue1()));
+                deckSetup.add(new CreatureCard(aCard.name(), Symbol.NONE, false, Ability.NONE, aCard.getValue1()));
             }
         }
-        deck.add(new CreatureCard("Peaceful Dragon", Symbol.NONE,false, Ability.DRAGON, Symbol.NONE));
-        deck.add(new CreatureCard("Dog", Symbol.NONE,false, Ability.GEM, Symbol.NONE));
-
-        shuffleDeck();
+        deckSetup.add(new CreatureCard("Peaceful Dragon", Symbol.NONE,false, Ability.DRAGON, Symbol.NONE));
+        deckSetup.add(new CreatureCard("Dog", Symbol.NONE,false, Ability.GEM, Symbol.NONE));
+		deck = new Deck(deckSetup);
     }
     
     //TODO event framework
@@ -45,22 +47,8 @@ public class Player {
         return name;
     }
 
-    private void shuffleDeck() {
-        deck.addAll(discard);
-        Collections.shuffle(deck);
-    }
-
     public void drawCards(int amount) {
-        while (amount>0) {
-            if (deck.size()==0) {
-                shuffleDeck();
-                if(deck.size()==0) {
-                    return;
-                }
-            }
-            hand.add(deck.remove(0));
-            amount--;
-        }
+		hand.addAll(deck.draw(amount));
     }
 	
 	public int getGems() {

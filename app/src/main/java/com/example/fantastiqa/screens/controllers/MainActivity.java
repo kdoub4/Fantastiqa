@@ -51,6 +51,7 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
     private CreatureCard emptyRoadCard = new CreatureCard("",Symbol.NONE, false, Ability.NONE ,Symbol.NONE);
     private Map<spaceRegion,Region> spaceRegionMap = new EnumMap<>(spaceRegion.class);
     private Map<Region,spaceRegion> regionSpaceMap = new HashMap<>();
+	private Map<Road,spaceRoad> roadSpaceMap = new HashMap<>();
 	private List<Card> playerChoices = new ArrayList<>(5);
 
     @Override
@@ -78,12 +79,27 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 				spaceRegion compassRegion =spaceRegion.values()[theGame.board.regions().indexOf(anArea)]; 
 				spaceRegionMap.put(compassRegion, anArea);
 				regionSpaceMap.put(anArea, compassRegion);
-				
-                rootView.bindLand(compassRegion, anArea);
+				toast(compassRegion.toString() + anArea.name.toString());
+				rootView.bindLand(compassRegion, anArea);
             }
+			
+			roadSpaceMap.put(theGame.board.getRoad(
+				spaceRegionMap.get(spaceRegion.NW), spaceRegionMap.get( spaceRegion.NE)),spaceRoad.N);
+			roadSpaceMap.put(theGame.board.getRoad(
+				spaceRegionMap.get(spaceRegion.NE), spaceRegionMap.get( spaceRegion.E)),spaceRoad.NE);
+			roadSpaceMap.put(theGame.board.getRoad(
+				spaceRegionMap.get(spaceRegion.E), spaceRegionMap.get( spaceRegion.SE)),spaceRoad.SE);
+			roadSpaceMap.put(theGame.board.getRoad(
+				spaceRegionMap.get(spaceRegion.SE), spaceRegionMap.get( spaceRegion.SW)),spaceRoad.S);
+			roadSpaceMap.put(theGame.board.getRoad(
+				spaceRegionMap.get(spaceRegion.SW), spaceRegionMap.get( spaceRegion.W)),spaceRoad.SW);
+			roadSpaceMap.put(theGame.board.getRoad(
+				spaceRegionMap.get(spaceRegion.W), spaceRegionMap.get( spaceRegion.NW)),spaceRoad.NW);
+			roadSpaceMap.put(theGame.board.getRoad(
+				spaceRegionMap.get(spaceRegion.W), spaceRegionMap.get( spaceRegion.E)),spaceRoad.MID);
 
             for (Road aRoad: theGame.board.roads()) {
-                rootView.bindRoad(theGame.board.roads().indexOf(aRoad)+1, aRoad);
+                rootView.bindRoad(roadSpaceMap.get(aRoad), aRoad);
             }
 
             for (Quest aQuest : theGame.board.quests) {
@@ -96,8 +112,8 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
     }
 
 	@Override
-	public void Toast(String text) {
-		Toast.makeText(MainActivity.this,text,Toast.LENGTH_SHORT);
+	public void toast(String text) {
+		Toast.makeText(MainActivity.this,text,Toast.LENGTH_SHORT).show();
 	}
 
 /*    //@Override
@@ -294,7 +310,7 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
             ) {
                 rootView.bindLand(regionSpaceMap.get(anArea),anArea);
             }
-            rootView.bindRoad(theGame.board.roads().indexOf(moveTarget.first)+1, moveTarget.first);
+            rootView.bindRoad(roadSpaceMap.get(moveTarget.first), moveTarget.first);
             currentLocation= moveTarget.second;
             changeGameState("open");
             moveTargets.clear();
@@ -438,23 +454,31 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 	}
 	
 	@Override
-	public List<Card> beginVisitBazaar() {
-		int keyCardCount = 0;
+	public void beginVisitBazaar() {
 		List<Card> selectableCards = currentPlayer.handContains(Ability.PLUS_CARD);
-		for (Card selectedCard : rootView.selectKeyCards(selectableCards)) {
+		if (selectableCards.size()>0) {
+			rootView.selectKeyCards(selectableCards);
+		}
+		else 
+			onSelectedKeyCards(new ArrayList<Card>());
+		changeGameState("TowerBuy");
+	}
+
+	@Override
+	public void onSelectedKeyCards(List<Card> selections) {
+		int keyCardCount = 0;
+		for (Card selectedCard : selections) {
 			keyCardCount++;
 			currentPlayer.discard.add(selectedCard);
 			currentPlayer.hand.remove(selectedCard);
 		}
-		
 		for (int i = 0;i < 3 +keyCardCount ; i++) {
 			if (theGame.bazaarDeck.size() > 0) {
 				playerChoices.add(theGame.bazaarDeck.remove(0));
 			}
 		}
-		changeGameState("TowerBuy");
 		rootView.bindHand(currentPlayer.hand);
-		return playerChoices;
+		rootView.selectCard(playerChoices);
 	}
 	
 	@Override

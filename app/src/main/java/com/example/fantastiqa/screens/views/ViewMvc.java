@@ -45,7 +45,7 @@ public interface ViewMvc {
     public Bundle getViewState();
 
     void bindLand(spaceRegion location, Region details);
-    void bindRoad(int location, Road details);
+    void bindRoad(spaceRoad location, Road details);
     void bindQuest(int location, Quest details);
     void bindHand(List<Card> theHand);
 	void bindStorage(List<Card> theHand);
@@ -64,8 +64,8 @@ public interface ViewMvc {
     void onStoreCardsClick();
     void onHandClick(View v);
     void onStoreQuestClick();
-    List<Card> selectKeyCards(List<Card> selectFrom);
-
+    void selectKeyCards(List<Card> selectFrom);
+	void selectCard(final List<Card> selectFrom);
 	
     interface ViewMvcListener {
 		List<spaceRegion> getValidAdventuring();
@@ -78,10 +78,11 @@ public interface ViewMvc {
 		void storeCardQuest(Card theCard);
 		List<Card> getValidQuestCards();
 		void beginStoreCardsQuest();
-		void Toast(String text);
-		List<Card> beginVisitBazaar();
+		void toast(String text);
+		void beginVisitBazaar();
 		Boolean canTowerTeleport();
 		void endVisitBazaar(int selection);
+		void onSelectedKeyCards(List<Card> selections);
     }
 
     public void setListener(ViewMvcListener listner);

@@ -112,9 +112,9 @@ public class Game {
             board.quests.add(questDeck.remove(random.nextInt(questDeck.size())));
         }
 
-        for (int i =0;i<13;i+=2){
+        //for (int i =0;i<13;i+=2){
+		for (Road aRoad : board.roads()) {
             CreatureCard roadCreature = creatureDeck.remove(0);
-            Road aRoad = (Road)board.locations.get(i);
             aRoad.creature= roadCreature;
             aRoad.gem = roadCreature.gem;
         }
@@ -122,7 +122,7 @@ public class Game {
         players.add(new Player("P1"));
         players.add(new Player("P2"));
         for (Player someone: players) {
-            ((Region)board.locations.get(1)).players.add(someone);
+            ((Region)board.regions().get(1)).players.add(someone);
             someone.drawCards(5);
             someone.quests.add(questDeck.remove(random.nextInt(questDeck.size())));
         }
