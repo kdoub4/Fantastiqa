@@ -1,44 +1,34 @@
 package com.example.fantastiqa.screens.controllers;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.os.Bundle;
 import android.util.Pair;
-import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
-import android.graphics.Color;
 
-import com.example.fantastiqa.screens.deckCards;
-import com.example.fantastiqa.screens.spaceRoad;
-import com.example.fantastiqa.screens.spaceRegion;
-import com.example.fantastiqa.screens.gameStatus;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.fantastiqa.GameState.Ability;
-import com.example.fantastiqa.GameState.Area;
 import com.example.fantastiqa.GameState.Card;
 import com.example.fantastiqa.GameState.CreatureCard;
 import com.example.fantastiqa.GameState.Game;
-import com.example.fantastiqa.GameState.LoopingLinkedList;
-import com.example.fantastiqa.GameState.LoopingListIterator;
 import com.example.fantastiqa.GameState.Player;
 import com.example.fantastiqa.GameState.Quest;
 import com.example.fantastiqa.GameState.Region;
 import com.example.fantastiqa.GameState.Road;
 import com.example.fantastiqa.GameState.Symbol;
-import com.example.fantastiqa.R;
+import com.example.fantastiqa.screens.GameStatus;
+import com.example.fantastiqa.screens.spaceRegion;
+import com.example.fantastiqa.screens.spaceRoad;
 import com.example.fantastiqa.screens.views.RootViewMvcImpl;
 import com.example.fantastiqa.screens.views.ViewMvc;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
-import java.util.EnumMap;
-import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcListener, Player.playerListener {
     private Button buttonMove;
@@ -46,7 +36,7 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
     private com.example.fantastiqa.screens.views.ViewMvc rootView;
     private Player currentPlayer;
     private Region currentLocation;
-    private gameStatus gameState;
+    private GameStatus gameState;
     private List<Pair<Road,Region>> moveTargets = new LinkedList<>();
     private List<spaceRegion> moveTargetIds = new LinkedList<>();
     private CreatureCard emptyRoadCard = new CreatureCard("",Symbol.NONE, false, Ability.NONE ,Symbol.NONE);
@@ -117,10 +107,10 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 
     @Override
     public void finishPhase() {
-		changeGameState(gameStatus.OPEN);
+        changeGameState(GameStatus.OPEN);
 	}
-	
-    private void changeGameState(gameStatus newState) {
+
+    private void changeGameState(GameStatus newState) {
 		rootView.gameStateChange(newState);
 		gameState = newState;
 	}
@@ -150,18 +140,17 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 	@Override
     public Boolean doMove(spaceRegion newSpace) {
 		Toast.makeText(MainActivity.this, newSpace.toString(), Toast.LENGTH_SHORT).show();
-        if (gameState == gameStatus.MOVING && moveTargetIds.contains(newSpace)){
+        if (gameState == GameStatus.MOVING && moveTargetIds.contains(newSpace)) {
 			Pair<Road,Region> moveTarget = moveTargets.get(moveTargetIds.indexOf(newSpace));
             movePlayer(currentPlayer, moveTarget.second);
             subdue(moveTarget.first);
             rootView.bindHand(currentPlayer.hand);
             rootView.bindRoad(roadSpaceMap.get(moveTarget.first), moveTarget.first);
-            changeGameState(gameStatus.OPEN);
+            changeGameState(GameStatus.OPEN);
             moveTargets.clear();
             moveTargetIds.clear();
             return true;
-        }
-        else if (gameState == gameStatus.FLYING_CARPET && moveTargetIds.contains(newSpace)) {
+        } else if (gameState == GameStatus.FLYING_CARPET && moveTargetIds.contains(newSpace)) {
 			endFlyingCarpet(newSpace);
 			return true;
 		}
@@ -195,7 +184,7 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
             moveTargetIds.add(regionSpaceMap.get(aPair.second));    
         }
         if (moveTargets.size() > 0){
-            changeGameState(gameStatus.MOVING);
+            changeGameState(GameStatus.MOVING);
 		}
         return moveTargetIds;
     }
@@ -345,7 +334,7 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 		}
 		else 
 			onSelectedKeyCards(new ArrayList<Card>());
-		changeGameState(gameStatus.TOWER_BUY);
+        changeGameState(GameStatus.TOWER_BUY);
 	}
 
 	@Override
@@ -369,8 +358,9 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 	public void endVisitBazaar(int buy) {
 		//TODO in Game possiblePurchase list
 		Toast.makeText(MainActivity.this, "endBazaar", Toast.LENGTH_SHORT).show();
-		changeGameState(gameStatus.OPEN);
+        changeGameState(GameStatus.OPEN);
 		currentPlayer.discard.add( playerChoices.remove(buy));
+        currentPlayer.changeGems(-3);
 		ListIterator<Card> cardIter = playerChoices.listIterator();
 		while (cardIter.hasNext()) {
 			
@@ -383,12 +373,12 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 	//Store cards
 	@Override
 	public void beginStoreCardsPrivate() {
-		changeGameState(gameStatus.STORING_PRIVATE);
+        changeGameState(GameStatus.STORING_PRIVATE);
 	}
 	
 	@Override
 	public void beginStoreCardsQuest() {
-		changeGameState(gameStatus.STORING_QUESTCARDS);
+        changeGameState(GameStatus.STORING_QUESTCARDS);
 	}
 
 	@Override
@@ -414,14 +404,14 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 		//rootView.validCardsForQuest(matchQuest);
 		//rootView.gameStateChange(gameState);
 		if (matchQuest.size()==0) {
-			changeGameState(gameStatus.OPEN);
+            changeGameState(GameStatus.OPEN);
 		}
 		return matchQuest;
 	}
 
 	@Override
 	public void storeCardQuest(Card aCard) {
-		if (gameState == gameStatus.STORING_QUESTCARDS) {
+        if (gameState == GameStatus.STORING_QUESTCARDS) {
 			//TODO check if legal card
 			//TODO other quests
 			//if (((TextView)v).getTextColor == Color.YELLOW)
@@ -441,34 +431,42 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 	}
 	
     @Override
-    public void storeCardPrivate(Card aCard) {
+    public Boolean storeCardPrivate(Card aCard) {
 		Card transferCard = aCard;
-		if (gameState == gameStatus.STORING_PRIVATE) {
+        if (gameState == GameStatus.STORING_PRIVATE) {
 			if (transferCard != null) {
 				currentPlayer.hand.remove(transferCard);
 				currentPlayer.publicQuest.add(transferCard);
-				rootView.bindHand(currentPlayer.hand);
+                //rootView.bindHand(currentPlayer.hand);
 				rootView.bindStorage(currentPlayer.publicQuest);
+                return true;
 			}
 		}
+        return false;
 	}
 
 	@Override
-	public void storeCard(Card aCard) {
+    public void handClick(Card aCard) {
+        //TODO check if card eligible
 		Toast.makeText(MainActivity.this, gameState.toString(), Toast.LENGTH_SHORT);
-		if (gameState == gameStatus.STORING_PRIVATE) {
-			storeCardPrivate(aCard);
-		}
-		else if (gameState == gameStatus.STORING_QUESTCARDS) {
+        if (gameState == GameStatus.STORING_PRIVATE) {
+            if (storeCardPrivate(aCard)) {
+                rootView.removeHandCard(aCard);
+            }
+        } else if (gameState == GameStatus.STORING_QUESTCARDS) {
 			storeCardQuest(aCard);
-		}
+		} else if (gameState == GameStatus.RELEASE) {
+            if (releaseCard(aCard)) {
+                rootView.removeHandCard(aCard);
+            }
+        }
 	}
 	
 	//Flying Carpet
 	@Override
 	public List<spaceRegion> beginFlyingCarpet() {
 		if (currentPlayer.getFlyingCarpets()>0) {
-			changeGameState(gameStatus.FLYING_CARPET);
+            changeGameState(GameStatus.FLYING_CARPET);
 			for(Pair<Road,Region> aRegion : theGame.board.getAdjacentAreas(currentLocation)) {
 				moveTargetIds.add(regionSpaceMap.get(aRegion.second));
 			}
@@ -484,9 +482,33 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 		Region moveTarget = spaceRegionMap.get(newSpace);
 		movePlayer(currentPlayer, moveTarget);
 		currentPlayer.useFlyingCarpet();
-		changeGameState(gameStatus.OPEN);
+        changeGameState(GameStatus.OPEN);
 		moveTargets.clear();
         moveTargetIds.clear();
             
 	}
+
+    //Release card
+    @Override
+    public List<Card> beginReleaseCard() {
+        List<Card> results = new ArrayList<>(5);
+        if (currentPlayer.getGems() > 0) {
+            for (Card handCard : currentPlayer.hand) {
+                if (((CreatureCard) handCard).name != "Peaceful Dragon") {
+                    results.add(handCard);
+                }
+            }
+            changeGameState(GameStatus.RELEASE);
+        }
+        return results;
+    }
+
+    private Boolean releaseCard(Card aCard) {
+        if (currentPlayer.getGems() > 0) {
+            currentPlayer.hand.remove(aCard);
+            currentPlayer.changeGems(-1);
+            return true;
+        }
+        return false;
+    }
 }

@@ -1,6 +1,8 @@
 package com.example.fantastiqa.screens.views;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -8,29 +10,24 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 
 import com.example.fantastiqa.GameState.Card;
 import com.example.fantastiqa.GameState.Player;
 import com.example.fantastiqa.GameState.Quest;
 import com.example.fantastiqa.GameState.Region;
 import com.example.fantastiqa.GameState.Road;
-import com.example.fantastiqa.GameState.CreatureCard;
 import com.example.fantastiqa.R;
-
-import com.example.fantastiqa.screens.deckCards;
-import com.example.fantastiqa.screens.spaceRoad;
+import com.example.fantastiqa.screens.GameStatus;
 import com.example.fantastiqa.screens.spaceRegion;
-import com.example.fantastiqa.screens.gameStatus;
+import com.example.fantastiqa.screens.spaceRoad;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
-import java.util.EnumMap;
-import java.util.HashMap;
 /*
  * Very simple MVC view containing just single FrameLayout
  */
@@ -280,14 +277,26 @@ public class RootViewMvcImpl implements ViewMvc  {
 				switch (which) {
 					case 0: mListener.towerTeleport(); break;
 					case 1: beginTowerCards(); break;// mListener.beginVisitBazaar(); break;
-					case 2: //purge
-					break;
+                    case 2:
+                        beginReleaseCards();
+                        break;
+
 				}
 			}
 		}
 		);
 		builder.show();
-	} 
+    }
+
+    private void beginReleaseCards() {
+        for (Card releaseable : mListener.beginReleaseCard()) {
+            for (TextView tvHand : theHandViews) {
+                if (tvHand.getTag() == releaseable) {
+                    tvHand.setTextColor(Color.YELLOW);
+                }
+            }
+        }
+    }
 	
 	private void beginTowerCards() {
 		mListener.beginVisitBazaar();
@@ -322,8 +331,8 @@ public class RootViewMvcImpl implements ViewMvc  {
 	@Override
 	public void onHandClick(View v) {
 		//TODO enable click
-		if (v.getTag() instanceof Card )
-			mListener.storeCard((Card)v.getTag());
+        if (v.getTag() instanceof Card && ((TextView) v).getCurrentTextColor() == Color.YELLOW)
+            mListener.handClick((Card) v.getTag());
 	}
 	
 	@Override
@@ -334,7 +343,7 @@ public class RootViewMvcImpl implements ViewMvc  {
 	}
 	
 	@Override
-	public void gameStateChange(gameStatus newState) {
+    public void gameStateChange(GameStatus newState) {
 		switch (newState) {
 		case MOVING:
 			moveButton.setEnabled(false);
@@ -469,6 +478,16 @@ public class RootViewMvcImpl implements ViewMvc  {
 			TextView tvHandCard = (TextView)listIter.next();
 			tvHandCard.setText(aCard.toString());
             tvHandCard.setTag(aCard);
+        }
+    }
+
+    @Override
+    public void removeHandCard(Card aCard) {
+        for (TextView tvHand : theHandViews) {
+            if (tvHand.getTag() == aCard) {
+                tvHand.setTag(null);
+                tvHand.setText("");
+            }
         }
     }
     

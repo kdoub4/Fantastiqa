@@ -3,17 +3,13 @@ package com.example.fantastiqa.screens.views;
 import android.os.Bundle;
 import android.view.View;
 
-import com.example.fantastiqa.GameState.Area;
 import com.example.fantastiqa.GameState.Card;
 import com.example.fantastiqa.GameState.Quest;
 import com.example.fantastiqa.GameState.Region;
 import com.example.fantastiqa.GameState.Road;
-import com.example.fantastiqa.GameState.CreatureCard;
-
-import com.example.fantastiqa.screens.deckCards;
-import com.example.fantastiqa.screens.spaceRoad;
+import com.example.fantastiqa.screens.GameStatus;
 import com.example.fantastiqa.screens.spaceRegion;
-import com.example.fantastiqa.screens.gameStatus;
+import com.example.fantastiqa.screens.spaceRoad;
 
 import java.util.List;
 
@@ -68,6 +64,8 @@ public interface ViewMvc {
     void selectKeyCards(List<Card> selectFrom);
 	void selectCard(final List<Card> selectFrom);
 	void onFlyingCarpetClick();
+
+    void removeHandCard(Card card);
 	
     interface ViewMvcListener {
 		List<spaceRegion> getValidAdventuring();
@@ -75,8 +73,10 @@ public interface ViewMvc {
 		Boolean doMove(spaceRegion newSpace);
 		void finishPhase();
 		void beginStoreCardsPrivate();
-		void storeCard(Card theCard);
-		void storeCardPrivate(Card theCard);
+
+        void handClick(Card theCard);
+
+        Boolean storeCardPrivate(Card theCard);
 		void storeCardQuest(Card theCard);
 		List<Card> getValidQuestCards();
 		void beginStoreCardsQuest();
@@ -86,10 +86,13 @@ public interface ViewMvc {
 		void endVisitBazaar(int selection);
 		void onSelectedKeyCards(List<Card> selections);
 		List<spaceRegion> beginFlyingCarpet();
-		public void endFlyingCarpet(spaceRegion newSpace);
+
+        void endFlyingCarpet(spaceRegion newSpace);
+
+        List<Card> beginReleaseCard();
     }
 
     public void setListener(ViewMvcListener listner);
-    
-    public void gameStateChange(gameStatus newState);
+
+    public void gameStateChange(GameStatus newState);
 }
