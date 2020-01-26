@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.fantastiqa.GameState.Ability;
 import com.example.fantastiqa.GameState.Card;
 import com.example.fantastiqa.GameState.CreatureCard;
+import com.example.fantastiqa.GameState.Deck;
 import com.example.fantastiqa.GameState.Game;
 import com.example.fantastiqa.GameState.Player;
 import com.example.fantastiqa.GameState.Quest;
@@ -44,6 +45,8 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
     private Map<Region,spaceRegion> regionSpaceMap = new HashMap<>();
 	private Map<Road,spaceRoad> roadSpaceMap = new HashMap<>();
 	private List<Card> playerChoices = new ArrayList<>(5);
+
+    private Deck visitingDeck;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -165,8 +168,8 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
                 //Toast.makeText(MainActivity.this, handCreature.values.get(0).toString(), Toast.LENGTH_SHORT).show();
                 if (toSubdue.creature.subduedBy == handCreature.values.get(0)) {
                     currentPlayer.hand.remove(handCreature);
-                    currentPlayer.discard.add(handCreature);
-                    currentPlayer.discard.add(toSubdue.creature);
+                    currentPlayer.deck.discard(handCreature);
+                    currentPlayer.deck.discard(toSubdue.creature);
                     toSubdue.creature = emptyRoadCard;
                     break;
                 }
@@ -325,16 +328,20 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 	}
 
 	//New cards
+    private void visitTowerCards(Deck towerDeck) {
+        changeGameState(GameStatus.TOWER_BUY);
+        visitingDeck = towerDeck;
+        List<Card> selectableCards = currentPlayer.handContains(Ability.PLUS_CARD);
+        if (selectableCards.size() > 0) {
+            rootView.selectKeyCards(selectableCards);
+        } else
+            onSelectedKeyCards(new ArrayList<Card>());
+
+    }
 	//Beast Bazaar
 	@Override
 	public void beginVisitBazaar() {
-		List<Card> selectableCards = currentPlayer.handContains(Ability.PLUS_CARD);
-		if (selectableCards.size()>0) {
-			rootView.selectKeyCards(selectableCards);
-		}
-		else 
-			onSelectedKeyCards(new ArrayList<Card>());
-        changeGameState(GameStatus.TOWER_BUY);
+        visitTowerCards(theGame.bazaarDeck);
 	}
 
 	@Override
@@ -342,16 +349,23 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 		int keyCardCount = 0;
 		for (Card selectedCard : selections) {
 			keyCardCount++;
-			currentPlayer.discard.add(selectedCard);
+            currentPlayer.deck.discard(selectedCard);
 			currentPlayer.hand.remove(selectedCard);
 		}
+        List<Boolean> canBuy = new ArrayList<>(3 + keyCardCount);
+        playerChoices.addAll(visitingDeck.draw(3 + keyCardCount));
 		for (int i = 0;i < 3 +keyCardCount ; i++) {
-			if (theGame.bazaarDeck.size() > 0) {
-				playerChoices.add(theGame.bazaarDeck.remove(0));
+            //TODO card cost
+            //TODO change to true
+            if (false) { //currentPlayer.getGems()>=3) {
+                canBuy.add(true);
+            } else {
+                canBuy.add(false);
+            }
 			}
-		}
+
 		rootView.bindHand(currentPlayer.hand);
-		rootView.selectCard(playerChoices);
+        rootView.selectCard(playerChoices, canBuy);
 	}
 	
 	@Override
@@ -359,14 +373,15 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 		//TODO in Game possiblePurchase list
 		Toast.makeText(MainActivity.this, "endBazaar", Toast.LENGTH_SHORT).show();
         changeGameState(GameStatus.OPEN);
-		currentPlayer.discard.add( playerChoices.remove(buy));
+        currentPlayer.deck.discard(playerChoices.remove(buy));
         currentPlayer.changeGems(-3);
 		ListIterator<Card> cardIter = playerChoices.listIterator();
 		while (cardIter.hasNext()) {
-			
-			theGame.bazaarDeck.add((CreatureCard)cardIter.next());
+
+            theGame.bazaarDeck.discard(cardIter.next());
 			cardIter.remove();
 		}
+        toast(currentPlayer.deck.sizeToString());
 	}
 
 	//Free Actions
@@ -458,6 +473,9 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 		} else if (gameState == GameStatus.RELEASE) {
             if (releaseCard(aCard)) {
                 rootView.removeHandCard(aCard);
+                if (currentPlayer.getGems() == 0) {
+                    changeGameState(GameStatus.OPEN);
+                }
             }
         }
 	}
@@ -510,5 +528,17 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
             return true;
         }
         return false;
+    }
+
+    //Quest Cards
+
+    @Override
+    public void beginVisitQuest() {
+        changeGameState(GameStatus.TOWER_BUY);
+    }
+
+    @Override
+    public void endVisitQuest(int[] selection) {
+
     }
 }

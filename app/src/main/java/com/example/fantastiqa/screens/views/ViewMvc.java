@@ -62,15 +62,18 @@ public interface ViewMvc {
     void onHandClick(View v);
     void onStoreQuestClick();
     void selectKeyCards(List<Card> selectFrom);
-	void selectCard(final List<Card> selectFrom);
+
+    void selectCard(final List<Card> selectFrom, List<Boolean> enabled);
 	void onFlyingCarpetClick();
 
     void removeHandCard(Card card);
 	
     interface ViewMvcListener {
 		List<spaceRegion> getValidAdventuring();
-		spaceRegion towerTeleport();
-		Boolean doMove(spaceRegion newSpace);
+
+        Boolean doMove(spaceRegion newSpace);
+
+        spaceRegion towerTeleport();
 		void finishPhase();
 		void beginStoreCardsPrivate();
 
@@ -82,14 +85,24 @@ public interface ViewMvc {
 		void beginStoreCardsQuest();
 		void toast(String text);
 		void beginVisitBazaar();
-		Boolean canTowerTeleport();
 		void endVisitBazaar(int selection);
 		void onSelectedKeyCards(List<Card> selections);
 		List<spaceRegion> beginFlyingCarpet();
 
         void endFlyingCarpet(spaceRegion newSpace);
 
+        void beginVisitQuest();
+
+        void endVisitQuest(int[] selection);
+
+        Boolean canTowerTeleport();
+
         List<Card> beginReleaseCard();
+
+        /*
+        void beginVisitArtifact();
+        void endVisitArtifact(int[] selection);
+         */
     }
 
     public void setListener(ViewMvcListener listner);

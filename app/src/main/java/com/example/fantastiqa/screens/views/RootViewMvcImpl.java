@@ -9,6 +9,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.fantastiqa.GameState.Card;
@@ -303,19 +305,35 @@ public class RootViewMvcImpl implements ViewMvc  {
 	}
 	
 	@Override
-	public void selectCard(List<Card> towerCards) {
+    public void selectCard(List<Card> towerCards, List<Boolean> enabled) {
 		CharSequence[] dialogItems = new CharSequence[towerCards.size()];
+        int checkedItem = 0;
 		for (int i=0; i<towerCards.size(); i++) {
 			dialogItems[i]=towerCards.get(i).name;
 		}
 		AlertDialog.Builder buyDialog = new AlertDialog.Builder(mRootView.getContext());
-		buyDialog.setItems(dialogItems, new DialogInterface.OnClickListener() {
+        buyDialog.setItems(dialogItems, new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int which) {
 				mListener.endVisitBazaar(which);
 			}
 		  }
 		);
-		buyDialog.show();
+        AlertDialog buyD = buyDialog.create();
+        buyD.show();
+        ListView list = buyD.getListView();
+        final ListAdapter adaptor = buyD.getListView().getAdapter();
+        for (int i = 0; i < dialogItems.length; i++) { // index
+            if (enabled.get(i) == false) {
+                // Disable choice in dialog
+                adaptor.getView(i, null, list).setEnabled(false);
+                adaptor.getView(i, null, list).setBackgroundColor(Color.BLACK);
+
+            } else {
+                // Enable choice in dialog
+                adaptor.getView(i, null, list).setEnabled(true);
+            }
+        }
+
 	}
 	
 	@Override

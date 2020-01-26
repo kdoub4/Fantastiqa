@@ -1,15 +1,11 @@
 package com.example.fantastiqa.GameState;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-
-import com.example.fantastiqa.GameState.Deck;
 
 public class Player {
     public List<Card> quests = new ArrayList<>();
     public Deck deck;
-    public List<Card> discard = new ArrayList<Card>();
     public List<Card> publicQuest = new ArrayList<>();
     public List<Card> hand = new ArrayList<>();
     private int trophies = 0;
