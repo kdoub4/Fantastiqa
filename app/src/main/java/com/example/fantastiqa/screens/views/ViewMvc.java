@@ -46,7 +46,7 @@ public interface ViewMvc {
     void bindQuest(int location, Quest details, Boolean canComplete);
     void bindHand(List<Card> theHand);
 	void bindStorage(List<Card> theHand);
-	void bindPlayerQuest(List<Card> theHand);
+	void bindPlayerStorage(List<Card> theHand);
 	void bindQuestStorage(Quest theQuest, List<Card> theCards);
 
     void highlightLand(int location);
@@ -63,7 +63,7 @@ public interface ViewMvc {
     void onStoreQuestClick();
     void selectKeyCards(List<Card> selectFrom);
 
-    void selectCard(final List<Card> selectFrom, List<Boolean> enabled);
+    void selectCard(final List<? extends Card> selectFrom, List<Boolean> enabled);
 	void onFlyingCarpetClick();
 
     void removeHandCard(Card card);
@@ -94,6 +94,8 @@ public interface ViewMvc {
         Boolean canTowerTeleport();
 
         List<Card> beginReleaseCard();
+
+        void beginDiscard();
 
         Boolean canCompleteQuest(Quest aQuest);
         void beginCompleteQuest(Quest aQuest);

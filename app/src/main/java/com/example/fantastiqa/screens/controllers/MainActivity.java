@@ -1,6 +1,7 @@
 package com.example.fantastiqa.screens.controllers;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.util.Pair;
 import android.widget.Button;
 import android.widget.Toast;
@@ -98,7 +99,7 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
         bindAllQuests();
 
         rootView.bindHand(currentPlayer.hand);
-        rootView.bindPlayerQuest(currentPlayer.quests);
+        rootView.bindPlayerStorage(currentPlayer.quests);
     }
 
     private void bindAllQuests() {
@@ -122,6 +123,9 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
     public void finishPhase()
     {
         if (gameState == GameStatus.OPEN) {
+            beginDiscard();
+        }
+        else if (gameState == GameStatus.DISCARD){
             endTurn();
         }
         else {
@@ -131,23 +135,23 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 
     @Override
     public Boolean canCompleteQuest(Quest aQuest) {
-        return theGame.canCompleteQuest(aQuest, ListUtils.union(currentPlayer.publicQuest, currentPlayer.hand));
+        return theGame.canCompleteQuest(aQuest, ListUtils.union(currentPlayer.storage, currentPlayer.hand));
     }
 
     @Override
     public void beginCompleteQuest(Quest aQuest) {
         if (canCompleteQuest(aQuest)) {
-            List<Card> used = theGame.completeQuest(aQuest, ListUtils.union(currentPlayer.publicQuest, currentPlayer.hand));
+            List<Card> used = theGame.completeQuest(aQuest, ListUtils.union(currentPlayer.storage, currentPlayer.hand));
             if (used.size()>0) {
                 currentPlayer.setVps(currentPlayer.getVps()+aQuest.vps);
                 currentPlayer.changeGems(aQuest.gems);
                 for (Card usedCard : used) {
-                    currentPlayer.publicQuest.remove(usedCard);
+                    currentPlayer.storage.remove(usedCard);
                     currentPlayer.hand.remove(usedCard);
                     currentPlayer.deck.discard(usedCard);
                 }
                 rootView.bindHand(currentPlayer.hand);
-                rootView.bindPlayerQuest(currentPlayer.publicQuest);
+                rootView.bindPlayerStorage(currentPlayer.storage);
                 //TODO remove quest from board
             }
             changeGameState(GameStatus.OPEN);
@@ -156,32 +160,53 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
     }
 
     private void endTurn() {
+        toast(currentPlayer.deck.sizeToString());
+
         if (currentPlayer.getVps() >= theGame.VPgoal ) {
             toast("Game Over " + currentPlayer.name );
         }
+        changeGameState(GameStatus.OPEN);
         for (Road aRoad : theGame.board.roads()) {
             if (aRoad.creature == emptyRoadCard) {
                 aRoad.creature = (CreatureCard)theGame.creatureDeck.drawOne();
             }
         }
+
+        for (Quest newQuest : theGame.questDeck.draw(2-theGame.board.quests.size())) {
+            theGame.board.quests.add(newQuest);
+        }
         currentPlayer.drawCards(5-currentPlayer.hand.size());
         bindAllQuests();
         bindAllRoads();
         rootView.bindHand(currentPlayer.hand);
-        rootView.bindPlayerQuest(currentPlayer.quests);
-        rootView.bindStorage(currentPlayer.publicQuest);
+        rootView.bindPlayerStorage(currentPlayer.quests);
+        rootView.bindStorage(currentPlayer.storage);
         for (Card aQuest : currentPlayer.quests) {
             rootView.bindQuestStorage((Quest)aQuest, ((Quest) aQuest).stored);
         }
         rootView.bindQuest(1, theGame.board.quests.get(0),canCompleteQuest(theGame.board.quests.get(0)));
         rootView.bindQuest(2, theGame.board.quests.get(1),canCompleteQuest(theGame.board.quests.get(1)));
+        toast(currentPlayer.deck.sizeToString());
+
     }
 
     private void changeGameState(GameStatus newState) {
 		rootView.gameStateChange(newState);
 		gameState = newState;
+		if (newState == GameStatus.OPEN) {
+		    moveTargets.clear();
+		    moveTargetIds.clear();
+		    playerChoices.clear();
+            visitingDeck=null;
+        }
+
 	}
- 	
+
+	@Override
+    public void beginDiscard() {
+        changeGameState((GameStatus.DISCARD));
+    }
+
 	@Override
 	public void onGemChange(int newGems, int oldGems) {
 		if (oldGems < 2 && newGems > 2) {
@@ -274,14 +299,11 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
         Boolean hasTwoCards = false;
 
         List<Symbol> handSymbols = new ArrayList<>();
-        Toast.makeText(MainActivity.this, aCreature.subduedBy.toString(), Toast.LENGTH_SHORT).show();
         //Check hand for first symbol
-        Toast.makeText(MainActivity.this, Integer.toString(currentPlayer.hand.size()),Toast.LENGTH_SHORT);
         for (Card aCard:currentPlayer.hand
         ) {
             if (aCard instanceof CreatureCard && ((CreatureCard)aCard).values.get(0) != Symbol.NONE) {
                 CreatureCard handCreature = (CreatureCard) aCard;
-                Toast.makeText(MainActivity.this, handCreature.values.get(0).toString(), Toast.LENGTH_SHORT).show();
                 if (aCreature.subduedBy == handCreature.values.get(0)) {
                     matchFirst = true;
                     break;
@@ -443,12 +465,9 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 	@Override
 	public void endVisitTowerCards(int buy) {
 		//TODO in Game possiblePurchase list
-		Toast.makeText(MainActivity.this, "endBazaar", Toast.LENGTH_SHORT).show();
-        changeGameState(GameStatus.OPEN);
-        if (visitingDeck == theGame.questDeck) {
+		if (visitingDeck == theGame.questDeck) {
             currentPlayer.quests.add(playerChoices.remove(buy));
-            rootView.bindPlayerQuest(currentPlayer.quests);
-            toast(currentPlayer.quests.get(0).toString() + currentPlayer.quests.get(1).toString());
+            rootView.bindPlayerStorage(currentPlayer.quests);
         }
         else {
             currentPlayer.deck.discard(playerChoices.remove(buy));
@@ -460,9 +479,11 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
             visitingDeck.discard(cardIter.next());
 			cardIter.remove();
 		}
+
         toast(currentPlayer.deck.sizeToString());
-		visitingDeck=null;
-	}
+		changeGameState(GameStatus.OPEN);
+
+    }
 
 	//Free Actions
 	//Store cards
@@ -530,8 +551,8 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 		if (gameState == GameStatus.STORING_PRIVATE) {
 			if (aCard != null) {
 				currentPlayer.hand.remove(aCard);
-				currentPlayer.publicQuest.add(aCard);
-                rootView.bindStorage(currentPlayer.publicQuest);
+				currentPlayer.storage.add(aCard);
+                rootView.bindStorage(currentPlayer.storage);
                 return true;
 			}
 		}
@@ -555,6 +576,10 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
                     changeGameState(GameStatus.OPEN);
                 }
             }
+        }
+        if (gameState == GameStatus.DISCARD) {
+            currentPlayer.discardFromHand(aCard);
+            rootView.removeHandCard(aCard);
         }
 	}
 	

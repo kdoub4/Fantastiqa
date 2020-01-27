@@ -5,8 +5,8 @@ import java.util.List;
 
 public class Player {
     public List<Card> quests = new ArrayList<>();
-    public Deck deck;
-    public List<Card> publicQuest = new ArrayList<>();
+    public Deck<Card> deck;
+    public List<Card> storage = new ArrayList<>();
     public List<Card> hand = new ArrayList<>();
     private int trophies = 0;
     private int flyingCarpets = 3;
@@ -36,7 +36,7 @@ public class Player {
         }
         deckSetup.add(new CreatureCard("Peaceful Dragon", Symbol.NONE,false, Ability.DRAGON, Symbol.NONE));
         deckSetup.add(new CreatureCard("Dog", Symbol.NONE,false, Ability.GEM, Symbol.NONE));
-		deck = new Deck(deckSetup);
+		deck = new Deck<>(deckSetup);
     }
     
     //TODO event framework
@@ -122,5 +122,13 @@ public class Player {
 			}
 		}
 		return results;
-	} 
+	}
+
+	public Boolean discardFromHand(Card aCard) {
+        if (hand.remove(aCard)) {
+            deck.discard(aCard);
+            return true;
+        }
+        return false;
+    }
 }

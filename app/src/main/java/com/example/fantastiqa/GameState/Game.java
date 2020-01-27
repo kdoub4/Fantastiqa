@@ -10,11 +10,11 @@ import java.util.Set;
 
 public class Game {
     public Board board;
-    public int VPgoal;
-    public Deck creatureDeck;
-    public Deck artifactDeck;
-    public Deck bazaarDeck;
-    public Deck questDeck;
+    public int VPgoal=1;
+    public Deck<Card> creatureDeck;
+    public Deck<Artifact> artifactDeck;
+    public Deck<CreatureCard> bazaarDeck;
+    public Deck<Quest> questDeck;
     public List<Player> players = new ArrayList<>();
 	public List<Card> selectCards = new ArrayList<>(5);
 //	public deckType selectType;
@@ -25,7 +25,7 @@ public class Game {
         //TopDeck
         ArrayList<Card> tempDeck = new ArrayList<>();
         ArrayList<Card> tempTop = new ArrayList<>();
-        ArrayList<Card> tempBazaar = new ArrayList<>();
+        ArrayList<CreatureCard> tempBazaar = new ArrayList<>();
 
         for (CreatureCards aCard: CreatureCards.values()) {
             if (aCard.getValue2()== Symbol.NONE) {
@@ -53,34 +53,35 @@ public class Game {
                 }
             }
         }
-        bazaarDeck = new Deck(tempBazaar);
+        bazaarDeck = new Deck<>(tempBazaar);
         bazaarDeck.shuffle(true);
 
         Collections.shuffle(tempDeck);
         tempTop.addAll(tempDeck);
-        creatureDeck = new Deck(tempTop);
+        creatureDeck = new Deck<>(tempTop);
 
         //QuestDeck
         tempDeck.clear();
-        tempDeck.add(new Quest("FIRE", 1, 3, Symbol.FIRE, Symbol.NONE, RegionName.WETLANDS));
+        ArrayList<Quest> tempQuest = new ArrayList<Quest>();
+        tempQuest.add(new Quest("FIRE", 1, 3, Symbol.FIRE, Symbol.NONE, RegionName.WETLANDS));
 
-        tempDeck.add(new Quest("WATER", 1, 3, Symbol.WATER, Symbol.NONE , RegionName.FIELDS));
+        tempQuest.add(new Quest("WATER", 1, 3, Symbol.WATER, Symbol.NONE , RegionName.FIELDS));
 
-        tempDeck.add(new Quest("BAT", 1, 3, Symbol.BAT,Symbol.NONE, RegionName.HIGHLANDS));
+        tempQuest.add(new Quest("BAT", 1, 3, Symbol.BAT,Symbol.NONE, RegionName.HIGHLANDS));
 
-        tempDeck.add(new Quest("BROOM", 1, 3, Symbol.BROOM, Symbol.NONE, RegionName.FIELDS));
+        tempQuest.add(new Quest("BROOM", 1, 3, Symbol.BROOM, Symbol.NONE, RegionName.FIELDS));
 
-        tempDeck.add(new Quest("NET", 1, 3, Symbol.NET, Symbol.NONE, RegionName.HILLS));
+        tempQuest.add(new Quest("NET", 1, 3, Symbol.NET, Symbol.NONE, RegionName.HILLS));
 
-        tempDeck.add(new Quest("HELMET", 1, 3, Symbol.HELMET, Symbol.NONE, RegionName.TUNDRA));
+        tempQuest.add(new Quest("HELMET", 1, 3, Symbol.HELMET, Symbol.NONE, RegionName.TUNDRA));
 
-        tempDeck.add(new Quest("SWORD", 1, 3, Symbol.SWORD, Symbol.NONE, RegionName.HILLS));
+        tempQuest.add(new Quest("SWORD", 1, 3, Symbol.SWORD, Symbol.NONE, RegionName.HILLS));
 
-        tempDeck.add(new Quest("TOOTH", 1, 3, Symbol.TOOTH, Symbol.NONE, RegionName.TUNDRA));
+        tempQuest.add(new Quest("TOOTH", 1, 3, Symbol.TOOTH, Symbol.NONE, RegionName.TUNDRA));
 
-        tempDeck.add(new Quest("WAND", 1, 3, Symbol.WAND, Symbol.NONE, RegionName.WETLANDS));
+        tempQuest.add(new Quest("WAND", 1, 3, Symbol.WAND, Symbol.NONE, RegionName.WETLANDS));
 
-        questDeck = new Deck(tempDeck);
+        questDeck = new Deck<>(tempQuest);
         questDeck.shuffle(true);
         board = new Board();
         for (Card aQuest : questDeck.draw(2)) {
@@ -144,13 +145,15 @@ public class Game {
 		selectCards.clear();
 	}
 	* */
+//TODO 2 double requirements
     public Boolean canCompleteQuest(Quest aQuest, List<Card> storedCards) {
         Set<Card> used = new HashSet<>(5);
         int doubleCount = aQuest.getDoubleRequirement() == Symbol.NONE ? 2 : 0;
         int tripleCount = aQuest.getTripleRequirement() == Symbol.NONE ? 3 : 0;
+        List<Card> sortedCards = new ArrayList<>(storedCards);
+        Collections.sort(sortedCards, new SortBySymbolCount());
 
-        Collections.sort(storedCards, new SortBySymbolCount());
-        for (Card aStoredCard : storedCards) {
+        for (Card aStoredCard : sortedCards) {
             if (!(aStoredCard instanceof CreatureCard) || used.contains(aStoredCard)) {
                 continue;
             }
@@ -183,9 +186,9 @@ public class Game {
         List<Card> results = new ArrayList<>();
         int doubleCount = aQuest.getDoubleRequirement() == Symbol.NONE ? 2 : 0;
         int tripleCount = aQuest.getTripleRequirement() == Symbol.NONE ? 3 : 0;
-
-        Collections.sort(availableCards, new SortBySymbolCount());
-        for (Card aStoredCard : availableCards) {
+        List<Card> sortedCards = new ArrayList<>(availableCards);
+        Collections.sort(sortedCards, new SortBySymbolCount());
+        for (Card aStoredCard : sortedCards) {
             if (!(aStoredCard instanceof CreatureCard) || results.contains(aStoredCard)) {
                 continue;
             }
@@ -210,7 +213,9 @@ public class Game {
                 continue;
             }
         }
-
+        if (results.size()>0) {
+            board.quests.remove(aQuest);
+        }
         return results;
     }
 }
@@ -224,8 +229,12 @@ class SortBySymbolCount implements Comparator<Card>
     // Used for sorting in ascending order of symbol count
     public int compare(Card a, Card b)
     {
-        int aCreature = (a instanceof CreatureCard) ? ((CreatureCard)a).values.size() : 0;
-        int bCreature = (b instanceof CreatureCard) ? ((CreatureCard)b).values.size() : 0;
+        int aCreature = (a instanceof CreatureCard) && ((CreatureCard)a).values.get(0) != Symbol.NONE ?
+                ((CreatureCard)a).values.size() :
+                0;
+        int bCreature = (b instanceof CreatureCard) && ((CreatureCard)b).values.get(0) != Symbol.NONE ?
+                ((CreatureCard)b).values.size() :
+                0;
 
         return bCreature-aCreature;
     }

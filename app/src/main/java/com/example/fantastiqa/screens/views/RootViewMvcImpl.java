@@ -266,6 +266,22 @@ public class RootViewMvcImpl implements ViewMvc  {
                 }
             });
         }
+        publicQuest1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mListener != null) {
+                    onQuestClick(v);
+                }
+            }
+        });
+        publicQuest2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mListener != null) {
+                    onQuestClick(v);
+                }
+            }
+        });
     }
 
     public void onQuestClick(View v) {
@@ -322,7 +338,7 @@ public class RootViewMvcImpl implements ViewMvc  {
 	}
 	
 	@Override
-    public void selectCard(List<Card> towerCards, List<Boolean> enabled) {
+    public void selectCard(List<? extends Card> towerCards, List<Boolean> enabled) {
 		CharSequence[] dialogItems = new CharSequence[towerCards.size()];
         int checkedItem = 0;
 		for (int i=0; i<towerCards.size(); i++) {
@@ -395,6 +411,7 @@ public class RootViewMvcImpl implements ViewMvc  {
 			doneButton.setEnabled(true);
 			setHandColor(Color.WHITE);
 			setLandColor(Color.WHITE);
+			setStoredColor(Color.WHITE);
 			break;
 		case STORING_PRIVATE:
 			//TODO is this controller logic
@@ -410,6 +427,10 @@ public class RootViewMvcImpl implements ViewMvc  {
 				}
 			}
 			break;
+        case DISCARD:
+            setHandColor(Color.YELLOW);
+            setStoredColor(Color.YELLOW);
+            break;
 	}
 	}
 	
@@ -548,7 +569,7 @@ public class RootViewMvcImpl implements ViewMvc  {
     }
     
     @Override
-    public void bindPlayerQuest(List<Card> theHand) {
+    public void bindPlayerStorage(List<Card> theHand) {
 		//TODO multiple quests
         int i=0;
 		for (Card aQuest : theHand) {
@@ -586,14 +607,26 @@ public class RootViewMvcImpl implements ViewMvc  {
 	public void onDoneClick() {
 		mListener.finishPhase();
 	}
-	
+
+
+	private void setStoredColor(Integer aColor) {
+        setTextViewListColor(aColor, storage);
+        setTextViewListColor(aColor, quest0Storage);
+        setTextViewListColor(aColor, quest1Storage);
+    }
+
 	private void setHandColor(Integer aColor) {
-		ListIterator<TextView> listIter = theHandViews.listIterator(0);
+        setTextViewListColor(aColor, theHandViews);
+    }
+
+    private void setTextViewListColor(Integer aColor, List<TextView> tvList) {
+        ListIterator<TextView> listIter = tvList.listIterator(0);
         while (listIter.hasNext()) {
             listIter.next().setTextColor(aColor);
         }
-	}
-	private void setLandColor(Integer aColor) {
+    }
+
+    private void setLandColor(Integer aColor) {
 		land1.setTextColor(aColor);
 		land2.setTextColor(aColor);
 		land3.setTextColor(aColor);

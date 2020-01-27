@@ -4,16 +4,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class Deck {
+public class Deck <Card> {
 	ArrayList<Card> deck= new ArrayList<>();
-	ArrayList<Card> discard = new ArrayList<>();
+	private ArrayList<Card> discardPile = new ArrayList<>();
 	
 	public Deck(ArrayList<Card> initDeck) {
 		deck.addAll(initDeck);
 	}
 
 	public String sizeToString() {
-		return "Deck" + (deck.size()) + " Discard" + discard.size();
+		return "Deck" + (deck.size()) + " Discard" + discardPile.size();
 	}
 
 	public Card drawOne() {
@@ -32,13 +32,13 @@ public class Deck {
 	}
 
 	public void discard(Card aCard) {
-		discard.add(aCard);
+		discardPile.add(aCard);
 	}
-	
+
 	public void shuffle(Boolean includeDiscard) {
 		if (includeDiscard) {
-			deck.addAll(discard);
-			discard.clear();
+			deck.addAll(discardPile);
+			discardPile.clear();
 		}
 		Collections.shuffle(deck);
 	}
