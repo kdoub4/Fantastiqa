@@ -1,4 +1,4 @@
-package com.example.fantastiqaTest;
+package com.example.fantastiqa;
 
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -9,7 +9,7 @@ import com.example.fantastiqa.GameState.Board;
 import com.example.fantastiqa.GameState.TowerName;
 import com.example.fantastiqa.GameState.Region;
 
-public class BasicTest {
+public class BoardTest {
 	
 	Board theBoard = new Board();
 	

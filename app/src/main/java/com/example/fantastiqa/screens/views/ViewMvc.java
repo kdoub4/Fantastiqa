@@ -43,7 +43,7 @@ public interface ViewMvc {
 
     void bindLand(spaceRegion location, Region details);
     void bindRoad(spaceRoad location, Road details);
-    void bindQuest(int location, Quest details);
+    void bindQuest(int location, Quest details, Boolean canComplete);
     void bindHand(List<Card> theHand);
 	void bindStorage(List<Card> theHand);
 	void bindPlayerQuest(List<Card> theHand);
@@ -84,25 +84,20 @@ public interface ViewMvc {
 		List<Card> getValidQuestCards();
 		void beginStoreCardsQuest();
 		void toast(String text);
-		void beginVisitBazaar();
-		void endVisitBazaar(int selection);
+		void beginVisitTowerCards();
+		void endVisitTowerCards(int selection);
 		void onSelectedKeyCards(List<Card> selections);
 		List<spaceRegion> beginFlyingCarpet();
 
         void endFlyingCarpet(spaceRegion newSpace);
 
-        void beginVisitQuest();
-
-        void endVisitQuest(int[] selection);
-
         Boolean canTowerTeleport();
 
         List<Card> beginReleaseCard();
 
-        /*
-        void beginVisitArtifact();
-        void endVisitArtifact(int[] selection);
-         */
+        Boolean canCompleteQuest(Quest aQuest);
+        void beginCompleteQuest(Quest aQuest);
+
     }
 
     public void setListener(ViewMvcListener listner);

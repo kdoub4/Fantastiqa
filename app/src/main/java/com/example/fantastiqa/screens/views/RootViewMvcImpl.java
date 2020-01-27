@@ -254,6 +254,23 @@ public class RootViewMvcImpl implements ViewMvc  {
 				}
 			});
 		}
+
+        listIter = quests.listIterator(0);;
+        while (listIter.hasNext()) {
+            listIter.next().setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (mListener != null) {
+                        onQuestClick(v);
+                    }
+                }
+            });
+        }
+    }
+
+    public void onQuestClick(View v) {
+        v.setClickable(false);
+        mListener.beginCompleteQuest((Quest)v.getTag());
     }
 
 	@Override
@@ -278,7 +295,7 @@ public class RootViewMvcImpl implements ViewMvc  {
 			public void onClick(DialogInterface dialog, int which) {
 				switch (which) {
 					case 0: mListener.towerTeleport(); break;
-					case 1: beginTowerCards(); break;// mListener.beginVisitBazaar(); break;
+					case 1: beginTowerCards(); break;// mListener.beginVisitTowerCards(); break;
                     case 2:
                         beginReleaseCards();
                         break;
@@ -301,7 +318,7 @@ public class RootViewMvcImpl implements ViewMvc  {
     }
 	
 	private void beginTowerCards() {
-		mListener.beginVisitBazaar();
+		mListener.beginVisitTowerCards();
 	}
 	
 	@Override
@@ -314,7 +331,7 @@ public class RootViewMvcImpl implements ViewMvc  {
 		AlertDialog.Builder buyDialog = new AlertDialog.Builder(mRootView.getContext());
         buyDialog.setItems(dialogItems, new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int which) {
-				mListener.endVisitBazaar(which);
+				mListener.endVisitTowerCards(which);
 			}
 		  }
 		);
@@ -475,12 +492,20 @@ public class RootViewMvcImpl implements ViewMvc  {
     }
 
     @Override
-    public void bindQuest(int location, Quest details) {
+    public void bindQuest(int location, Quest details, Boolean canComplete) {
         switch (location) {
             case 1:
-                publicQuest1.setText(details.name);break;
+                publicQuest1.setText(details.name);
+                publicQuest1.setTag(details);
+                publicQuest1.setTextColor(canComplete ? Color.GREEN : Color.WHITE);
+                publicQuest1.setClickable(canComplete);
+                break;
             case 2:
-                publicQuest2.setText(details.name);break;
+                publicQuest2.setText(details.name);
+                publicQuest2.setTag(details);
+                publicQuest2.setTextColor(canComplete ? Color.GREEN : Color.WHITE);
+                publicQuest2.setClickable(canComplete);
+                break;
         }
     }
 
@@ -525,7 +550,11 @@ public class RootViewMvcImpl implements ViewMvc  {
     @Override
     public void bindPlayerQuest(List<Card> theHand) {
 		//TODO multiple quests
-		quests.get(0).setText(theHand.get(0).name);
+        int i=0;
+		for (Card aQuest : theHand) {
+            quests.get(i++).setText(aQuest.name);
+            if (i==2) break;
+        }
 	}
 	
 	@Override
@@ -561,7 +590,7 @@ public class RootViewMvcImpl implements ViewMvc  {
 	private void setHandColor(Integer aColor) {
 		ListIterator<TextView> listIter = theHandViews.listIterator(0);
         while (listIter.hasNext()) {
-            ((TextView)listIter.next()).setTextColor(aColor);
+            listIter.next().setTextColor(aColor);
         }
 	}
 	private void setLandColor(Integer aColor) {

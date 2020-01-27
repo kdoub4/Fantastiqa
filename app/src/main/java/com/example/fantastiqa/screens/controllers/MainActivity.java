@@ -31,6 +31,8 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
+import org.apache.commons.collections4.ListUtils;
+
 public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcListener, Player.playerListener {
     private Button buttonMove;
     private Game theGame;
@@ -91,27 +93,89 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 			roadSpaceMap.put(theGame.board.getRoad(
 				spaceRegionMap.get(spaceRegion.W), spaceRegionMap.get( spaceRegion.E)),spaceRoad.MID);
 
-            for (Road aRoad: theGame.board.roads()) {
-                rootView.bindRoad(roadSpaceMap.get(aRoad), aRoad);
-            }
+        bindAllRoads();
 
-            for (Quest aQuest : theGame.board.quests) {
-                rootView.bindQuest(theGame.board.quests.indexOf(aQuest)+1, aQuest);
-            }
+        bindAllQuests();
 
-            rootView.bindHand(currentPlayer.hand);
-            rootView.bindPlayerQuest(currentPlayer.quests);
+        rootView.bindHand(currentPlayer.hand);
+        rootView.bindPlayerQuest(currentPlayer.quests);
     }
 
-	@Override
+    private void bindAllQuests() {
+        for (Quest aQuest : theGame.board.quests) {
+                rootView.bindQuest(theGame.board.quests.indexOf(aQuest)+1, aQuest, canCompleteQuest(aQuest));
+            }
+    }
+
+    private void bindAllRoads() {
+        for (Road aRoad: theGame.board.roads()) {
+            rootView.bindRoad(roadSpaceMap.get(aRoad), aRoad);
+        }
+    }
+
+    @Override
 	public void toast(String text) {
 		Toast.makeText(MainActivity.this,text,Toast.LENGTH_SHORT).show();
 	}
 
     @Override
-    public void finishPhase() {
-        changeGameState(GameStatus.OPEN);
+    public void finishPhase()
+    {
+        if (gameState == GameStatus.OPEN) {
+            endTurn();
+        }
+        else {
+            changeGameState(GameStatus.OPEN);
+        }
 	}
+
+    @Override
+    public Boolean canCompleteQuest(Quest aQuest) {
+        return theGame.canCompleteQuest(aQuest, ListUtils.union(currentPlayer.publicQuest, currentPlayer.hand));
+    }
+
+    @Override
+    public void beginCompleteQuest(Quest aQuest) {
+        if (canCompleteQuest(aQuest)) {
+            List<Card> used = theGame.completeQuest(aQuest, ListUtils.union(currentPlayer.publicQuest, currentPlayer.hand));
+            if (used.size()>0) {
+                currentPlayer.setVps(currentPlayer.getVps()+aQuest.vps);
+                currentPlayer.changeGems(aQuest.gems);
+                for (Card usedCard : used) {
+                    currentPlayer.publicQuest.remove(usedCard);
+                    currentPlayer.hand.remove(usedCard);
+                    currentPlayer.deck.discard(usedCard);
+                }
+                rootView.bindHand(currentPlayer.hand);
+                rootView.bindPlayerQuest(currentPlayer.publicQuest);
+                //TODO remove quest from board
+            }
+            changeGameState(GameStatus.OPEN);
+
+        }
+    }
+
+    private void endTurn() {
+        if (currentPlayer.getVps() >= theGame.VPgoal ) {
+            toast("Game Over " + currentPlayer.name );
+        }
+        for (Road aRoad : theGame.board.roads()) {
+            if (aRoad.creature == emptyRoadCard) {
+                aRoad.creature = (CreatureCard)theGame.creatureDeck.drawOne();
+            }
+        }
+        currentPlayer.drawCards(5-currentPlayer.hand.size());
+        bindAllQuests();
+        bindAllRoads();
+        rootView.bindHand(currentPlayer.hand);
+        rootView.bindPlayerQuest(currentPlayer.quests);
+        rootView.bindStorage(currentPlayer.publicQuest);
+        for (Card aQuest : currentPlayer.quests) {
+            rootView.bindQuestStorage((Quest)aQuest, ((Quest) aQuest).stored);
+        }
+        rootView.bindQuest(1, theGame.board.quests.get(0),canCompleteQuest(theGame.board.quests.get(0)));
+        rootView.bindQuest(2, theGame.board.quests.get(1),canCompleteQuest(theGame.board.quests.get(1)));
+    }
 
     private void changeGameState(GameStatus newState) {
 		rootView.gameStateChange(newState);
@@ -276,8 +340,7 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
                 }
             }
         }
-        if (symbolCount>=2) return  true;
-        return  false;
+        return (symbolCount>=2);
     }
     public List<Pair<Road,Region>> getMoves(){
         List<Pair<Road,Region>> results = new LinkedList<>();
@@ -338,10 +401,19 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
             onSelectedKeyCards(new ArrayList<Card>());
 
     }
-	//Beast Bazaar
 	@Override
-	public void beginVisitBazaar() {
-        visitTowerCards(theGame.bazaarDeck);
+	public void beginVisitTowerCards() {
+        switch (currentLocation.tower) {
+            case BAZAAR:
+                visitTowerCards(theGame.bazaarDeck);
+                break;
+            case QUEST:
+                visitTowerCards(theGame.questDeck);
+                break;
+            case ARTIFACT:
+                break;
+        }
+
 	}
 
 	@Override
@@ -369,19 +441,27 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 	}
 	
 	@Override
-	public void endVisitBazaar(int buy) {
+	public void endVisitTowerCards(int buy) {
 		//TODO in Game possiblePurchase list
 		Toast.makeText(MainActivity.this, "endBazaar", Toast.LENGTH_SHORT).show();
         changeGameState(GameStatus.OPEN);
-        currentPlayer.deck.discard(playerChoices.remove(buy));
-        currentPlayer.changeGems(-3);
+        if (visitingDeck == theGame.questDeck) {
+            currentPlayer.quests.add(playerChoices.remove(buy));
+            rootView.bindPlayerQuest(currentPlayer.quests);
+            toast(currentPlayer.quests.get(0).toString() + currentPlayer.quests.get(1).toString());
+        }
+        else {
+            currentPlayer.deck.discard(playerChoices.remove(buy));
+            currentPlayer.changeGems(-3);
+        }
 		ListIterator<Card> cardIter = playerChoices.listIterator();
 		while (cardIter.hasNext()) {
 
-            theGame.bazaarDeck.discard(cardIter.next());
+            visitingDeck.discard(cardIter.next());
 			cardIter.remove();
 		}
         toast(currentPlayer.deck.sizeToString());
+		visitingDeck=null;
 	}
 
 	//Free Actions
@@ -403,7 +483,7 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 		Card questCard = currentPlayer.quests.get(0);
 		for (Card handCard : currentPlayer.hand) {
 			if (handCard instanceof CreatureCard) {
-				 ListIterator<Symbol> questIter = ((Quest)questCard).requirements.listIterator(0);
+				 ListIterator<Symbol> questIter = ((Quest)questCard).getRequirements().listIterator(0);
 				 while (questIter.hasNext()) {
 					 Symbol requiredSymbol = questIter.next();
 					 Toast.makeText(MainActivity.this, ((CreatureCard)handCard).values.get(0).toString() + requiredSymbol.toString(), Toast.LENGTH_SHORT).show();
@@ -447,13 +527,11 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 	
     @Override
     public Boolean storeCardPrivate(Card aCard) {
-		Card transferCard = aCard;
-        if (gameState == GameStatus.STORING_PRIVATE) {
-			if (transferCard != null) {
-				currentPlayer.hand.remove(transferCard);
-				currentPlayer.publicQuest.add(transferCard);
-                //rootView.bindHand(currentPlayer.hand);
-				rootView.bindStorage(currentPlayer.publicQuest);
+		if (gameState == GameStatus.STORING_PRIVATE) {
+			if (aCard != null) {
+				currentPlayer.hand.remove(aCard);
+				currentPlayer.publicQuest.add(aCard);
+                rootView.bindStorage(currentPlayer.publicQuest);
                 return true;
 			}
 		}
@@ -463,7 +541,7 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 	@Override
     public void handClick(Card aCard) {
         //TODO check if card eligible
-		Toast.makeText(MainActivity.this, gameState.toString(), Toast.LENGTH_SHORT);
+	    //	Toast.makeText(MainActivity.this, gameState.toString(), Toast.LENGTH_SHORT);
         if (gameState == GameStatus.STORING_PRIVATE) {
             if (storeCardPrivate(aCard)) {
                 rootView.removeHandCard(aCard);
@@ -530,15 +608,4 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
         return false;
     }
 
-    //Quest Cards
-
-    @Override
-    public void beginVisitQuest() {
-        changeGameState(GameStatus.TOWER_BUY);
-    }
-
-    @Override
-    public void endVisitQuest(int[] selection) {
-
-    }
 }

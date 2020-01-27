@@ -15,6 +15,16 @@ public class Player {
     private int gems = 3;
     private playerListener mListener = null;
 
+    public int getVps() {
+        return vps;
+    }
+
+    public void setVps(int vps) {
+        this.vps = vps;
+    }
+
+    private int vps;
+
     public Player(String thename) {
         name= thename;
 		ArrayList<Card> deckSetup = new ArrayList<>();

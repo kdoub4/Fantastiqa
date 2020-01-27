@@ -2,11 +2,15 @@ package com.example.fantastiqa.GameState;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 public class Game {
     public Board board;
+    public int VPgoal;
     public Deck creatureDeck;
     public Deck artifactDeck;
     public Deck bazaarDeck;
@@ -58,68 +62,23 @@ public class Game {
 
         //QuestDeck
         tempDeck.clear();
-        tempDeck.add(new Quest("FIRE", 1, 3, new ArrayList<Symbol>() {
-            {
-            add(Symbol.FIRE);
-            add(Symbol.FIRE);
-        }
-        }, RegionName.WETLANDS));
+        tempDeck.add(new Quest("FIRE", 1, 3, Symbol.FIRE, Symbol.NONE, RegionName.WETLANDS));
 
-        tempDeck.add(new Quest("WATER", 1, 3, new ArrayList<Symbol>() {
-            {
-            add(Symbol.WATER);
-            add(Symbol.WATER);
-        }
-        }, RegionName.FIELDS));
+        tempDeck.add(new Quest("WATER", 1, 3, Symbol.WATER, Symbol.NONE , RegionName.FIELDS));
 
-        tempDeck.add(new Quest("BAT", 1, 3, new ArrayList<Symbol>() {
-            {
-            add(Symbol.BAT);
-            add(Symbol.BAT);
-        }
-        }, RegionName.HIGHLANDS));
+        tempDeck.add(new Quest("BAT", 1, 3, Symbol.BAT,Symbol.NONE, RegionName.HIGHLANDS));
 
-        tempDeck.add(new Quest("BROOM", 1, 3, new ArrayList<Symbol>() {
-            {
-            add(Symbol.BROOM);
-            add(Symbol.BROOM);
-        }
-        }, RegionName.FIELDS));
+        tempDeck.add(new Quest("BROOM", 1, 3, Symbol.BROOM, Symbol.NONE, RegionName.FIELDS));
 
-        tempDeck.add(new Quest("NET", 1, 3, new ArrayList<Symbol>() {
-            {
-            add(Symbol.NET);
-            add(Symbol.NET);
-        }
-        }, RegionName.HILLS));
+        tempDeck.add(new Quest("NET", 1, 3, Symbol.NET, Symbol.NONE, RegionName.HILLS));
 
-        tempDeck.add(new Quest("HELMET", 1, 3, new ArrayList<Symbol>() {
-            {
-            add(Symbol.HELMET);
-            add(Symbol.HELMET);
-        }
-        }, RegionName.TUNDRA));
+        tempDeck.add(new Quest("HELMET", 1, 3, Symbol.HELMET, Symbol.NONE, RegionName.TUNDRA));
 
-        tempDeck.add(new Quest("SWORD", 1, 3, new ArrayList<Symbol>() {
-            {
-            add(Symbol.SWORD);
-            add(Symbol.SWORD);
-        }
-        }, RegionName.HILLS));
+        tempDeck.add(new Quest("SWORD", 1, 3, Symbol.SWORD, Symbol.NONE, RegionName.HILLS));
 
-        tempDeck.add(new Quest("TOOTH", 1, 3, new ArrayList<Symbol>() {
-            {
-            add(Symbol.TOOTH);
-            add(Symbol.TOOTH);
-        }
-        }, RegionName.TUNDRA));
+        tempDeck.add(new Quest("TOOTH", 1, 3, Symbol.TOOTH, Symbol.NONE, RegionName.TUNDRA));
 
-        tempDeck.add(new Quest("WAND", 1, 3, new ArrayList<Symbol>() {
-            {
-            add(Symbol.WAND);
-            add(Symbol.WAND);
-        }
-        }, RegionName.WETLANDS));
+        tempDeck.add(new Quest("WAND", 1, 3, Symbol.WAND, Symbol.NONE, RegionName.WETLANDS));
 
         questDeck = new Deck(tempDeck);
         questDeck.shuffle(true);
@@ -185,8 +144,89 @@ public class Game {
 		selectCards.clear();
 	}
 	* */
+    public Boolean canCompleteQuest(Quest aQuest, List<Card> storedCards) {
+        Set<Card> used = new HashSet<>(5);
+        int doubleCount = aQuest.getDoubleRequirement() == Symbol.NONE ? 2 : 0;
+        int tripleCount = aQuest.getTripleRequirement() == Symbol.NONE ? 3 : 0;
+
+        Collections.sort(storedCards, new SortBySymbolCount());
+        for (Card aStoredCard : storedCards) {
+            if (!(aStoredCard instanceof CreatureCard) || used.contains(aStoredCard)) {
+                continue;
+            }
+            CreatureCard aStoredCreature = ((CreatureCard) aStoredCard);
+            if (doubleCount <= 2 && aQuest.getDoubleRequirement() == aStoredCreature.values.get(0)) {
+                used.add(aStoredCard);
+                doubleCount++;
+                if (aStoredCreature.values.size() > 1 &&
+                        aQuest.getDoubleRequirement() == aStoredCreature.values.get(1)) {
+                    doubleCount++;
+                }
+                continue;
+            }
+
+            if (tripleCount <= 3 && aQuest.getTripleRequirement() == aStoredCreature.values.get(0)) {
+                used.add(aStoredCard);
+                tripleCount++;
+                if (aStoredCreature.values.size() > 1 &&
+                        aQuest.getTripleRequirement() == aStoredCreature.values.get(1)) {
+                    tripleCount++;
+                }
+                continue;
+            }
+        }
+
+        return doubleCount >= 2 && tripleCount >= 3;
+    }
+
+    public List<Card> completeQuest(Quest aQuest, List<Card> availableCards) {
+        List<Card> results = new ArrayList<>();
+        int doubleCount = aQuest.getDoubleRequirement() == Symbol.NONE ? 2 : 0;
+        int tripleCount = aQuest.getTripleRequirement() == Symbol.NONE ? 3 : 0;
+
+        Collections.sort(availableCards, new SortBySymbolCount());
+        for (Card aStoredCard : availableCards) {
+            if (!(aStoredCard instanceof CreatureCard) || results.contains(aStoredCard)) {
+                continue;
+            }
+            CreatureCard aStoredCreature = ((CreatureCard) aStoredCard);
+            if (doubleCount < 2 && aQuest.getDoubleRequirement() == aStoredCreature.values.get(0)) {
+                results.add(aStoredCard);
+                doubleCount++;
+                if (aStoredCreature.values.size() > 1 &&
+                        aQuest.getDoubleRequirement() == aStoredCreature.values.get(1)) {
+                    doubleCount++;
+                }
+                continue;
+            }
+
+            if (tripleCount < 3 && aQuest.getTripleRequirement() == aStoredCreature.values.get(0)) {
+                results.add(aStoredCard);
+                tripleCount++;
+                if (aStoredCreature.values.size() > 1 &&
+                        aQuest.getTripleRequirement() == aStoredCreature.values.get(1)) {
+                    tripleCount++;
+                }
+                continue;
+            }
+        }
+
+        return results;
+    }
 }
 
 enum deckTypes {
 	QUEST, BAZAAR, ARTIFACT, CREATURE
+}
+
+class SortBySymbolCount implements Comparator<Card>
+{
+    // Used for sorting in ascending order of symbol count
+    public int compare(Card a, Card b)
+    {
+        int aCreature = (a instanceof CreatureCard) ? ((CreatureCard)a).values.size() : 0;
+        int bCreature = (b instanceof CreatureCard) ? ((CreatureCard)b).values.size() : 0;
+
+        return bCreature-aCreature;
+    }
 }
