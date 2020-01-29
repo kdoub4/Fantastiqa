@@ -49,6 +49,11 @@ public interface ViewMvc {
 	void bindPlayerStorage(List<Card> theHand);
 	void bindQuestStorage(Quest theQuest, List<Card> theCards);
 
+	void updateGems(int gems);
+	void updateVps(int vps);
+	void updateDeck(int size);
+	void updateDiscard(int size);
+
     void highlightLand(int location);
     void validCardsForQuest(List<Card> matches);
     

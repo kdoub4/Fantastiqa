@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">Fantastiqa</string>
+    <string name="Gems">Gems : %1d</string>
+    <string name="Vps">VP : %1d</string>
+    <string name="Deck">Deck: %1d</string>
+    <string name="Discard">Discard: %1d</string>
+
 </resources>

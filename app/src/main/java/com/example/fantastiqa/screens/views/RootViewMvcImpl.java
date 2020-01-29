@@ -68,13 +68,25 @@ public class RootViewMvcImpl implements ViewMvc  {
     LinkedList<TextView> quests;
     LinkedList<TextView> quest1Storage;
     LinkedList<TextView> quest0Storage;
-    
+
+    private TextView status;
+    private TextView tvGems;
+    private TextView tvVps;
+    private TextView tvDeck;
+    private TextView tvDiscard;
+
+    private Context mContext;
     Map<spaceRegion, TextView> regionTextView = new EnumMap<>(spaceRegion.class);
     Map<TextView, spaceRegion> textViewRegion = new HashMap<>();
 
     public RootViewMvcImpl(Context context, ViewGroup container) {
         mRootView = LayoutInflater.from(context).inflate(R.layout.activity_main, container);
-
+        mContext = context;
+        status = mRootView.findViewById(R.id.status);
+        tvGems = mRootView.findViewById(R.id.gems);
+        tvVps = mRootView.findViewById(R.id.vps);
+        tvDeck    = mRootView.findViewById(R.id.deck);
+        tvDiscard = mRootView.findViewById(R.id.discard);
         moveButton = mRootView.findViewById(R.id.buttonMove);
         moveButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -87,7 +99,7 @@ public class RootViewMvcImpl implements ViewMvc  {
                 */
             }
         });
-        
+
         towerButton = mRootView.findViewById(R.id.buttonTower);
         towerButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -395,7 +407,8 @@ public class RootViewMvcImpl implements ViewMvc  {
 	
 	@Override
     public void gameStateChange(GameStatus newState) {
-		switch (newState) {
+		status.setText(newState.toString());
+        switch (newState) {
 		case MOVING:
 			moveButton.setEnabled(false);
 			towerButton.setEnabled(false);
@@ -433,7 +446,28 @@ public class RootViewMvcImpl implements ViewMvc  {
             break;
 	}
 	}
-	
+
+
+    @Override
+    public void updateGems(int gems) {
+        tvGems.setText(mContext.getString(R.string.Gems, gems));
+    }
+
+    @Override
+    public void updateVps(int vps) {
+        tvVps.setText(mContext.getString(R.string.Vps, vps));
+    }
+
+    @Override
+    public void updateDeck(int size) {
+        tvDeck.setText(mContext.getString(R.string.Deck, size));
+    }
+
+    @Override
+    public void updateDiscard(int size) {
+        tvDiscard.setText(mContext.getString(R.string.Discard, size));
+    }
+
     @Override
     public View getRootView() {
         return mRootView;

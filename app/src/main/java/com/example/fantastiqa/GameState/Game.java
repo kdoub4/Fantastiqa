@@ -1,5 +1,9 @@
 package com.example.fantastiqa.GameState;
 
+import android.widget.ArrayAdapter;
+
+import org.apache.commons.math3.util.Combinations;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -218,6 +222,65 @@ public class Game {
         }
         return results;
     }
+
+    public Boolean subdue(Road aRoad, Player aPlayer) {
+//        if (canSubdue(aRoad, aPlayer.hand)) {
+//            return true;
+//        }
+        return false;
+    }
+    /*
+    private List<List<Card>> canSubdue(Road aRoad, List<Card> aHand) {
+
+    }
+*/
+    public List<Set<Card>> canSubdueSingle(CreatureCard aCreature, List<Card> aHand){
+        List<Set<Card>> fullList = new ArrayList<>();
+
+        List<Symbol> handSymbols = new ArrayList<>();
+        //Check hand for first symbol
+        for (Card aCard:aHand) {
+            if (aCard instanceof CreatureCard && ((CreatureCard)aCard).values.get(0) != Symbol.NONE) {
+                CreatureCard handCreature = (CreatureCard) aCard;
+                if (aCreature.subduedBy == handCreature.values.get(0)) {
+                    //symbol match
+                    fullList.add(Collections.singleton(aCard));
+                    continue;
+                }
+                if (handCreature.values.size() > 1 && handCreature.values.get(0) == handCreature.values.get(1)) {
+                    //Double symbol as wildcard
+                    fullList.add(Collections.singleton(aCard));
+                }
+                if (handSymbols.contains(handCreature.values.get(0))) {
+                    //add these cards later
+                }
+                else {
+                    handSymbols.add(handCreature.values.get(0));
+                }
+            }
+        }
+        List<Card> matches = new ArrayList<>();
+        Combinations combos;
+        Set<Card> comboCards;
+        for (Symbol match : handSymbols) {
+            for (Card aCard : aHand) {
+                if (aCard instanceof CreatureCard &&
+                        ((CreatureCard)aCard).values.get(0) == match) {
+                    matches.add(aCard);
+                }
+            }
+            if (matches.size()>1) {
+                combos = new Combinations(matches.size(), 2);
+                for (int[] pairing : combos) {
+                    comboCards = new HashSet<>(2);
+                    Collections.addAll(comboCards, matches.get(pairing[0]), matches.get(pairing[1]));
+                    fullList.add(comboCards);
+                }
+            }
+        }
+        return fullList;
+    }
+
 }
 
 enum deckTypes {

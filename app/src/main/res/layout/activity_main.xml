@@ -14,6 +14,15 @@
     android:orientation="vertical"
     android:stretchColumns="0,1,2">
 
+      <TableRow style="@style/rowLayout">
+      <TextView
+          android:id="@+id/status"
+          style="@style/textLayout"
+          android:layout_column="1"
+          android:layout_weight="0.35"
+          />
+      </TableRow>
+
     <TableRow style="@style/rowLayout">
         <TextView
             android:id="@+id/land6"
@@ -185,7 +194,33 @@
             android:textSize="8sp"
             android:layout_weight="1"/>
     </TableRow>
-    <TableRow android:layout_margin="10dp">
+      <TableRow style="@style/rowLayout">
+      <TextView
+          android:id="@+id/gems"
+          style="@style/textLayout"
+          android:layout_column="0"
+          android:layout_weight="0.35"
+          />
+          <TextView
+              android:id="@+id/vps"
+              style="@style/textLayout"
+              android:layout_column="1"
+              android:layout_weight="0.35"
+              />
+          <TextView
+              android:id="@+id/deck"
+              style="@style/textLayout"
+              android:layout_column="2"
+              android:layout_weight="0.35"
+              />
+          <TextView
+              android:id="@+id/discard"
+              style="@style/textLayout"
+              android:layout_column="3"
+              android:layout_weight="0.35"
+              />
+      </TableRow>
+      <TableRow android:layout_margin="10dp">
         <TextView
             android:id="@+id/hand1"
             style="@style/textLayout"

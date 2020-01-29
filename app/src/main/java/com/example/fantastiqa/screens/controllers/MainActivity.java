@@ -35,21 +35,21 @@ import java.util.Map;
 import org.apache.commons.collections4.ListUtils;
 
 public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcListener, Player.playerListener {
-    private Button buttonMove;
     private Game theGame;
     private com.example.fantastiqa.screens.views.ViewMvc rootView;
     private Player currentPlayer;
     private Region currentLocation;
+
     private GameStatus gameState;
     private List<Pair<Road,Region>> moveTargets = new LinkedList<>();
     private List<spaceRegion> moveTargetIds = new LinkedList<>();
     private CreatureCard emptyRoadCard = new CreatureCard("",Symbol.NONE, false, Ability.NONE ,Symbol.NONE);
+	private List<Card> playerChoices = new ArrayList<>(5);
+    private Deck visitingDeck;
+
     private Map<spaceRegion,Region> spaceRegionMap = new EnumMap<>(spaceRegion.class);
     private Map<Region,spaceRegion> regionSpaceMap = new HashMap<>();
-	private Map<Road,spaceRoad> roadSpaceMap = new HashMap<>();
-	private List<Card> playerChoices = new ArrayList<>(5);
-
-    private Deck visitingDeck;
+    private Map<Road,spaceRoad> roadSpaceMap = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +62,9 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
         setContentView(rootView.getRootView());
         //setContentView(R.layout.activity_main);
 
+        //TODO ask for players and vps, starting player
         theGame = new Game();
+        //
         for (Player aPlayer : theGame.players) {
 			aPlayer.setPlayerListener(this);
 		}
@@ -78,7 +80,7 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 				regionSpaceMap.put(anArea, compassRegion);
 				rootView.bindLand(compassRegion, anArea);
             }
-			
+			//TODO ask for starting locations
 			roadSpaceMap.put(theGame.board.getRoad(
 				spaceRegionMap.get(spaceRegion.NW), spaceRegionMap.get( spaceRegion.NE)),spaceRoad.N);
 			roadSpaceMap.put(theGame.board.getRoad(
@@ -155,7 +157,6 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
                 //TODO remove quest from board
             }
             changeGameState(GameStatus.OPEN);
-
         }
     }
 
@@ -168,7 +169,13 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
         changeGameState(GameStatus.OPEN);
         for (Road aRoad : theGame.board.roads()) {
             if (aRoad.creature == emptyRoadCard) {
-                aRoad.creature = (CreatureCard)theGame.creatureDeck.drawOne();
+                Card nextCard = theGame.creatureDeck.drawOne();
+                if (nextCard instanceof CreatureCard) {
+                    aRoad.creature = (CreatureCard)nextCard;
+                }
+                else {
+                    //Event?
+                }
             }
         }
 
@@ -176,6 +183,7 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
             theGame.board.quests.add(newQuest);
         }
         currentPlayer.drawCards(5-currentPlayer.hand.size());
+        //currentPlayer = theGame.nextPlayer();
         bindAllQuests();
         bindAllRoads();
         rootView.bindHand(currentPlayer.hand);
@@ -186,6 +194,11 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
         }
         rootView.bindQuest(1, theGame.board.quests.get(0),canCompleteQuest(theGame.board.quests.get(0)));
         rootView.bindQuest(2, theGame.board.quests.get(1),canCompleteQuest(theGame.board.quests.get(1)));
+        rootView.updateVps(currentPlayer.getVps());
+        rootView.updateGems(currentPlayer.getGems());
+        rootView.updateDeck(currentPlayer.deck.size());
+        rootView.updateDeck(currentPlayer.deck.discardSize());
+
         toast(currentPlayer.deck.sizeToString());
 
     }
@@ -199,6 +212,10 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 		    playerChoices.clear();
             visitingDeck=null;
         }
+		rootView.updateDeck(currentPlayer.deck.size());
+		rootView.updateDiscard(currentPlayer.deck.discardSize());
+		rootView.updateGems(currentPlayer.getGems());
+		rootView.updateVps(currentPlayer.getVps());
 
 	}
 
@@ -215,7 +232,7 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 		else if (oldGems > 2 && newGems < 2) {
 			rootView.setTowerTeleport(false);
 		}
-		
+        rootView.updateGems(currentPlayer.getGems());
 	}
 	
 	private void movePlayer(Player thePlayer, Region newRegion) {
@@ -233,15 +250,17 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
     public Boolean doMove(spaceRegion newSpace) {
 		Toast.makeText(MainActivity.this, newSpace.toString(), Toast.LENGTH_SHORT).show();
         if (gameState == GameStatus.MOVING && moveTargetIds.contains(newSpace)) {
-			Pair<Road,Region> moveTarget = moveTargets.get(moveTargetIds.indexOf(newSpace));
-            movePlayer(currentPlayer, moveTarget.second);
-            subdue(moveTarget.first);
-            rootView.bindHand(currentPlayer.hand);
-            rootView.bindRoad(roadSpaceMap.get(moveTarget.first), moveTarget.first);
-            changeGameState(GameStatus.OPEN);
-            moveTargets.clear();
-            moveTargetIds.clear();
-            return true;
+			//endAdventuring
+            Pair<Road,Region> moveTarget = moveTargets.get(moveTargetIds.indexOf(newSpace));
+            if (subdue(moveTarget.first)) {
+                movePlayer(currentPlayer, moveTarget.second);
+                rootView.bindHand(currentPlayer.hand);
+                rootView.bindRoad(roadSpaceMap.get(moveTarget.first), moveTarget.first);
+                changeGameState(GameStatus.OPEN);
+                moveTargets.clear();
+                moveTargetIds.clear();
+                return true;
+            }
         } else if (gameState == GameStatus.FLYING_CARPET && moveTargetIds.contains(newSpace)) {
 			endFlyingCarpet(newSpace);
 			return true;
@@ -249,7 +268,7 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 		return false;
     }
 
-	private void subdue(Road toSubdue) {
+	private Boolean subdue(Road toSubdue) {
 	        for (Card aCard : currentPlayer.hand
         ) {
             if (aCard instanceof CreatureCard) {
@@ -260,11 +279,12 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
                     currentPlayer.deck.discard(handCreature);
                     currentPlayer.deck.discard(toSubdue.creature);
                     toSubdue.creature = emptyRoadCard;
-                    break;
+                    return true;
                 }
             }
             //TODO other methods of subdue
         }
+	        return false;
 	}
     @Override
     public List<spaceRegion> getValidAdventuring() {
