@@ -1,5 +1,7 @@
 package com.example.fantastiqa.GameState;
 
+import android.util.Log;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.junit.Test;
 
@@ -7,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Set;
 
 import static org.junit.Assert.*;
@@ -183,6 +186,53 @@ public class GameTest {
         ArrayList<Card> cards = new ArrayList<>();
         cards.add(fenfairy);
         assertEquals(aGame.canSubdueSingle((CreatureCard)knight, cards).size(),0);
+    }
+
+    @Test
+    public void canSubdue_1symbol_missWildSingleDoubleWildWild () {
+        Game aGame = new Game();
+        //starting hand
+        ArrayList<Card> cards = new ArrayList<>();
+        Card troll = newCard("Troll");
+        cards.add(troll);
+        Card billygoat3 = newCard("BillyGoat");
+        cards.add(billygoat3);
+        Card fenfairy = newCard("FenFairy");
+        cards.add(fenfairy);
+        Card giantspider = newCard("GiantSpider");
+        cards.add(giantspider);
+        Card billygoat = newCard("BillyGoat");
+        cards.add(billygoat);
+        Card billygoat2 = newCard("BillyGoat");
+        cards.add(billygoat2);
+
+        Card roadCreature = newCard("Witch");
+
+        //expecting list<set<fenfairy>set<giantspider>3sets of billygoat
+        List<Set<Card>> expected = new ArrayList<>();
+        expected.add(Collections.singleton(fenfairy));
+        expected.add(Collections.singleton(giantspider));
+        Set<Card> expected3 = new HashSet<>();
+        Collections.addAll(expected3,billygoat3,billygoat);
+        Set<Card> expected4 = new HashSet<>();
+        Collections.addAll(expected4,billygoat3,billygoat2);
+        Set<Card> expected5 = new HashSet<>();
+        Collections.addAll(expected5,billygoat,billygoat2);
+
+        Collections.addAll(expected, expected3, expected4, expected5);
+        ListIterator<Set<Card>> expectedIter = expected.listIterator();
+        for (Set<Card> result : aGame.canSubdueSingle((CreatureCard)roadCreature   , cards)) {
+            assertTrue(CollectionUtils.isEqualCollection(result,
+                    expectedIter.next()));
+
+        }
+    }
+
+    private Card newCard(String cardName) {
+        CreatureCards aCardType = CreatureCards.valueOf(cardName);
+        Card nCard = new CreatureCard(aCardType.name(), aCardType.getSubduedBy(), aCardType.isGem(),
+                aCardType.isGem() ? Ability.NONE : aCardType.getAbility(), aCardType.getValue1(), aCardType.getValue2());
+        return nCard;
     }
 
 }

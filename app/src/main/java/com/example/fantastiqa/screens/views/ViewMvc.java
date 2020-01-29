@@ -12,6 +12,7 @@ import com.example.fantastiqa.screens.spaceRegion;
 import com.example.fantastiqa.screens.spaceRoad;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * MVC view interface.
@@ -67,6 +68,7 @@ public interface ViewMvc {
     void onHandClick(View v);
     void onStoreQuestClick();
     void selectKeyCards(List<Card> selectFrom);
+    void selectSubdueOption(List<Set<Card>> choices, Road toSubdue);
 
     void selectCard(final List<? extends Card> selectFrom, List<Boolean> enabled);
 	void onFlyingCarpetClick();
@@ -104,6 +106,7 @@ public interface ViewMvc {
 
         Boolean canCompleteQuest(Quest aQuest);
         void beginCompleteQuest(Quest aQuest);
+        Boolean subdue(Road toSubdue, Set<Card> selection);
 
     }
 

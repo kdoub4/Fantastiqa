@@ -131,4 +131,8 @@ public class Player {
         }
         return false;
     }
+
+    public void gainCard(Card aCard) {
+        deck.discard(aCard);
+    }
 }

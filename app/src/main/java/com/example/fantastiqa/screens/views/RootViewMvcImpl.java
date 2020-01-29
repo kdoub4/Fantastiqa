@@ -26,10 +26,13 @@ import com.example.fantastiqa.screens.spaceRoad;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Set;
+
 /*
  * Very simple MVC view containing just single FrameLayout
  */
@@ -741,4 +744,24 @@ public class RootViewMvcImpl implements ViewMvc  {
 		
 	}
 
+    @Override
+    public void selectSubdueOption(final List<Set<Card>> choices, final Road toSubdue)  {
+        CharSequence[] dialogItems = new CharSequence[choices.size()];
+        for (int i=0; i<choices.size(); i++) {
+            for (Set<Card> aChoice : choices) {
+                Iterator setIter = aChoice.iterator();
+                String strChoice = "";
+                while (setIter.hasNext()) {
+                    strChoice = strChoice + setIter.next().toString() + " ";
+                }
+            }
+        }
+
+	    AlertDialog.Builder chooseBuilder = new AlertDialog.Builder(mRootView.getContext());
+        chooseBuilder.setItems(dialogItems,new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                mListener.subdue(toSubdue, choices.get(which));
+            }
+        });
+    }
 }

@@ -27,10 +27,12 @@ import com.example.fantastiqa.screens.views.ViewMvc;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.collections4.ListUtils;
 
@@ -269,23 +271,33 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
     }
 
 	private Boolean subdue(Road toSubdue) {
-	        for (Card aCard : currentPlayer.hand
-        ) {
-            if (aCard instanceof CreatureCard) {
-                CreatureCard handCreature = (CreatureCard) aCard;
-                //Toast.makeText(MainActivity.this, handCreature.values.get(0).toString(), Toast.LENGTH_SHORT).show();
-                if (toSubdue.creature.subduedBy == handCreature.values.get(0)) {
-                    currentPlayer.hand.remove(handCreature);
-                    currentPlayer.deck.discard(handCreature);
-                    currentPlayer.deck.discard(toSubdue.creature);
-                    toSubdue.creature = emptyRoadCard;
-                    return true;
-                }
-            }
-            //TODO other methods of subdue
+        List<Set<Card>> subdueSets;
+        subdueSets = theGame.canSubdueSingle(toSubdue.creature, currentPlayer.hand);
+        if (subdueSets.size()==1) {
+            //remove automatically
+            return subdue(toSubdue, subdueSets.get(0));
         }
-	        return false;
+        else {
+            //ask player to choose
+            rootView.selectSubdueOption(subdueSets, toSubdue);
+        }
+            //TODO other methods of subdue
+
+        return false;
 	}
+
+	@Override
+    public Boolean subdue(Road toSubdue, Set<Card> subdueSet) {
+        Iterator<Card> setIter = subdueSet.iterator();
+        while (setIter.hasNext()) {
+            Card useCard = setIter.next();
+            currentPlayer.discardFromHand(useCard);
+        }
+        currentPlayer.gainCard(toSubdue.creature);
+        toSubdue.creature = emptyRoadCard;
+        return true;
+    }
+
     @Override
     public List<spaceRegion> getValidAdventuring() {
         for (Pair<Road,Region> aPair:getMoves()
@@ -309,7 +321,7 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
             return canSubdueDouble(aCreature);
         }
         else {
-            return canSubdueSingle(aCreature);
+            return theGame.canSubdueSingle(aCreature, currentPlayer.hand).size()>0;
         }
     }
 

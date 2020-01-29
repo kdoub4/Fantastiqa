@@ -250,6 +250,7 @@ public class Game {
                 if (handCreature.values.size() > 1 && handCreature.values.get(0) == handCreature.values.get(1)) {
                     //Double symbol as wildcard
                     fullList.add(Collections.singleton(aCard));
+                    continue;
                 }
                 if (handSymbols.contains(handCreature.values.get(0))) {
                     //add these cards later
@@ -277,6 +278,7 @@ public class Game {
                     fullList.add(comboCards);
                 }
             }
+            matches.clear();
         }
         return fullList;
     }
