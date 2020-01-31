@@ -72,11 +72,13 @@ public class RootViewMvcImpl implements ViewMvc  {
     
     Map<spaceRegion, TextView> regionTextView = new EnumMap<>(spaceRegion.class);
     Map<TextView, spaceRegion> textViewRegion = new HashMap<>();
+    
+    
 
     public RootViewMvcImpl(Context context, ViewGroup container) {
         mRootView = LayoutInflater.from(context).inflate(R.layout.activity_main, container);
-
-        moveButton = mRootView.findViewById(R.id.buttonMove);
+		
+		moveButton = mRootView.findViewById(R.id.buttonMove);
         moveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

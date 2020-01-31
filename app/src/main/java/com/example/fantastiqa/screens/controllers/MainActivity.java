@@ -9,6 +9,8 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.graphics.Color;
+import androidx.appcompat.widget.Toolbar;
+import android.view.Menu;
 
 import com.example.fantastiqa.screens.deckCards;
 import com.example.fantastiqa.screens.spaceRoad;
@@ -59,12 +61,17 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        
         rootView = new RootViewMvcImpl(this, null);
         rootView.setListener(this);
+
+		
         
 
         setContentView(rootView.getRootView());
         //setContentView(R.layout.activity_main);
+		Toolbar myToolbar = (Toolbar) findViewById(R.id.tower_menu);
+		setSupportActionBar(myToolbar);
 
         theGame = new Game();
         for (Player aPlayer : theGame.players) {
@@ -109,6 +116,12 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
             rootView.bindHand(currentPlayer.hand);
             rootView.bindPlayerQuest(currentPlayer.quests);
     }
+    
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+		getMenuInflater().inflate(R.menu.tower_menu, menu);
+		return true;
+	}
 
 	@Override
 	public void toast(String text) {
