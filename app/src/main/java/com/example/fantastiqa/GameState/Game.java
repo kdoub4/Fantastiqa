@@ -2,9 +2,12 @@ package com.example.fantastiqa.GameState;
 
 import android.widget.ArrayAdapter;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.math3.util.Combinations;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -280,6 +283,70 @@ public class Game {
             }
             matches.clear();
         }
+        return fullList;
+    }
+
+    public List<Set<Card>> canSubdueDouble(CreatureCard toSubdue, List<Card> aHand) {
+        List<Set<Card>> fullList = new ArrayList<>();
+        List<List<Card>> singleWildSets = new ArrayList<>();
+        List<List<Card>> singleNonMatch = new ArrayList<>();
+
+        for (Card aCard:aHand) {
+            if (aCard instanceof CreatureCard && ((CreatureCard)aCard).values.get(0) != Symbol.NONE) {
+                CreatureCard handCreature = (CreatureCard) aCard;
+                if (handCreature.values.size() > 1 && handCreature.values.get(0) == handCreature.values.get(1)) {
+                //double symbol
+                    if (toSubdue.subduedBy == handCreature.values.get(0)) {
+                        fullList.add(Collections.singleton(aCard));
+                    }
+                    else {
+                        singleWildSets.add(Collections.singletonList(aCard));
+                    }
+                }
+                else if (toSubdue.subduedBy == handCreature.values.get(0)) {
+                    //single symbol match
+                    singleWildSets.add(Collections.singletonList(aCard));
+                }
+                else {
+                    //single miss
+                    //is the symbol already in the list
+                    for (List<Card> singleSet : singleNonMatch) {
+                        if (((CreatureCard)singleSet.iterator().next()).values.get(0) == handCreature.values.get(0)) {
+                            singleSet.add(aCard);
+                            continue;
+                        }
+                    }
+                    List<Card> newSingle = new ArrayList<>();
+                    newSingle.add(aCard);
+                    singleNonMatch.add(newSingle);
+                }
+            }
+        }
+
+        Combinations combos;
+        List<Card> comboCards;
+        for (List<Card> singles : singleNonMatch) {
+            if (singles.size()>=2) {
+                combos = new Combinations(singles.size(),2);
+                for (int[] pairing : combos) {
+                    comboCards = new ArrayList<>(2);
+                    Collections.addAll(comboCards, singles.get(pairing[0]), singles.get(pairing[1]));
+                    singleWildSets.add(comboCards);
+                }
+            }
+        }
+        Set<Card> comboCardSet;
+        for (List<Card> singleWilds : singleWildSets){
+            if (singleWilds.size()>=2) {
+                combos = new Combinations(singleWilds.size(),2);
+                for (int[] pairing : combos) {
+                    comboCardSet = new HashSet<>(2);
+                    Collections.addAll(comboCardSet, singleWilds.get(pairing[0]), singleWilds.get(pairing[1]));
+                    fullList.add(comboCardSet);
+                }
+            }
+        }
+
         return fullList;
     }
 

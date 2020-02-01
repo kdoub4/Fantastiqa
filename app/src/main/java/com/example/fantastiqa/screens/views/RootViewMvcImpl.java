@@ -13,6 +13,11 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.example.fantastiqa.GameState.Card;
 import com.example.fantastiqa.GameState.Player;
 import com.example.fantastiqa.GameState.Quest;
@@ -82,9 +87,22 @@ public class RootViewMvcImpl implements ViewMvc  {
     Map<spaceRegion, TextView> regionTextView = new EnumMap<>(spaceRegion.class);
     Map<TextView, spaceRegion> textViewRegion = new HashMap<>();
 
+    private  static final int MAX_HAND_SIZE = 15;
+    private handAdapter mAdapter;
+    private RecyclerView mHandRV;
+
+
     public RootViewMvcImpl(Context context, ViewGroup container) {
         mRootView = LayoutInflater.from(context).inflate(R.layout.activity_main, container);
         mContext = context;
+
+        mHandRV = mRootView.findViewById(R.id.rvHand);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(context,RecyclerView.HORIZONTAL,false);
+        mHandRV.setLayoutManager(layoutManager);
+        mHandRV.setHasFixedSize( true);
+        mAdapter = new handAdapter(MAX_HAND_SIZE);
+        mHandRV.setAdapter(mAdapter);
+
         status = mRootView.findViewById(R.id.status);
         tvGems = mRootView.findViewById(R.id.gems);
         tvVps = mRootView.findViewById(R.id.vps);
@@ -764,4 +782,5 @@ public class RootViewMvcImpl implements ViewMvc  {
             }
         });
     }
+
 }
