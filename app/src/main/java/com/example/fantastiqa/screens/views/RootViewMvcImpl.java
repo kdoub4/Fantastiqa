@@ -87,6 +87,8 @@ public class RootViewMvcImpl implements ViewMvc  {
     Map<spaceRegion, TextView> regionTextView = new EnumMap<>(spaceRegion.class);
     Map<TextView, spaceRegion> textViewRegion = new HashMap<>();
 
+
+
     private  static final int MAX_HAND_SIZE = 15;
     private handAdapter mAdapter;
     private RecyclerView mHandRV;
@@ -108,7 +110,7 @@ public class RootViewMvcImpl implements ViewMvc  {
         tvVps = mRootView.findViewById(R.id.vps);
         tvDeck    = mRootView.findViewById(R.id.deck);
         tvDiscard = mRootView.findViewById(R.id.discard);
-        moveButton = mRootView.findViewById(R.id.buttonMove);
+		moveButton = mRootView.findViewById(R.id.buttonMove);
         moveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -609,7 +611,7 @@ public class RootViewMvcImpl implements ViewMvc  {
             }
         }
     }
-    
+
     @Override
     public void bindStorage(List<Card> hand) {
         ListIterator<TextView> listIter = storage.listIterator(0);
