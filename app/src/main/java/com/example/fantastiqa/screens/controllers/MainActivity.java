@@ -11,6 +11,7 @@ import android.widget.Toast;
 import android.graphics.Color;
 import androidx.appcompat.widget.Toolbar;
 import android.view.Menu;
+import android.view.MenuItem;
 
 import com.example.fantastiqa.screens.deckCards;
 import com.example.fantastiqa.screens.spaceRoad;
@@ -116,7 +117,12 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
             rootView.bindHand(currentPlayer.hand);
             rootView.bindPlayerQuest(currentPlayer.quests);
     }
-    
+    /*
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item){
+		
+		return true;
+	}*/
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.tower_menu, menu);
