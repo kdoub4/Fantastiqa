@@ -4,27 +4,20 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 import android.util.Pair;
-import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
-import android.graphics.Color;
+
 import androidx.appcompat.widget.Toolbar;
 import android.view.Menu;
-import android.view.MenuItem;
 
-import com.example.fantastiqa.screens.deckCards;
 import com.example.fantastiqa.screens.spaceRoad;
 import com.example.fantastiqa.screens.spaceRegion;
 import com.example.fantastiqa.screens.gameStatus;
 
 import com.example.fantastiqa.GameState.Ability;
-import com.example.fantastiqa.GameState.Area;
 import com.example.fantastiqa.GameState.Card;
 import com.example.fantastiqa.GameState.CreatureCard;
 import com.example.fantastiqa.GameState.Game;
-import com.example.fantastiqa.GameState.LoopingLinkedList;
-import com.example.fantastiqa.GameState.LoopingListIterator;
 import com.example.fantastiqa.GameState.Player;
 import com.example.fantastiqa.GameState.Quest;
 import com.example.fantastiqa.GameState.Region;
@@ -35,7 +28,6 @@ import com.example.fantastiqa.screens.views.RootViewMvcImpl;
 import com.example.fantastiqa.screens.views.ViewMvc;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
@@ -73,6 +65,7 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
         //setContentView(R.layout.activity_main);
 		Toolbar myToolbar = (Toolbar) findViewById(R.id.tower_menu);
 		setSupportActionBar(myToolbar);
+		getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         theGame = new Game();
         for (Player aPlayer : theGame.players) {
@@ -125,7 +118,7 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 	}*/
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.tower_menu, menu);
+		getMenuInflater().inflate(R.menu.actions_menu, menu);
 		return true;
 	}
 
