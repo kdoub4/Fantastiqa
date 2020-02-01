@@ -1,9 +1,7 @@
 package com.example.fantastiqa.screens.controllers;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.util.Pair;
-import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -25,14 +23,19 @@ import com.example.fantastiqa.screens.spaceRegion;
 import com.example.fantastiqa.screens.spaceRoad;
 import com.example.fantastiqa.screens.views.RootViewMvcImpl;
 import com.example.fantastiqa.screens.views.ViewMvc;
+import com.example.fantastiqa.R;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.collections4.ListUtils;
 
 public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcListener, Player.playerListener {
     private Game theGame;
@@ -47,7 +50,7 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 	private List<Card> playerChoices = new ArrayList<>(5);
     private Deck visitingDeck;
 
-    private Map<spaceRegion,Region> spaceRegionMap = new EnumMap<>(spaceRegion.class);
+    private Map<spaceRegion,Region> spaceRegionMap = new EnumMap<spaceRegion, Region>(spaceRegion.class);
     private Map<Region,spaceRegion> regionSpaceMap = new HashMap<>();
     private Map<Road,spaceRoad> roadSpaceMap = new HashMap<>();
 
