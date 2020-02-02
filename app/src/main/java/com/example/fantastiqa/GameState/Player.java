@@ -37,6 +37,7 @@ public class Player {
         deckSetup.add(new CreatureCard("Peaceful Dragon", Symbol.NONE,false, Ability.DRAGON, Symbol.NONE));
         deckSetup.add(new CreatureCard("Dog", Symbol.NONE,false, Ability.GEM, Symbol.NONE));
 		deck = new Deck<>(deckSetup);
+		deck.shuffle(true);
     }
     
     //TODO event framework

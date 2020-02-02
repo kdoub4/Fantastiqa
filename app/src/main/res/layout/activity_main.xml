@@ -4,7 +4,8 @@
 	xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    >
     
     <androidx.appcompat.widget.Toolbar
 		android:id="@+id/tower_menu"
@@ -15,7 +16,76 @@
 		android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
 		app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
 		/>
+          <androidx.recyclerview.widget.RecyclerView
+              android:layout_width="match_parent"
+              android:layout_height="100dp"
+              android:orientation="horizontal"
+              android:id="@+id/rvHand"/>
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:background="#FF0">
 		
+        <TextView
+            android:id="@+id/landt6"
+            style="@style/textLayout"
+            android:layout_column="0"
+            android:layout_weight="0.35"
+            android:tag="6"
+            android:background="#500"
+            />
+
+		<include
+		    android:id="@+id/roadc1"
+			layout="@layout/fcard2"
+            android:layout_column="1"
+            android:layout_weight="0.3"
+            android:background="#900"
+		/>
+
+        <TextView
+            android:id="@+id/landt1"
+            style="@style/textLayout"
+            android:layout_column="2"
+            android:layout_weight="0.35"
+            android:tag="1"
+            android:background="#200"
+            />
+</LinearLayout>
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:background="#030">
+
+
+        <include
+            android:id="@+id/roadc6"
+            layout="@layout/fcard2"
+            android:layout_column="0"
+            android:layout_weight="0.35"
+            android:paddingLeft="40dp"
+            android:background="#600"
+            />
+
+        <TextView
+            android:id="@+id/publicQuestT1"
+            style="@style/textLayout"
+            android:layout_column="1"
+            android:layout_weight="0.3"
+            android:text="Quest1"
+            />
+
+        <include
+            android:id="@+id/roadc2"
+            layout="@layout/fcard2"
+            android:layout_column="2"
+            android:layout_weight="0.35"
+            android:padding="40dp"
+            android:background="#800"
+            />
+</LinearLayout>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools" 
@@ -24,22 +94,17 @@
     android:background="#000"
     android:orientation="vertical">
     
+
   <TableLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="#000"
     android:orientation="vertical"
     android:stretchColumns="0,1,2">
-
       <TableRow
           android:layout_width="match_parent"
           android:layout_height="match_parent" >
 
-          <androidx.recyclerview.widget.RecyclerView
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:orientation="horizontal"
-              android:id="@+id/rvHand"/>
       </TableRow>
 
       <TableRow style="@style/rowLayout">

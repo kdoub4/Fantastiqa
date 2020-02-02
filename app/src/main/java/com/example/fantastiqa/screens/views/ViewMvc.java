@@ -73,7 +73,7 @@ public interface ViewMvc {
     void selectCard(final List<? extends Card> selectFrom, List<Boolean> enabled);
 	void onFlyingCarpetClick();
 
-    void removeHandCard(Card card);
+    void removeHandCard(Card card, List<Card> hand);
 	
     interface ViewMvcListener {
 		List<spaceRegion> getValidAdventuring();

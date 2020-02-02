@@ -615,13 +615,13 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 	    //	Toast.makeText(MainActivity.this, gameState.toString(), Toast.LENGTH_SHORT);
         if (gameState == GameStatus.STORING_PRIVATE) {
             if (storeCardPrivate(aCard)) {
-                rootView.removeHandCard(aCard);
+                rootView.removeHandCard(aCard, currentPlayer.hand);
             }
         } else if (gameState == GameStatus.STORING_QUESTCARDS) {
 			storeCardQuest(aCard);
 		} else if (gameState == GameStatus.RELEASE) {
             if (releaseCard(aCard)) {
-                rootView.removeHandCard(aCard);
+                rootView.removeHandCard(aCard, currentPlayer.hand);
                 if (currentPlayer.getGems() == 0) {
                     changeGameState(GameStatus.OPEN);
                 }
@@ -629,7 +629,7 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
         }
         if (gameState == GameStatus.DISCARD) {
             currentPlayer.discardFromHand(aCard);
-            rootView.removeHandCard(aCard);
+            rootView.removeHandCard(aCard, currentPlayer.hand);
         }
 	}
 	

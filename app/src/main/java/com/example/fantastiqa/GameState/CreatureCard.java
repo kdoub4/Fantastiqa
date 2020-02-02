@@ -3,7 +3,7 @@ package com.example.fantastiqa.GameState;
 import java.util.ArrayList;
 
 public class CreatureCard extends Card {
-    boolean gem;
+    public boolean gem;
     public Ability ability;
     public ArrayList<Symbol> values = new ArrayList<Symbol>();
     public Symbol subduedBy;

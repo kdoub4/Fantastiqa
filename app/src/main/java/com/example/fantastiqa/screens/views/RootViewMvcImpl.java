@@ -12,7 +12,7 @@ import android.widget.Button;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -41,7 +41,7 @@ import java.util.Set;
 /*
  * Very simple MVC view containing just single FrameLayout
  */
-public class RootViewMvcImpl implements ViewMvc  {
+public class RootViewMvcImpl implements ViewMvc, handAdapter.HandClickListener  {
 
     private View mRootView;
     private ViewMvcListener mListener;
@@ -89,7 +89,7 @@ public class RootViewMvcImpl implements ViewMvc  {
 
 
 
-    private  static final int MAX_HAND_SIZE = 15;
+    private  static final int MAX_HAND_SIZE = 5;
     private handAdapter mAdapter;
     private RecyclerView mHandRV;
 
@@ -102,7 +102,7 @@ public class RootViewMvcImpl implements ViewMvc  {
         LinearLayoutManager layoutManager = new LinearLayoutManager(context,RecyclerView.HORIZONTAL,false);
         mHandRV.setLayoutManager(layoutManager);
         mHandRV.setHasFixedSize( true);
-        mAdapter = new handAdapter(MAX_HAND_SIZE);
+        mAdapter = new handAdapter(MAX_HAND_SIZE, this);
         mHandRV.setAdapter(mAdapter);
 
         status = mRootView.findViewById(R.id.status);
@@ -323,7 +323,7 @@ public class RootViewMvcImpl implements ViewMvc  {
         v.setClickable(false);
         mListener.beginCompleteQuest((Quest)v.getTag());
     }
-
+	
 	@Override
 	public void onMoveClick(View v) {
 		for (spaceRegion aRegion : mListener.getValidAdventuring()) {
@@ -413,10 +413,21 @@ public class RootViewMvcImpl implements ViewMvc  {
 	public void onStoreQuestClick() {
 		mListener.beginStoreCardsQuest();
 	}
-	
+
+//graphic hand click
+	/*@Override
+	public void onHandClick(int position) {
+		
+	}
+	*/
 	@Override
 	public void onHandClick(View v) {
 		//TODO enable click
+		Log.d("fantastiqa : handClick", v.toString());
+		if (v instanceof CardView) {
+			Log.d("fantastiqa", "handclick");
+			mListener.handClick((Card) v.getTag());
+		} else
         if (v.getTag() instanceof Card && ((TextView) v).getCurrentTextColor() == Color.YELLOW)
             mListener.handClick((Card) v.getTag());
 	}
@@ -452,6 +463,7 @@ public class RootViewMvcImpl implements ViewMvc  {
 		case STORING_PRIVATE:
 			//TODO is this controller logic
 			setHandColor(Color.YELLOW);
+			enableHandClicks(true);
 			break;
 		case STORING_QUESTCARDS:
 			for (Card aCard : mListener.getValidQuestCards()) {
@@ -589,6 +601,8 @@ public class RootViewMvcImpl implements ViewMvc  {
 
     @Override
     public void bindHand(List<Card> hand) {
+		mAdapter.setDataset(hand.toArray(new Card[0]));
+		mAdapter.notifyDataSetChanged();
         ListIterator<TextView> listIter = theHandViews.listIterator(0);
         while (listIter.hasNext()) {
             ((TextView)listIter.next()).setText("");
@@ -603,13 +617,15 @@ public class RootViewMvcImpl implements ViewMvc  {
     }
 
     @Override
-    public void removeHandCard(Card aCard) {
+    public void removeHandCard(Card aCard, List<Card> theHand) {
         for (TextView tvHand : theHandViews) {
             if (tvHand.getTag() == aCard) {
                 tvHand.setTag(null);
                 tvHand.setText("");
             }
         }
+        mAdapter.setDataset(theHand.toArray(new Card[0]));
+        mAdapter.notifyDataSetChanged();
     }
 
     @Override
@@ -675,6 +691,12 @@ public class RootViewMvcImpl implements ViewMvc  {
 	private void setHandColor(Integer aColor) {
         setTextViewListColor(aColor, theHandViews);
     }
+    
+    private void enableHandClicks(Boolean enable) {
+		mAdapter.setHandClicks(true);
+		mAdapter.notifyDataSetChanged();
+		Log.d("fantastiqa", "setHandClicks");
+	}
 
     private void setTextViewListColor(Integer aColor, List<TextView> tvList) {
         ListIterator<TextView> listIter = tvList.listIterator(0);
