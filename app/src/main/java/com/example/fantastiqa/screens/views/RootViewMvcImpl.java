@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.Button;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -23,6 +24,7 @@ import com.example.fantastiqa.GameState.Player;
 import com.example.fantastiqa.GameState.Quest;
 import com.example.fantastiqa.GameState.Region;
 import com.example.fantastiqa.GameState.Road;
+import com.example.fantastiqa.GameState.Symbol;
 import com.example.fantastiqa.R;
 import com.example.fantastiqa.screens.GameStatus;
 import com.example.fantastiqa.screens.spaceRegion;
@@ -60,6 +62,13 @@ public class RootViewMvcImpl implements ViewMvc, handAdapter.HandClickListener  
     private TextView land5;
     private TextView land6;
 
+    private CardView land1c;
+    private CardView land2c;
+    private CardView land3c;
+    private CardView land4c;
+    private CardView land5c;
+    private CardView land6c;
+
     private TextView publicQuest1;
     private TextView publicQuest2;
 
@@ -71,6 +80,14 @@ public class RootViewMvcImpl implements ViewMvc, handAdapter.HandClickListener  
     private TextView road6;
     private TextView road7;
 
+    private CardView road1c;
+    private CardView road2c;
+    private CardView road3c;
+    private CardView road4c;
+    private CardView road5c;
+    private CardView road6c;
+    private CardView road7c;
+    
     LinkedList<TextView> theHandViews;
     LinkedList<TextView> storage;
     LinkedList<TextView> quests;
@@ -182,6 +199,19 @@ public class RootViewMvcImpl implements ViewMvc, handAdapter.HandClickListener  
         regionTextView.put(spaceRegion.NW,land6);
         textViewRegion.put(land6,spaceRegion.NW);
         
+        land1c = (CardView) mRootView.findViewById(R.id.landc1);
+        land1c.setTag(spaceRegion.NE);
+        land2c = (CardView) mRootView.findViewById(R.id.landc2);
+        land2c.setTag(spaceRegion.E);
+        land3c = (CardView) mRootView.findViewById(R.id.landc3);
+        land3c.setTag(spaceRegion.SE);
+        land4c = (CardView) mRootView.findViewById(R.id.landc4);
+        land4c.setTag(spaceRegion.SW);
+        land5c = (CardView) mRootView.findViewById(R.id.landc5);
+        land5c.setTag(spaceRegion.W);
+        land6c = (CardView) mRootView.findViewById(R.id.landc6);
+        land6c.setTag(spaceRegion.NW);
+        
         land1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -223,6 +253,48 @@ public class RootViewMvcImpl implements ViewMvc, handAdapter.HandClickListener  
                 
             }
         });
+
+        land1c.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+				onLandClick(view);
+            }
+        });
+        land2c.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                    onLandClick(view);
+                
+            }
+        });
+        land3c.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                    onLandClick(view);
+                
+            }
+        });
+        land4c.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                    onLandClick(view);
+                
+            }
+        });
+        land5c.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                    onLandClick(view);
+                
+            }
+        });
+        land6c.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                    onLandClick(view);
+                
+            }
+        });
         
         road1 = mRootView.findViewById(R.id.road1);
         road2 = mRootView.findViewById(R.id.road2);
@@ -231,6 +303,14 @@ public class RootViewMvcImpl implements ViewMvc, handAdapter.HandClickListener  
         road5 = mRootView.findViewById(R.id.road5);
         road6 = mRootView.findViewById(R.id.road6);
         road7 = mRootView.findViewById(R.id.road7);
+
+        road1c = mRootView.findViewById(R.id.roadc1);
+        road2c = mRootView.findViewById(R.id.roadc2);
+        road3c = mRootView.findViewById(R.id.roadc3);
+        road4c = mRootView.findViewById(R.id.roadc4);
+        road5c = mRootView.findViewById(R.id.roadc5);
+        road6c = mRootView.findViewById(R.id.roadc6);
+        road7c = mRootView.findViewById(R.id.roadc7);
 
         publicQuest1 = mRootView.findViewById(R.id.publicQuest1);
         publicQuest2 = mRootView.findViewById(R.id.publicQuest2);
@@ -434,8 +514,13 @@ public class RootViewMvcImpl implements ViewMvc, handAdapter.HandClickListener  
 	
 	@Override
 	public void onLandClick(View v) {
-		if (mListener.doMove(textViewRegion.get(v))) {
+		if (v instanceof CardView) {
+			mListener.doMove((spaceRegion)v.getTag());
+		}
+		else {
+			if (mListener.doMove(textViewRegion.get(v))) {
 				//setLandColor(Color.WHITE);
+			}
 		}
 	}
 	
@@ -565,21 +650,78 @@ public class RootViewMvcImpl implements ViewMvc, handAdapter.HandClickListener  
     public void bindRoad(spaceRoad location, Road details) {
         switch (location) {
             case N:
+				bindRoadCard(road1c, details);
                 road1.setText(details.creature.toString());break;
             case NE:
+                bindRoadCard(road2c, details);
                 road2.setText(details.creature.toString());break;
             case SE:
+                bindRoadCard(road3c, details);
                 road3.setText(details.creature.toString());break;
             case S:
+                bindRoadCard(road4c, details);
                 road4.setText(details.creature.toString());break;
             case SW:
+                bindRoadCard(road5c, details);
                 road5.setText(details.creature.toString());break;
             case NW:
+                bindRoadCard(road6c, details);
                 road6.setText(details.creature.toString());break;
             case MID:
+                bindRoadCard(road7c, details);
                 road7.setText(details.creature.toString());break;
         }
     }
+    
+    private void bindRoadCard(CardView view, Road details){
+		setImage((ImageView)view.findViewById(R.id.power1),details.creature.values.get(0));
+		if (details.creature.values.size()>1){
+			setImage((ImageView)view.findViewById(R.id.power2),details.creature.values.get(1));
+		}
+		//setImage((ImageView)view.findViewById(R.id.ability),details.creature.ability);
+		setImage((ImageView)view.findViewById(R.id.subdueBy),details.creature.subduedBy);
+		view.findViewById(R.id.gem).setVisibility(
+			details.creature.gem ? View.VISIBLE : View.INVISIBLE);
+		
+	}
+	
+	    private void setImage(ImageView theView, Symbol aSymbol){
+		if (aSymbol == Symbol.NONE) {
+			theView.setVisibility(View.INVISIBLE);
+		}
+		else {
+			theView.setVisibility(View.VISIBLE);
+		switch (aSymbol) {
+			case SWORD : 
+				theView.setImageResource(R.drawable.sword);
+				break;
+			case WAND : 
+				theView.setImageResource(R.drawable.wand);
+				break;
+			case BAT : 
+				theView.setImageResource(R.drawable.club);
+				break;
+			case HELMET : 
+				theView.setImageResource(R.drawable.helmet);
+				break;
+			case NET : 
+				theView.setImageResource(R.drawable.net);
+				break;
+			case TOOTH : 
+				theView.setImageResource(R.drawable.tooth);
+				break;
+			case BROOM : 
+				theView.setImageResource(R.drawable.broom);
+				break;
+			case WATER : 
+				theView.setImageResource(R.drawable.water);
+				break;
+			case FIRE : 
+				theView.setImageResource(R.drawable.fire);
+				break;	
+		}
+		}
+	}
 
     @Override
     public void bindQuest(int location, Quest details, Boolean canComplete) {
