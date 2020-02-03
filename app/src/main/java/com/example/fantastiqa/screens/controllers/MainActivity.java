@@ -67,7 +67,7 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 
         setContentView(rootView.getRootView());
         //setContentView(R.layout.activity_main);
-		Toolbar myToolbar = (Toolbar) findViewById(R.id.tower_menu);
+		Toolbar myToolbar = (Toolbar) findViewById(R.id.toolbar);
 		setSupportActionBar(myToolbar);
 		getSupportActionBar().setDisplayShowTitleEnabled(false);
 

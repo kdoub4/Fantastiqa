@@ -1,109 +1,212 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
     >
     
     <androidx.appcompat.widget.Toolbar
-		android:id="@+id/tower_menu"
+		android:id="@+id/toolbar"
 		android:layout_width="match_parent"
 		android:layout_height="?attr/actionBarSize"
 		android:background="?attr/colorPrimary"
 		android:elevation="4dp"
 		android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
 		app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintTop_toTopOf="parent"
 		/>
           <androidx.recyclerview.widget.RecyclerView
+              app:layout_constraintBottom_toBottomOf="parent"
+			  app:layout_constraintEnd_toEndOf="parent"
+              app:layout_constraintStart_toStartOf="parent"
+            
               android:layout_width="match_parent"
               android:layout_height="100dp"
               android:orientation="horizontal"
               android:id="@+id/rvHand"/>
-<LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:background="#FF0">
-		
-        <TextView
-            android:id="@+id/landt6"
-            style="@style/textLayout"
-            android:layout_column="0"
-            android:layout_weight="0.35"
-            android:tag="6"
-            android:background="#500"
-            />
 
-		<include
-		    android:id="@+id/roadc1"
-			layout="@layout/fcard2"
-            android:layout_column="1"
-            android:layout_weight="0.3"
-            android:background="#900"
+        <include
+            android:id="@+id/landc6"
+            layout="@layout/fcard2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/roadc1"
+            app:layout_constraintTop_toBottomOf="@id/boardTable"
+            app:layout_constraintHorizontal_chainStyle="spread"
+            
 		/>
 
-        <TextView
-            android:id="@+id/landt1"
-            style="@style/textLayout"
-            android:layout_column="2"
-            android:layout_weight="0.35"
-            android:tag="1"
-            android:background="#200"
+        <include
+            android:id="@+id/roadc1"
+            layout="@layout/fcard2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+			app:layout_constraintTop_toBottomOf="@id/boardTable"
+            app:layout_constraintStart_toEndOf="@id/landc6"
+            app:layout_constraintEnd_toStartOf="@id/landc1"
             />
-</LinearLayout>
-<LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:background="#030">
 
-
+        <include
+            android:id="@+id/landc1"
+            layout="@layout/fcard2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+			app:layout_constraintTop_toBottomOf="@id/boardTable"
+            app:layout_constraintStart_toEndOf="@id/roadc1"
+            app:layout_constraintEnd_toEndOf="parent"
+            />
+    
         <include
             android:id="@+id/roadc6"
             layout="@layout/fcard2"
-            android:layout_column="0"
-            android:layout_weight="0.35"
-            android:paddingLeft="40dp"
-            android:background="#600"
-            />
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/questc1"
+			app:layout_constraintTop_toBottomOf="@id/landc6"
+            app:layout_constraintHorizontal_chainStyle="spread"
+            
+		/>
 
-        <TextView
-            android:id="@+id/publicQuestT1"
-            style="@style/textLayout"
-            android:layout_column="1"
-            android:layout_weight="0.3"
-            android:text="Quest1"
+        <include
+            android:id="@+id/questc1"
+            layout="@layout/fcard2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+			app:layout_constraintTop_toBottomOf="@id/landc6"
+			app:layout_constraintStart_toEndOf="@id/roadc6"
+            app:layout_constraintEnd_toStartOf="@id/roadc2"
             />
 
         <include
             android:id="@+id/roadc2"
             layout="@layout/fcard2"
-            android:layout_column="2"
-            android:layout_weight="0.35"
-            android:padding="40dp"
-            android:background="#800"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+			app:layout_constraintTop_toBottomOf="@id/landc6"
+            app:layout_constraintStart_toEndOf="@id/questc1"
+            app:layout_constraintEnd_toEndOf="parent"
             />
-</LinearLayout>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools" 
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="#000"
-    android:orientation="vertical">
-    
+            
+            
+        <include
+            android:id="@+id/landc5"
+            layout="@layout/fcard2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/roadc7"
+			app:layout_constraintTop_toBottomOf="@id/roadc6"
+            app:layout_constraintHorizontal_chainStyle="spread"
+            
+		/>
+
+        <include
+            android:id="@+id/roadc7"
+            layout="@layout/fcard2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+			app:layout_constraintTop_toBottomOf="@id/roadc6"
+			app:layout_constraintStart_toEndOf="@id/landc5"
+            app:layout_constraintEnd_toStartOf="@id/landc2"
+            />
+
+        <include
+            android:id="@+id/landc2"
+            layout="@layout/fcard2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+			app:layout_constraintTop_toBottomOf="@id/roadc6"
+            app:layout_constraintStart_toEndOf="@id/roadc7"
+            app:layout_constraintEnd_toEndOf="parent"
+            />
+            
+            
+        <include
+            android:id="@+id/roadc5"
+            layout="@layout/fcard2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/questc2"
+			app:layout_constraintTop_toBottomOf="@id/landc5"
+            app:layout_constraintHorizontal_chainStyle="spread"
+            
+		/>
+
+        <include
+            android:id="@+id/questc2"
+            layout="@layout/fcard2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+			app:layout_constraintTop_toBottomOf="@id/landc5"
+			app:layout_constraintStart_toEndOf="@id/roadc5"
+            app:layout_constraintEnd_toStartOf="@id/roadc3"
+            />
+
+        <include
+            android:id="@+id/roadc3"
+            layout="@layout/fcard2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+			app:layout_constraintTop_toBottomOf="@id/landc5"
+            app:layout_constraintStart_toEndOf="@id/questc2"
+            app:layout_constraintEnd_toEndOf="parent"
+            />
+            
+            
+        <include
+            android:id="@+id/landc4"
+            layout="@layout/fcard2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/roadc4"
+			app:layout_constraintTop_toBottomOf="@id/roadc5"
+            app:layout_constraintHorizontal_chainStyle="spread"
+            
+		/>
+
+        <include
+            android:id="@+id/roadc4"
+            layout="@layout/fcard2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+			app:layout_constraintTop_toBottomOf="@id/roadc5"
+			app:layout_constraintStart_toEndOf="@id/landc4"
+            app:layout_constraintEnd_toStartOf="@id/landc3"
+            />
+
+        <include
+            android:id="@+id/landc3"
+            layout="@layout/fcard2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+			app:layout_constraintTop_toBottomOf="@id/roadc5"
+            app:layout_constraintStart_toEndOf="@id/roadc4"
+            app:layout_constraintEnd_toEndOf="parent"
+            />
 
   <TableLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="#000"
     android:orientation="vertical"
-    android:stretchColumns="0,1,2">
+    android:stretchColumns="0,1,2"
+    app:layout_constraintTop_toBottomOf="@id/toolbar"
+    app:layout_constraintStart_toStartOf="parent"
+    android:id="@+id/boardTable"
+	>
+    
       <TableRow
           android:layout_width="match_parent"
-          android:layout_height="match_parent" >
+          android:layout_height="match_parent"
+              android:visibility="gone"
+           >
 
       </TableRow>
 
@@ -116,7 +219,9 @@
           />
       </TableRow>
 
-    <TableRow style="@style/rowLayout">
+    <TableRow style="@style/rowLayout"    
+    android:visibility="gone"
+>
         <TextView
             android:id="@+id/land6"
             style="@style/textLayout"
@@ -141,7 +246,9 @@
             />
     </TableRow>
 
-    <TableRow style="@style/rowLayout">
+    <TableRow style="@style/rowLayout"
+        android:visibility="gone"
+>
         <TextView
             android:id="@+id/road6"
             style="@style/textLayout"
@@ -164,7 +271,9 @@
             />
     </TableRow>
 
-    <TableRow style="@style/rowLayout">
+    <TableRow style="@style/rowLayout"
+        android:visibility="gone"
+>
         <TextView
             android:id="@+id/land5"
             style="@style/textLayout"
@@ -189,7 +298,9 @@
             />
     </TableRow>
 
-    <TableRow style="@style/rowLayout">
+    <TableRow style="@style/rowLayout"
+        android:visibility="gone"
+>
         <TextView
             android:id="@+id/road5"
             style="@style/textLayout"
@@ -212,7 +323,9 @@
             />
     </TableRow>
 
-    <TableRow style="@style/rowLayout">
+    <TableRow style="@style/rowLayout"
+        android:visibility="gone"
+>
         <TextView
             android:id="@+id/land4"
             style="@style/textLayout"
@@ -504,5 +617,4 @@
             />
     </TableRow>
 </TableLayout>
-</ScrollView>
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -28,6 +28,8 @@
         <ImageView
             android:id="@+id/power1"
             style="@style/symbolLayout"
+            android:layout_marginTop="8dp"
+            android:layout_marginLeft="8dp"
             card_view:layout_constraintStart_toStartOf="parent"
             card_view:layout_constraintTop_toTopOf="parent"
             card_view:srcCompat="@drawable/broom" />
@@ -43,6 +45,8 @@
         <ImageView
             android:id="@+id/ability"
             style="@style/symbolLayout"
+            android:layout_marginTop="8dp"
+            android:layout_marginRight="8dp"
             card_view:layout_constraintEnd_toEndOf="parent"
             card_view:layout_constraintTop_toTopOf="parent"
             card_view:srcCompat="@mipmap/ic_launcher" />
@@ -50,6 +54,8 @@
         <ImageView
             android:id="@+id/subdueBy"
             style="@style/symbolLayout"
+            android:layout_marginBottom="8dp"
+            android:layout_marginRight="8dp"
             card_view:layout_constraintBottom_toBottomOf="parent"
             card_view:layout_constraintEnd_toEndOf="parent"
             card_view:srcCompat="@drawable/water" />
@@ -58,6 +64,8 @@
             android:id="@+id/gem"
             style="@style/symbolLayout"
             android:visibility="invisible"
+			android:layout_marginBottom="8dp"
+            android:layout_marginLeft="8dp"
             card_view:layout_constraintBottom_toBottomOf="parent"
             card_view:layout_constraintStart_toStartOf="parent"
             card_view:srcCompat="@drawable/diamond" />
