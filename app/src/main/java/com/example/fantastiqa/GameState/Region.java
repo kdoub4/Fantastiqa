@@ -23,7 +23,7 @@ public class Region extends Area {
 		return name.toString() + "\n" + tower.toString() + "\n" + getPlayersString();
 	}
 	
-    private String getPlayersString(){
+    public String getPlayersString(){
 		String results="";
 		for (Player aPlayer : players) {
 			results +=aPlayer.toString() + " ";

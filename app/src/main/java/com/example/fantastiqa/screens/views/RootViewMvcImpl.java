@@ -18,6 +18,7 @@ import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.example.fantastiqa.GameState.Card;
 import com.example.fantastiqa.GameState.Player;
@@ -26,6 +27,7 @@ import com.example.fantastiqa.GameState.Region;
 import com.example.fantastiqa.GameState.Road;
 import com.example.fantastiqa.GameState.Symbol;
 import com.example.fantastiqa.GameState.RegionName;
+import com.example.fantastiqa.GameState.TowerName;
 import com.example.fantastiqa.R;
 import com.example.fantastiqa.screens.GameStatus;
 import com.example.fantastiqa.screens.spaceRegion;
@@ -64,12 +66,12 @@ public class RootViewMvcImpl implements ViewMvc, handAdapter.HandClickListener  
     private TextView land5;
     private TextView land6;
 
-    private CardView land1c;
-    private CardView land2c;
-    private CardView land3c;
-    private CardView land4c;
-    private CardView land5c;
-    private CardView land6c;
+    private ConstraintLayout land1c;
+    private ConstraintLayout land2c;
+    private ConstraintLayout land3c;
+    private ConstraintLayout land4c;
+    private ConstraintLayout land5c;
+    private ConstraintLayout land6c;
 
     private TextView publicQuest1;
     private TextView publicQuest2;
@@ -202,17 +204,17 @@ public class RootViewMvcImpl implements ViewMvc, handAdapter.HandClickListener  
         regionTextView.put(spaceRegion.NW,land6);
         textViewRegion.put(land6,spaceRegion.NW);
         
-        land1c = (CardView) mRootView.findViewById(R.id.landc1);
+        land1c = (ConstraintLayout) mRootView.findViewById(R.id.landc1);
         land1c.setTag(spaceRegion.NE);
-        land2c = (CardView) mRootView.findViewById(R.id.landc2);
+        land2c = (ConstraintLayout) mRootView.findViewById(R.id.landc2);
         land2c.setTag(spaceRegion.E);
-        land3c = (CardView) mRootView.findViewById(R.id.landc3);
+        land3c = (ConstraintLayout) mRootView.findViewById(R.id.landc3);
         land3c.setTag(spaceRegion.SE);
-        land4c = (CardView) mRootView.findViewById(R.id.landc4);
+        land4c = (ConstraintLayout) mRootView.findViewById(R.id.landc4);
         land4c.setTag(spaceRegion.SW);
-        land5c = (CardView) mRootView.findViewById(R.id.landc5);
+        land5c = (ConstraintLayout) mRootView.findViewById(R.id.landc5);
         land5c.setTag(spaceRegion.W);
-        land6c = (CardView) mRootView.findViewById(R.id.landc6);
+        land6c = (ConstraintLayout) mRootView.findViewById(R.id.landc6);
         land6c.setTag(spaceRegion.NW);
         
         land1.setOnClickListener(new View.OnClickListener() {
@@ -423,22 +425,22 @@ public class RootViewMvcImpl implements ViewMvc, handAdapter.HandClickListener  
 	private void setLandBackground(spaceRegion aRegion, int aColor) {
 		switch (aRegion) {
 			case NE:
-				land1c.setCardBackgroundColor(aColor);
+				land1c.setBackgroundColor(aColor);
 				break;
 			case E:
-				land2c.setCardBackgroundColor(aColor);
+				land2c.setBackgroundColor(aColor);
 				break;
 			case SE:
-				land3c.setCardBackgroundColor(aColor);
+				land3c.setBackgroundColor(aColor);
 				break;
 			case SW:
-				land4c.setCardBackgroundColor(aColor);
+				land4c.setBackgroundColor(aColor);
 				break;
 			case W:
-				land5c.setCardBackgroundColor(aColor);
+				land5c.setBackgroundColor(aColor);
 				break;
 			case NW:
-				land6c.setCardBackgroundColor(aColor);
+				land6c.setBackgroundColor(aColor);
 				break;
 		}
 
@@ -547,7 +549,7 @@ public class RootViewMvcImpl implements ViewMvc, handAdapter.HandClickListener  
 	
 	@Override
 	public void onLandClick(View v) {
-		if (v instanceof CardView) {
+		if (v instanceof ConstraintLayout) {
 			mListener.doMove((spaceRegion)v.getTag());
 			//setLandBackground((spaceRegion)v.getTag(),Color.WHITE);
 		}
@@ -683,12 +685,27 @@ public class RootViewMvcImpl implements ViewMvc, handAdapter.HandClickListener  
         }
     }
 
-	private void bindLandCard(Region details, CardView land) {
-		setLandImage((ImageView)land.findViewById(R.id.cardImage), details.name);
-		land.findViewById(R.id.players).setVisibility(details.players.size()>0 ?
-			View.VISIBLE : View.INVISIBLE);
+	private void bindLandCard(Region details, View land) {
+		setLandImage((ImageView)land.findViewById(R.id.landImage), details.name);
+		TextView p1 = (TextView)land.findViewById(R.id.player1);
+		p1.setVisibility(details.players.size()>0 ? View.VISIBLE : View.INVISIBLE);
+		p1.setText(details.getPlayersString());
+		setTowerImage((ImageView)land.findViewById(R.id.tower), details.tower);
 	}
 	
+	private void setTowerImage(ImageView view, TowerName tname){
+		switch (tname) {
+			case BAZAAR:
+				view.setImageResource(R.drawable.bazaar);
+				break;
+			case ARTIFACT:
+				view.setImageResource(R.drawable.artifact);
+				break;
+			case QUEST:
+				view.setImageResource(R.drawable.quest);
+				break;
+		}
+	}
 	private void setLandImage(ImageView view, RegionName tname){
 		switch (tname) {
 			case HIGHLANDS:
@@ -926,12 +943,12 @@ public class RootViewMvcImpl implements ViewMvc, handAdapter.HandClickListener  
 		land5.setTextColor(aColor);
 		land6.setTextColor(aColor);
 		
-		land1c.setCardBackgroundColor(aColor);
-		land2c.setCardBackgroundColor(aColor);
-		land3c.setCardBackgroundColor(aColor);
-		land4c.setCardBackgroundColor(aColor);
-		land5c.setCardBackgroundColor(aColor);
-		land6c.setCardBackgroundColor(aColor);
+		land1c.setBackgroundColor(aColor);
+		land2c.setBackgroundColor(aColor);
+		land3c.setBackgroundColor(aColor);
+		land4c.setBackgroundColor(aColor);
+		land5c.setBackgroundColor(aColor);
+		land6c.setBackgroundColor(aColor);
 		
 	}
 

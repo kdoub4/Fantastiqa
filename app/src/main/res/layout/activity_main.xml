@@ -29,7 +29,7 @@
               android:id="@+id/rvHand"/>
 
         <include
-            layout="@layout/fcard2"
+            layout="@layout/land_card"
             android:id="@+id/landc6"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -51,7 +51,7 @@
 
         <include
             android:id="@+id/landc1"
-            layout="@layout/fcard2"
+            layout="@layout/land_card"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
 			app:layout_constraintTop_toBottomOf="@id/boardTable"
@@ -81,6 +81,7 @@
 			app:layout_constraintStart_toEndOf="@id/roadc6"
             app:layout_constraintEnd_toStartOf="@id/roadc2"
             android:layout_marginTop="16dp"
+            card_view:srcCompat="@mipmap/ic_launcher" 
             />
 
         <include
@@ -97,7 +98,7 @@
             
         <include
             android:id="@+id/landc5"
-            layout="@layout/fcard2"
+            layout="@layout/land_card"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:layout_constraintStart_toStartOf="parent"
@@ -119,7 +120,7 @@
 
         <include
             android:id="@+id/landc2"
-            layout="@layout/fcard2"
+            layout="@layout/land_card"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
 			app:layout_constraintTop_toBottomOf="@id/roadc6"
@@ -148,6 +149,7 @@
 			app:layout_constraintTop_toBottomOf="@id/landc5"
 			app:layout_constraintStart_toEndOf="@id/roadc5"
             app:layout_constraintEnd_toStartOf="@id/roadc3"
+            card_view:srcCompat="@mipmap/ic_launcher" 
             />
 
         <include
@@ -163,7 +165,7 @@
             
         <include
             android:id="@+id/landc4"
-            layout="@layout/fcard2"
+            layout="@layout/land_card"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:layout_constraintStart_toStartOf="parent"
@@ -185,7 +187,7 @@
 
         <include
             android:id="@+id/landc3"
-            layout="@layout/fcard2"
+            layout="@layout/land_card"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
 			app:layout_constraintTop_toBottomOf="@id/roadc5"
