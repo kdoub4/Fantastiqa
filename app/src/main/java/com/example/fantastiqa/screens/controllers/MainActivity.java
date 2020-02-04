@@ -1,5 +1,7 @@
 package com.example.fantastiqa.screens.controllers;
 
+import android.util.Log;
+
 import android.os.Bundle;
 import android.util.Pair;
 import android.widget.Toast;
@@ -280,14 +282,10 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
         if (gameState == GameStatus.MOVING && moveTargetIds.contains(newSpace)) {
 			//endAdventuring
             Pair<Road,Region> moveTarget = moveTargets.get(moveTargetIds.indexOf(newSpace));
+            moveTargets.clear();
+            moveTargets.add(moveTarget);
             if (subdue(moveTarget.first)) {
-                movePlayer(currentPlayer, moveTarget.second);
-                rootView.bindHand(currentPlayer.hand);
-                rootView.bindRoad(roadSpaceMap.get(moveTarget.first), moveTarget.first);
-                changeGameState(GameStatus.OPEN);
-                moveTargets.clear();
-                moveTargetIds.clear();
-                return true;
+				return finishMove(moveTarget.first, moveTarget.second);
             }
         } else if (gameState == GameStatus.FLYING_CARPET && moveTargetIds.contains(newSpace)) {
 			endFlyingCarpet(newSpace);
@@ -295,6 +293,16 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 		}
 		return false;
     }
+    
+    private Boolean finishMove(Road moveTarget, Region regionTarget){
+		    movePlayer(currentPlayer, regionTarget);
+                rootView.bindHand(currentPlayer.hand);
+                rootView.bindRoad(roadSpaceMap.get(moveTarget), moveTarget);
+                changeGameState(GameStatus.OPEN);
+                moveTargets.clear();
+                moveTargetIds.clear();
+                return true;
+	}
 
 	private Boolean subdue(Road toSubdue) {
         List<Set<Card>> subdueSets;
@@ -314,6 +322,9 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 
 	@Override
     public Boolean subdue(Road toSubdue, Set<Card> subdueSet) {
+        Log.d("fantastiqa", subdueSet.toString());
+        if (moveTargets.size()==1) {
+		
         Iterator<Card> setIter = subdueSet.iterator();
         while (setIter.hasNext()) {
             Card useCard = setIter.next();
@@ -321,7 +332,10 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
         }
         currentPlayer.gainCard(toSubdue.creature);
         toSubdue.creature = emptyRoadCard;
-        return true;
+        	return finishMove(moveTargets.get(0).first, moveTargets.get(0).second);
+		}
+		//could find it from road
+		return false;
     }
 
     @Override
