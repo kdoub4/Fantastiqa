@@ -24,7 +24,8 @@
         android:layout_gravity="center"
         android:src="@drawable/add_library"
         android:contentDescription="New Cards"
-        android:padding="8dp"/>
+        android:padding="8dp"
+        android:onClick="onBuyCardsClick"/>
 
     <ImageView
         android:layout_width="wrap_content"
@@ -33,6 +34,7 @@
         android:src="@drawable/remove"
         android:contentDescription="Release"
         android:padding="8dp"
-        android:tooltipText="Release"/>
+        android:tooltipText="Release"
+        android:onClick="onReleaseClick"/>
 
 </LinearLayout>

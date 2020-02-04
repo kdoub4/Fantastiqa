@@ -164,5 +164,9 @@ public class handAdapter extends RecyclerView.Adapter<handAdapter.cardViewHolder
         public void setVisibility(int set){
 			listHandCardView.setVisibility(set);
 		}
+		
+		public void setBackground(int color){
+			listHandCardView.setCardBackgroundColor(color);
+		}
     }
 }

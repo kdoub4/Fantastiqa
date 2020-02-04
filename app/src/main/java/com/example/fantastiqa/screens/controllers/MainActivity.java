@@ -474,6 +474,14 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 	public void onTowerTeleportClick(View v) {
 			towerTeleport();
 	}
+
+	public void onBuyCardsClick(View v) {
+			beginVisitTowerCards();
+	}
+	
+	public void onReleaseClick(View v){
+		rootView.beginReleaseCards();
+	}
 	
     @Override
     public spaceRegion towerTeleport() {
@@ -701,7 +709,7 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
     }
 
     private Boolean releaseCard(Card aCard) {
-        if (currentPlayer.getGems() > 0) {
+        if (currentPlayer.getGems() > 0 && ((CreatureCard)aCard).name != "Peaceful Dragon") {
             currentPlayer.hand.remove(aCard);
             currentPlayer.changeGems(-1);
             return true;

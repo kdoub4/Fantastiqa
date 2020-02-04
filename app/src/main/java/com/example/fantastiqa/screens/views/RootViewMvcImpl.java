@@ -132,16 +132,12 @@ public class RootViewMvcImpl implements ViewMvc, handAdapter.HandClickListener  
         tvVps = mRootView.findViewById(R.id.vps);
         tvDeck    = mRootView.findViewById(R.id.deck);
         tvDiscard = mRootView.findViewById(R.id.discard);
+		
 		moveButton = mRootView.findViewById(R.id.buttonMove);
         moveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 onMoveClick(view);
-                /*
-                if (mListener != null) {
-                    mListener.onMoveClick();
-                }
-                */
             }
         });
 
@@ -473,14 +469,18 @@ public class RootViewMvcImpl implements ViewMvc, handAdapter.HandClickListener  
 		builder.show();
     }
 
-    private void beginReleaseCards() {
+	@Override
+    public void beginReleaseCards() {
         for (Card releaseable : mListener.beginReleaseCard()) {
+			//card highlighting?
             for (TextView tvHand : theHandViews) {
                 if (tvHand.getTag() == releaseable) {
                     tvHand.setTextColor(Color.YELLOW);
+                    continue;
                 }
             }
         }
+		enableHandClicks(true);
     }
 	
 	private void beginTowerCards() {
