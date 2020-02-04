@@ -1027,22 +1027,24 @@ public class RootViewMvcImpl implements ViewMvc, handAdapter.HandClickListener  
     @Override
     public void selectSubdueOption(final List<Set<Card>> choices, final Road toSubdue)  {
         CharSequence[] dialogItems = new CharSequence[choices.size()];
-        for (int i=0; i<choices.size(); i++) {
+            int i=0;
             for (Set<Card> aChoice : choices) {
                 Iterator setIter = aChoice.iterator();
                 String strChoice = "";
                 while (setIter.hasNext()) {
                     strChoice = strChoice + setIter.next().toString() + " ";
                 }
+                dialogItems[i]=strChoice;
+                i++;
             }
-        }
-
+        
 	    AlertDialog.Builder chooseBuilder = new AlertDialog.Builder(mRootView.getContext());
         chooseBuilder.setItems(dialogItems,new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 mListener.subdue(toSubdue, choices.get(which));
             }
         });
+        chooseBuilder.show();
     }
 
 }
