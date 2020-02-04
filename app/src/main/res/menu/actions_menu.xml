@@ -7,29 +7,29 @@
             android:id="@+id/adventuring"
             android:title="Go Adventuring"
             android:icon="@drawable/walk"
-            app:showAsAction="ifRoom"
+            app:showAsAction="always"
         ></item>
 
 	<item
             android:id="@+id/tower_visit"
             android:title="Visit Tower"
             android:icon="@drawable/key"
-            app:showAsAction="ifRoom|collapseActionView"
+            app:showAsAction="always|collapseActionView"
             app:actionLayout="@layout/tower_options">
     </item>
     <item
             android:id="@+id/questing"
             android:title="Complete Quest"
             android:icon="@drawable/cup"
-            app:showAsAction="ifRoom"></item>
+            app:showAsAction="always"></item>
     <item
         android:id="@+id/free_action"
         android:title="Free Action"
         android:icon="@drawable/stars"
-        app:showAsAction="ifRoom"></item>
+        app:showAsAction="always"></item>
     <item
         android:id="@+id/discard"
         android:title="Discard"
         android:icon="@drawable/tent"
-        app:showAsAction="ifRoom"></item>
+        app:showAsAction="always"></item>
 </menu>
