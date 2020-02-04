@@ -29,6 +29,7 @@ import com.example.fantastiqa.R;
 import com.example.fantastiqa.screens.GameStatus;
 import com.example.fantastiqa.screens.spaceRegion;
 import com.example.fantastiqa.screens.spaceRoad;
+import com.example.fantastiqa.screens.views.EqualSpacingItemDecoration;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -118,7 +119,8 @@ public class RootViewMvcImpl implements ViewMvc, handAdapter.HandClickListener  
         mHandRV = mRootView.findViewById(R.id.rvHand);
         LinearLayoutManager layoutManager = new LinearLayoutManager(context,RecyclerView.HORIZONTAL,false);
         mHandRV.setLayoutManager(layoutManager);
-        mHandRV.setHasFixedSize( true);
+        mHandRV.setHasFixedSize( false);
+        mHandRV.addItemDecoration(new EqualSpacingItemDecoration(16));
         mAdapter = new handAdapter(MAX_HAND_SIZE, this);
         mHandRV.setAdapter(mAdapter);
 
