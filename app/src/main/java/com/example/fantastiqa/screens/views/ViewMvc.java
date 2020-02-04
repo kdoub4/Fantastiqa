@@ -61,6 +61,7 @@ public interface ViewMvc {
     void setTowerTeleport(Boolean value);
 	
 	void onMoveClick(View v);
+	void onMoveClick();
 	void onDoneClick();
 	void onTowerVisitClick();
     void onLandClick(View v);

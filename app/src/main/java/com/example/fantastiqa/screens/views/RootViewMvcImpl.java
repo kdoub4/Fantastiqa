@@ -25,6 +25,7 @@ import com.example.fantastiqa.GameState.Quest;
 import com.example.fantastiqa.GameState.Region;
 import com.example.fantastiqa.GameState.Road;
 import com.example.fantastiqa.GameState.Symbol;
+import com.example.fantastiqa.GameState.RegionName;
 import com.example.fantastiqa.R;
 import com.example.fantastiqa.screens.GameStatus;
 import com.example.fantastiqa.screens.spaceRegion;
@@ -408,9 +409,39 @@ public class RootViewMvcImpl implements ViewMvc, handAdapter.HandClickListener  
 	
 	@Override
 	public void onMoveClick(View v) {
+		onMoveClick();
+	}
+
+	@Override
+	public void onMoveClick(){
 		for (spaceRegion aRegion : mListener.getValidAdventuring()) {
 			regionTextView.get(aRegion).setTextColor(Color.YELLOW);
+			setLandBackground(aRegion,Color.GREEN);
 		}
+	}
+	
+	private void setLandBackground(spaceRegion aRegion, int aColor) {
+		switch (aRegion) {
+			case NE:
+				land1c.setCardBackgroundColor(aColor);
+				break;
+			case E:
+				land2c.setCardBackgroundColor(aColor);
+				break;
+			case SE:
+				land3c.setCardBackgroundColor(aColor);
+				break;
+			case SW:
+				land4c.setCardBackgroundColor(aColor);
+				break;
+			case W:
+				land5c.setCardBackgroundColor(aColor);
+				break;
+			case NW:
+				land6c.setCardBackgroundColor(aColor);
+				break;
+		}
+
 	}
 	
 	@Override
@@ -518,6 +549,7 @@ public class RootViewMvcImpl implements ViewMvc, handAdapter.HandClickListener  
 	public void onLandClick(View v) {
 		if (v instanceof CardView) {
 			mListener.doMove((spaceRegion)v.getTag());
+			//setLandBackground((spaceRegion)v.getTag(),Color.WHITE);
 		}
 		else {
 			if (mListener.doMove(textViewRegion.get(v))) {
@@ -546,6 +578,7 @@ public class RootViewMvcImpl implements ViewMvc, handAdapter.HandClickListener  
 			setHandColor(Color.WHITE);
 			setLandColor(Color.WHITE);
 			setStoredColor(Color.WHITE);
+			enableHandClicks(false);
 			break;
 		case STORING_PRIVATE:
 			//TODO is this controller logic
@@ -563,6 +596,7 @@ public class RootViewMvcImpl implements ViewMvc, handAdapter.HandClickListener  
 			}
 			break;
         case DISCARD:
+			enableHandClicks(true);
             setHandColor(Color.YELLOW);
             setStoredColor(Color.YELLOW);
             break;
@@ -623,26 +657,61 @@ public class RootViewMvcImpl implements ViewMvc, handAdapter.HandClickListener  
         }
         switch (location) {
             case NE:
+				bindLandCard(details, land1c);
                 setLandText(details, strPlayers, land1);
                 break;
             case E:
+				bindLandCard(details, land2c);
                 setLandText(details, strPlayers, land2);
                 break;
             case SE:
+				bindLandCard(details, land3c);
                 setLandText(details, strPlayers, land3);
                 break;
             case SW:
+				bindLandCard(details, land4c);
                 setLandText(details, strPlayers, land4);
                 break;
             case W:
+				bindLandCard(details, land5c);
                 setLandText(details, strPlayers, land5);
                 break;
             case NW:
+				bindLandCard(details, land6c);
                 setLandText(details, strPlayers, land6);
                 break;
         }
     }
 
+	private void bindLandCard(Region details, CardView land) {
+		setLandImage((ImageView)land.findViewById(R.id.cardImage), details.name);
+		land.findViewById(R.id.players).setVisibility(details.players.size()>0 ?
+			View.VISIBLE : View.INVISIBLE);
+	}
+	
+	private void setLandImage(ImageView view, RegionName tname){
+		switch (tname) {
+			case HIGHLANDS:
+				view.setImageResource(R.drawable.highlands);
+				break;
+			case HILLS:
+				view.setImageResource(R.drawable.hills);
+				break;
+			case TUNDRA:
+				view.setImageResource(R.drawable.tundra);
+				break;
+			case FIELDS:
+				view.setImageResource(R.drawable.plains);
+				break;
+			case WETLANDS:
+				view.setImageResource(R.drawable.wetlands);
+				break;
+			case FOREST:
+				view.setImageResource(R.drawable.woods);
+				break;
+		}
+	}
+	
     private void setLandText(Region details, String strPlayers, TextView land) {
         land.setTextColor(Color.WHITE);
         land.setText(details.name.toString() + "\n" + details.tower.toString() + "\n" + strPlayers);
@@ -856,6 +925,14 @@ public class RootViewMvcImpl implements ViewMvc, handAdapter.HandClickListener  
 		land4.setTextColor(aColor);
 		land5.setTextColor(aColor);
 		land6.setTextColor(aColor);
+		
+		land1c.setCardBackgroundColor(aColor);
+		land2c.setCardBackgroundColor(aColor);
+		land3c.setCardBackgroundColor(aColor);
+		land4c.setCardBackgroundColor(aColor);
+		land5c.setCardBackgroundColor(aColor);
+		land6c.setCardBackgroundColor(aColor);
+		
 	}
 
 	@Override

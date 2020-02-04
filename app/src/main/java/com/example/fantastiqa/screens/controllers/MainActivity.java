@@ -7,6 +7,8 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
 
 import com.example.fantastiqa.GameState.Ability;
 import com.example.fantastiqa.GameState.Card;
@@ -68,8 +70,9 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
         setContentView(rootView.getRootView());
         //setContentView(R.layout.activity_main);
 		Toolbar myToolbar = (Toolbar) findViewById(R.id.toolbar);
+		myToolbar.setTitle("");
 		setSupportActionBar(myToolbar);
-		getSupportActionBar().setDisplayShowTitleEnabled(false);
+		//getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         //TODO ask for players and vps, starting player
         theGame = new Game();
@@ -124,16 +127,21 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
             rootView.bindRoad(roadSpaceMap.get(aRoad), aRoad);
         }
     }
-    /*
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item){
 
-		return true;
-	}*/
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.actions_menu, menu);
 		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+			case R.id.adventuring :
+				rootView.onMoveClick();
+				return true;
+		}
+		return false;
 	}
 
     @Override
@@ -449,6 +457,10 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 		return currentPlayer.getGems() >= 2;
 	}
 
+	public void onTowerTeleportClick(View v) {
+			towerTeleport();
+	}
+	
     @Override
     public spaceRegion towerTeleport() {
 				//TODO check for enough gems
