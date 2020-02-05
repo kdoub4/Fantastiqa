@@ -17,19 +17,23 @@
             app:showAsAction="always|collapseActionView"
             app:actionLayout="@layout/tower_options">
     </item>
+    <!--
     <item
             android:id="@+id/questing"
             android:title="Complete Quest"
             android:icon="@drawable/cup"
             app:showAsAction="always"></item>
+            -->
     <item
         android:id="@+id/free_action"
         android:title="Free Action"
         android:icon="@drawable/stars"
-        app:showAsAction="always"></item>
+        app:showAsAction="always|collapseActionView"
+        app:actionLayout="@layout/free_actions">        </item>
     <item
         android:id="@+id/discard"
         android:title="Discard"
         android:icon="@drawable/tent"
-        app:showAsAction="always"></item>
+        app:showAsAction="always"
+        />
 </menu>

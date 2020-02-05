@@ -1,10 +1,13 @@
 package com.example.fantastiqa.screens.views;
 
+import android.graphics.Color;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
@@ -76,6 +79,7 @@ public class handAdapter extends RecyclerView.Adapter<handAdapter.cardViewHolder
 			}
 		}
 		holder.setClickable(isClickable); 
+		holder.setBackground(isClickable ? Color.GREEN : Color.WHITE);
     }
 
 	public void setHandClicks(Boolean enable){

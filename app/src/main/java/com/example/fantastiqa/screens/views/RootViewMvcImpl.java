@@ -923,7 +923,7 @@ public class RootViewMvcImpl implements ViewMvc, handAdapter.HandClickListener  
     }
     
     private void enableHandClicks(Boolean enable) {
-		mAdapter.setHandClicks(true);
+		mAdapter.setHandClicks(enable);
 		mAdapter.notifyDataSetChanged();
 		Log.d("fantastiqa", "setHandClicks");
 	}
