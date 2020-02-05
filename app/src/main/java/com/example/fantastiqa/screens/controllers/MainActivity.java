@@ -116,6 +116,7 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 
         rootView.bindHand(currentPlayer.hand);
         rootView.bindPlayerStorage(currentPlayer.quests);
+        changeGameState(GameStatus.OPEN);
     }
 
     private void bindAllQuests() {
@@ -142,6 +143,8 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 			case R.id.adventuring :
 				rootView.onMoveClick();
 				return true;
+			case R.id.discard:
+				finishPhase();
 		}
 		return false;
 	}
@@ -462,9 +465,6 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 		if (playerArea == null) return null;
         return theGame.board.getAdjacentAreas(playerArea);
     }
-
-	//Visit Tower
-	//Tower Teleport
 		
 	@Override
 	public Boolean canTowerTeleport() {
@@ -475,6 +475,18 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 			towerTeleport();
 	}
 	
+	public void onFlyingCarpetClick(View v){
+		beginFlyingCarpet();
+	}
+	
+	public void onStorePersonalClick(View v){
+		beginStoreCardsPrivate();
+	}
+	
+	public void onStoreQuestClick(View v){
+		beginStoreCardsQuest();
+	}
+		
     @Override
     public spaceRegion towerTeleport() {
 				//TODO check for enough gems
@@ -662,6 +674,7 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 	//Flying Carpet
 	@Override
 	public List<spaceRegion> beginFlyingCarpet() {
+		//TODO card flying carpets
 		if (currentPlayer.getFlyingCarpets()>0) {
             changeGameState(GameStatus.FLYING_CARPET);
 			for(Pair<Road,Region> aRegion : theGame.board.getAdjacentAreas(currentLocation)) {
@@ -669,7 +682,7 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 			}
 		}
 		else {
-			//TODO message can't do
+			toast("You have no Flying Carpets");
 		}
 		return moveTargetIds;
 	}
