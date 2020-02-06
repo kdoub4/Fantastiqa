@@ -104,6 +104,7 @@ public interface ViewMvc {
         List<Card> beginReleaseCard();
 
         void beginDiscard();
+        void discardFromStorage(Card aCard);
 
         Boolean canCompleteQuest(Quest aQuest);
         void beginCompleteQuest(Quest aQuest);

@@ -196,7 +196,6 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
         if (currentPlayer.getVps() >= theGame.VPgoal ) {
             toast("Game Over " + currentPlayer.name );
         }
-        changeGameState(GameStatus.OPEN);
         for (Road aRoad : theGame.board.roads()) {
             if (aRoad.creature == emptyRoadCard) {
                 Card nextCard = theGame.creatureDeck.drawOne();
@@ -213,7 +212,13 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
             theGame.board.quests.add(newQuest);
         }
         currentPlayer.drawCards(5-currentPlayer.hand.size());
-        //currentPlayer = theGame.nextPlayer();
+        currentPlayer = theGame.nextPlayer(currentPlayer);
+        for (Region anArea: theGame.board.regions()
+                 ) {
+				if (anArea.players.contains(currentPlayer)) {
+					currentLocation = anArea;
+				}
+		}
         bindAllQuests();
         bindAllRoads();
         rootView.bindHand(currentPlayer.hand);
@@ -228,7 +233,8 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
         rootView.updateGems(currentPlayer.getGems());
         rootView.updateDeck(currentPlayer.deck.size());
         rootView.updateDeck(currentPlayer.deck.discardSize());
-
+		changeGameState(GameStatus.OPEN);
+        
         toast(currentPlayer.deck.sizeToString());
 
     }
@@ -636,6 +642,16 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 	}
 
 	@Override
+	public void discardFromStorage(Card aCard){
+		if (gameState == GameStatus.STORING_PRIVATE || 
+			gameState == GameStatus.DISCARD) {
+				currentPlayer.storage.remove(aCard);
+				currentPlayer.deck.discard(aCard);
+				rootView.bindStorage(currentPlayer.storage);
+			}
+	}
+
+	@Override
     public void handClick(Card aCard) {
         //TODO check if card eligible
 	    //	Toast.makeText(MainActivity.this, gameState.toString(), Toast.LENGTH_SHORT);
@@ -658,6 +674,7 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
             rootView.removeHandCard(aCard, currentPlayer.hand);
         }
 	}
+	
 	
 	//Flying Carpet
 	@Override
