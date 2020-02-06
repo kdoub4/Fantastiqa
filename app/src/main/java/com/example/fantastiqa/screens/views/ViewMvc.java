@@ -75,7 +75,8 @@ public interface ViewMvc {
 	void onFlyingCarpetClick();
 
     void removeHandCard(Card card, List<Card> hand);
-	
+	void beginReleaseCards();
+    
     interface ViewMvcListener {
 		List<spaceRegion> getValidAdventuring();
 
