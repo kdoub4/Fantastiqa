@@ -68,7 +68,6 @@
             app:layout_constraintEnd_toStartOf="@id/questc1"
 			app:layout_constraintTop_toBottomOf="@id/landc6"
             app:layout_constraintHorizontal_chainStyle="spread"
-            android:layout_marginTop="16dp"
             
 		/>
 
@@ -80,8 +79,7 @@
 			app:layout_constraintTop_toBottomOf="@id/landc6"
 			app:layout_constraintStart_toEndOf="@id/roadc6"
             app:layout_constraintEnd_toStartOf="@id/roadc2"
-            android:layout_marginTop="16dp"
-            app:srcCompat="@mipmap/ic_launcher" 
+            
             />
 
         <include
@@ -92,7 +90,6 @@
 			app:layout_constraintTop_toBottomOf="@id/landc6"
             app:layout_constraintStart_toEndOf="@id/questc1"
             app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="16dp"
             />
             
             
@@ -149,7 +146,6 @@
 			app:layout_constraintTop_toBottomOf="@id/landc5"
 			app:layout_constraintStart_toEndOf="@id/roadc5"
             app:layout_constraintEnd_toStartOf="@id/roadc3"
-            app:srcCompat="@mipmap/ic_launcher" 
             />
 
         <include
