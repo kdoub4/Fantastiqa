@@ -91,7 +91,10 @@ public class RootViewMvcImpl implements ViewMvc, handAdapter.HandClickListener  
     private CardView road5c;
     private CardView road6c;
     private CardView road7c;
-    
+
+	private CardView publicQuest1c;
+	private CardView publicQuest2c;
+	
     LinkedList<TextView> theHandViews;
     LinkedList<TextView> storage;
     LinkedList<TextView> quests;
@@ -320,6 +323,14 @@ public class RootViewMvcImpl implements ViewMvc, handAdapter.HandClickListener  
         publicQuest1 = mRootView.findViewById(R.id.publicQuest1);
         publicQuest2 = mRootView.findViewById(R.id.publicQuest2);
 
+		publicQuest1c = mRootView.findViewById(R.id.questc1);
+        publicQuest2c = mRootView.findViewById(R.id.questc2);
+        
+        publicQuest1c.findViewById(R.id.ability).setVisibility(View.GONE);
+        publicQuest1c.findViewById(R.id.subdueBy).setVisibility(View.GONE);
+        publicQuest2c.findViewById(R.id.ability).setVisibility(View.GONE);
+        publicQuest2c.findViewById(R.id.subdueBy).setVisibility(View.GONE);
+
         theHandViews = new LinkedList<TextView>(){ {
             add((TextView)mRootView.findViewById(R.id.hand1));
             add((TextView)mRootView.findViewById(R.id.hand2));
@@ -340,6 +351,17 @@ public class RootViewMvcImpl implements ViewMvc, handAdapter.HandClickListener  
         	add((TextView)mRootView.findViewById(R.id.stored3));
         	add((TextView)mRootView.findViewById(R.id.stored4));
         }};
+        
+        for (TextView tvStorage : storage) {
+			tvStorage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                    onStorageClick(view);
+                
+            }
+        });
+
+		}
 
         
         quests = new LinkedList<TextView>() { {
@@ -473,10 +495,12 @@ public class RootViewMvcImpl implements ViewMvc, handAdapter.HandClickListener  
 		builder.show();
     }
 
-    private void beginReleaseCards() {
-        for (Card releaseable : mListener.beginReleaseCard()) {
+	@Override
+    public void beginReleaseCards() {
+        for (Card releasable : mListener.beginReleaseCard()) {
+			mAdapter.setCardEnabled(releasable,true);
             for (TextView tvHand : theHandViews) {
-                if (tvHand.getTag() == releaseable) {
+                if (tvHand.getTag() == releasable) {
                     tvHand.setTextColor(Color.YELLOW);
                 }
             }
@@ -558,6 +582,10 @@ public class RootViewMvcImpl implements ViewMvc, handAdapter.HandClickListener  
 				//setLandColor(Color.WHITE);
 			}
 		}
+	}
+	
+	public void onStorageClick(View v){
+		if (v.getTag() instanceof Card) mListener.discardFromStorage((Card)v.getTag());
 	}
 	
 	@Override
@@ -815,12 +843,14 @@ public class RootViewMvcImpl implements ViewMvc, handAdapter.HandClickListener  
     public void bindQuest(int location, Quest details, Boolean canComplete) {
         switch (location) {
             case 1:
+				bindQuestCard(publicQuest1c, details, canComplete);
                 publicQuest1.setText(details.name);
                 publicQuest1.setTag(details);
                 publicQuest1.setTextColor(canComplete ? Color.GREEN : Color.WHITE);
                 publicQuest1.setClickable(canComplete);
                 break;
             case 2:
+				bindQuestCard(publicQuest2c, details, canComplete);
                 publicQuest2.setText(details.name);
                 publicQuest2.setTag(details);
                 publicQuest2.setTextColor(canComplete ? Color.GREEN : Color.WHITE);
@@ -828,10 +858,17 @@ public class RootViewMvcImpl implements ViewMvc, handAdapter.HandClickListener  
                 break;
         }
     }
+    
+    private void bindQuestCard(CardView qCard, Quest details, Boolean canComplete ){
+		setImage((ImageView)qCard.findViewById(R.id.power1), details.getDoubleRequirement());
+		setImage((ImageView)qCard.findViewById(R.id.power2), details.getDoubleRequirement());
+		qCard.setCardBackgroundColor(canComplete ? Color.GREEN : Color.WHITE);
+		//TODO other quest types
+	}
 
     @Override
     public void bindHand(List<Card> hand) {
-		mAdapter.setDataset(hand.toArray(new Card[0]));
+		mAdapter.setDataset(hand.toArray(new Card[0]), true);
 		mAdapter.notifyDataSetChanged();
         ListIterator<TextView> listIter = theHandViews.listIterator(0);
         while (listIter.hasNext()) {
@@ -867,7 +904,9 @@ public class RootViewMvcImpl implements ViewMvc, handAdapter.HandClickListener  
         listIter = storage.listIterator(0);
         for (Card aCard: hand
              ) {
-            listIter.next().setText(aCard.toString());
+            TextView tvStorageCard = (TextView)listIter.next();
+			tvStorageCard.setText(aCard.toString());
+            tvStorageCard.setTag(aCard);
         }
     }
     

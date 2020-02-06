@@ -18,6 +18,7 @@ import com.example.fantastiqa.GameState.Symbol;
 public class handAdapter extends RecyclerView.Adapter<handAdapter.cardViewHolder>{
 
 	private Card[] mDataset;
+	private boolean[] mEnabled = new boolean[0];
     private int mNumberItems;
     final private HandClickListener mListener;
     private CardView theCard;
@@ -32,6 +33,14 @@ public class handAdapter extends RecyclerView.Adapter<handAdapter.cardViewHolder
 	public void setDataset(Card[] aDataset){
 			mDataset = aDataset;
 	}
+	
+	public void setDataset(Card[] aDataset, Boolean enabled){
+		setDataset(aDataset);
+		if (mEnabled==null || mEnabled.length != mDataset.length) {
+			mEnabled = new boolean[mDataset.length];
+		}
+		setHandEnabled(enabled);
+	}	
 	
     @NonNull
     @Override
@@ -75,12 +84,30 @@ public class handAdapter extends RecyclerView.Adapter<handAdapter.cardViewHolder
 				holder.gems.setVisibility(View.INVISIBLE);
 			}
 		}
-		holder.setClickable(isClickable); 
+		holder.setClickable(mEnabled[position]); 
+		holder.setBackground(mEnabled[position] ? Color.GREEN : Color.WHITE);
+		holder.setEnabled(mEnabled[position]);
     }
 
+	public void setHandEnabled(Boolean enable){
+		for (int i=0;i<mEnabled.length; i++) {
+			mEnabled[i]=enable;
+		}
+	}
 	public void setHandClicks(Boolean enable){
-			isClickable = enable;
+			setHandEnabled(enable);
 			notifyDataSetChanged();
+	}
+	
+	public void setCardEnabled(Card aCard, Boolean enable) {
+		for (int c=0;c<mDataset.length; c++) {
+			if (aCard==mDataset[c]) {
+				mEnabled[c]=enable;
+				notifyItemChanged(c);
+				return;
+			}
+		}
+		
 	}
 	
     private void setImage(Symbol aSymbol, ImageView theView){
@@ -163,6 +190,14 @@ public class handAdapter extends RecyclerView.Adapter<handAdapter.cardViewHolder
         
         public void setVisibility(int set){
 			listHandCardView.setVisibility(set);
+		}
+		
+		public void setBackground(int color){
+			listHandCardView.setCardBackgroundColor(color);
+		}
+		
+		public void setEnabled(Boolean enable) {
+			listHandCardView.setEnabled(enable);
 		}
     }
 }
