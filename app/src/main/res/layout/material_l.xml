@@ -1,54 +1,82 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main_content"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-	<com.google.android.material.card.MaterialCardView
-    android:id="@+id/card_view"
-    android:layout_width="match_parent"
-    android:layout_height="@dimen/card_height"
-    android:layout_gravity="center"
-    android:layout_marginBottom="@dimen/md_keylines"
-    android:layout_marginLeft="@dimen/md_keylines"
-    android:layout_marginRight="@dimen/md_keylines"
-    app:rippleColor="@color/colorAccent"
-    android:clickable="true"
-    android:enabled="false"
-        android:foreground="?attr/selectableItemBackground"
-    >
-		<LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
 
-        <TextView
-            android:id="@+id/card_title"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/card_title_height"
-            android:layout_marginLeft="@dimen/md_keylines"
-            android:text="Some Text to Shade"
-            android:textAppearance="@style/TextAppearance.AppCompat.Title"
-            android:textColor="@color/white" 
-            android:background="@color/colorPrimary"
-            android:enabled="false"
-            />
-            
+    <include
+        android:id="@+id/landm1"
+        layout="@layout/fcardm"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:layout_marginEnd="15dp"
+        android:layout_marginRight="15dp"
+        app:layout_constraintEnd_toStartOf="@+id/include5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-	</LinearLayout>
- </com.google.android.material.card.MaterialCardView>
-        <Button
-            android:id="@+id/buttonMove"
-            android:layout_width="150dp"
-            android:layout_height="130dp"
-            android:text="Switch"
-            android:textSize="20dp"
-            android:textColor="#AAAA00"
-            android:onClick="onButtonClick"
-            />
+    <include
+        android:id="@+id/include5"
+        layout="@layout/fcardm"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:layout_marginEnd="14dp"
+        android:layout_marginRight="14dp"
+        app:layout_constraintEnd_toStartOf="@+id/include6"
+        app:layout_constraintStart_toEndOf="@+id/landm1"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <include
+        android:id="@+id/include6"
+        layout="@layout/fcardm"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/include5"
+        app:layout_constraintTop_toTopOf="parent" />
 
 
-    
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+    <include
+        android:id="@+id/handm1"
+        layout="@layout/fcardm"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="15dp"
+        android:layout_marginRight="15dp"
+        app:layout_constraintEnd_toStartOf="@+id/include7"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/include7" />
+
+    <include
+        android:id="@+id/include7"
+        layout="@layout/fcardm"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="14dp"
+        android:layout_marginRight="14dp"
+        app:layout_constraintEnd_toStartOf="@+id/include8"
+        app:layout_constraintStart_toEndOf="@+id/handm1"
+        app:layout_constraintTop_toTopOf="@+id/include8" />
+
+    <include
+        android:id="@+id/include8"
+        layout="@layout/fcardm"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/include7"
+        app:layout_constraintTop_toBottomOf="@+id/include6" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
