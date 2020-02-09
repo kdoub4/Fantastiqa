@@ -1,5 +1,7 @@
 package com.example.fantastiqa.screens.controllers;
 
+import android.util.Log;
+
 import android.os.Bundle;
 import android.util.Pair;
 import android.widget.Toast;
@@ -7,6 +9,8 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
 
 import com.example.fantastiqa.GameState.Ability;
 import com.example.fantastiqa.GameState.Card;
@@ -67,9 +71,10 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 
         setContentView(rootView.getRootView());
         //setContentView(R.layout.activity_main);
-		Toolbar myToolbar = (Toolbar) findViewById(R.id.tower_menu);
+		Toolbar myToolbar = (Toolbar) findViewById(R.id.toolbar);
+		myToolbar.setTitle("");
 		setSupportActionBar(myToolbar);
-		getSupportActionBar().setDisplayShowTitleEnabled(false);
+		//getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         //TODO ask for players and vps, starting player
         theGame = new Game();
@@ -111,6 +116,7 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 
         rootView.bindHand(currentPlayer.hand);
         rootView.bindPlayerStorage(currentPlayer.quests);
+        changeGameState(GameStatus.OPEN);
     }
 
     private void bindAllQuests() {
@@ -124,16 +130,23 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
             rootView.bindRoad(roadSpaceMap.get(aRoad), aRoad);
         }
     }
-    /*
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item){
 
-		return true;
-	}*/
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.actions_menu, menu);
 		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+			case R.id.adventuring :
+				rootView.onMoveClick();
+				return true;
+			case R.id.discard:
+				finishPhase();
+		}
+		return false;
 	}
 
     @Override
@@ -186,7 +199,6 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
         if (currentPlayer.getVps() >= theGame.VPgoal ) {
             toast("Game Over " + currentPlayer.name );
         }
-        changeGameState(GameStatus.OPEN);
         for (Road aRoad : theGame.board.roads()) {
             if (aRoad.creature == emptyRoadCard) {
                 Card nextCard = theGame.creatureDeck.drawOne();
@@ -203,7 +215,13 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
             theGame.board.quests.add(newQuest);
         }
         currentPlayer.drawCards(5-currentPlayer.hand.size());
-        //currentPlayer = theGame.nextPlayer();
+        currentPlayer = theGame.nextPlayer(currentPlayer);
+        for (Region anArea: theGame.board.regions()
+                 ) {
+				if (anArea.players.contains(currentPlayer)) {
+					currentLocation = anArea;
+				}
+		}
         bindAllQuests();
         bindAllRoads();
         rootView.bindHand(currentPlayer.hand);
@@ -218,7 +236,8 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
         rootView.updateGems(currentPlayer.getGems());
         rootView.updateDeck(currentPlayer.deck.size());
         rootView.updateDeck(currentPlayer.deck.discardSize());
-
+		changeGameState(GameStatus.OPEN);
+        
         toast(currentPlayer.deck.sizeToString());
 
     }
@@ -272,14 +291,10 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
         if (gameState == GameStatus.MOVING && moveTargetIds.contains(newSpace)) {
 			//endAdventuring
             Pair<Road,Region> moveTarget = moveTargets.get(moveTargetIds.indexOf(newSpace));
+            moveTargets.clear();
+            moveTargets.add(moveTarget);
             if (subdue(moveTarget.first)) {
-                movePlayer(currentPlayer, moveTarget.second);
-                rootView.bindHand(currentPlayer.hand);
-                rootView.bindRoad(roadSpaceMap.get(moveTarget.first), moveTarget.first);
-                changeGameState(GameStatus.OPEN);
-                moveTargets.clear();
-                moveTargetIds.clear();
-                return true;
+				return finishMove(moveTarget.first, moveTarget.second);
             }
         } else if (gameState == GameStatus.FLYING_CARPET && moveTargetIds.contains(newSpace)) {
 			endFlyingCarpet(newSpace);
@@ -287,6 +302,16 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 		}
 		return false;
     }
+    
+    private Boolean finishMove(Road moveTarget, Region regionTarget){
+		    movePlayer(currentPlayer, regionTarget);
+                rootView.bindHand(currentPlayer.hand);
+                rootView.bindRoad(roadSpaceMap.get(moveTarget), moveTarget);
+                changeGameState(GameStatus.OPEN);
+                moveTargets.clear();
+                moveTargetIds.clear();
+                return true;
+	}
 
 	private Boolean subdue(Road toSubdue) {
         List<Set<Card>> subdueSets;
@@ -306,6 +331,9 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 
 	@Override
     public Boolean subdue(Road toSubdue, Set<Card> subdueSet) {
+        Log.d("fantastiqa", subdueSet.toString());
+        if (moveTargets.size()==1) {
+		
         Iterator<Card> setIter = subdueSet.iterator();
         while (setIter.hasNext()) {
             Card useCard = setIter.next();
@@ -313,7 +341,10 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
         }
         currentPlayer.gainCard(toSubdue.creature);
         toSubdue.creature = emptyRoadCard;
-        return true;
+        	return finishMove(moveTargets.get(0).first, moveTargets.get(0).second);
+		}
+		//could find it from road
+		return false;
     }
 
     @Override
@@ -440,15 +471,36 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 		if (playerArea == null) return null;
         return theGame.board.getAdjacentAreas(playerArea);
     }
-
-	//Visit Tower
-	//Tower Teleport
 		
 	@Override
 	public Boolean canTowerTeleport() {
 		return currentPlayer.getGems() >= 2;
 	}
 
+	public void onTowerTeleportClick(View v) {
+			towerTeleport();
+	}
+
+	public void onBuyCardsClick(View v) {
+			beginVisitTowerCards();
+	}
+	
+	public void onReleaseClick(View v){
+		rootView.beginReleaseCards();
+	}
+	
+	public void onFlyingCarpetClick(View v){
+		beginFlyingCarpet();
+	}
+	
+	public void onStorePersonalClick(View v){
+		beginStoreCardsPrivate();
+	}
+	
+	public void onStoreQuestClick(View v){
+		beginStoreCardsQuest();
+	}
+		
     @Override
     public spaceRegion towerTeleport() {
 				//TODO check for enough gems
@@ -610,18 +662,28 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 	}
 
 	@Override
+	public void discardFromStorage(Card aCard){
+		if (gameState == GameStatus.STORING_PRIVATE || 
+			gameState == GameStatus.DISCARD) {
+				currentPlayer.storage.remove(aCard);
+				currentPlayer.deck.discard(aCard);
+				rootView.bindStorage(currentPlayer.storage);
+			}
+	}
+
+	@Override
     public void handClick(Card aCard) {
         //TODO check if card eligible
 	    //	Toast.makeText(MainActivity.this, gameState.toString(), Toast.LENGTH_SHORT);
         if (gameState == GameStatus.STORING_PRIVATE) {
             if (storeCardPrivate(aCard)) {
-                rootView.removeHandCard(aCard);
+                rootView.removeHandCard(aCard, currentPlayer.hand);
             }
         } else if (gameState == GameStatus.STORING_QUESTCARDS) {
 			storeCardQuest(aCard);
 		} else if (gameState == GameStatus.RELEASE) {
             if (releaseCard(aCard)) {
-                rootView.removeHandCard(aCard);
+                rootView.removeHandCard(aCard, currentPlayer.hand);
                 if (currentPlayer.getGems() == 0) {
                     changeGameState(GameStatus.OPEN);
                 }
@@ -629,13 +691,15 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
         }
         if (gameState == GameStatus.DISCARD) {
             currentPlayer.discardFromHand(aCard);
-            rootView.removeHandCard(aCard);
+            rootView.removeHandCard(aCard, currentPlayer.hand);
         }
 	}
+	
 	
 	//Flying Carpet
 	@Override
 	public List<spaceRegion> beginFlyingCarpet() {
+		//TODO card flying carpets
 		if (currentPlayer.getFlyingCarpets()>0) {
             changeGameState(GameStatus.FLYING_CARPET);
 			for(Pair<Road,Region> aRegion : theGame.board.getAdjacentAreas(currentLocation)) {
@@ -643,7 +707,7 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 			}
 		}
 		else {
-			//TODO message can't do
+			toast("You have no Flying Carpets");
 		}
 		return moveTargetIds;
 	}
@@ -675,7 +739,7 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
     }
 
     private Boolean releaseCard(Card aCard) {
-        if (currentPlayer.getGems() > 0) {
+        if (currentPlayer.getGems() > 0 && ((CreatureCard)aCard).name != "Peaceful Dragon") {
             currentPlayer.hand.remove(aCard);
             currentPlayer.changeGems(-1);
             return true;

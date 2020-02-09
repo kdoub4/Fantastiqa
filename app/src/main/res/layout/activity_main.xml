@@ -1,30 +1,215 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <androidx.constraintlayout.widget.ConstraintLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    >
     
     <androidx.appcompat.widget.Toolbar
-		android:id="@+id/tower_menu"
+		android:id="@+id/toolbar"
 		android:layout_width="match_parent"
 		android:layout_height="?attr/actionBarSize"
 		android:background="?attr/colorPrimary"
 		android:elevation="4dp"
 		android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
 		app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintTop_toTopOf="parent"
 		/>
           <androidx.recyclerview.widget.RecyclerView
               app:layout_constraintBottom_toBottomOf="parent"
 			  app:layout_constraintEnd_toEndOf="parent"
               app:layout_constraintStart_toStartOf="parent"
-
+            
               android:layout_width="match_parent"
               android:layout_height="100dp"
               android:orientation="horizontal"
               android:id="@+id/rvHand"/>
+
+        <include
+            layout="@layout/land_card"
+            android:id="@+id/landc6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/roadc1"
+            app:layout_constraintTop_toBottomOf="@id/boardTable"
+            app:layout_constraintHorizontal_chainStyle="spread"			            
+		/>
+
+        <include
+            android:id="@+id/roadc1"
+            layout="@layout/fcard2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+			app:layout_constraintTop_toBottomOf="@id/boardTable"
+            app:layout_constraintStart_toEndOf="@id/landc6"
+            app:layout_constraintEnd_toStartOf="@id/landc1"
+            />
+
+        <include
+            android:id="@+id/landc1"
+            layout="@layout/land_card"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+			app:layout_constraintTop_toBottomOf="@id/boardTable"
+            app:layout_constraintStart_toEndOf="@id/roadc1"
+            app:layout_constraintEnd_toEndOf="parent"
+            />
+    
+        <include
+            android:id="@+id/roadc6"
+            layout="@layout/fcard2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/questc1"
+			app:layout_constraintTop_toBottomOf="@id/landc6"
+            app:layout_constraintHorizontal_chainStyle="spread"
+            
+		/>
+
+        <include
+            android:id="@+id/questc1"
+            layout="@layout/fcard2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+			app:layout_constraintTop_toBottomOf="@id/landc6"
+			app:layout_constraintStart_toEndOf="@id/roadc6"
+            app:layout_constraintEnd_toStartOf="@id/roadc2"
+            
+            />
+
+        <include
+            android:id="@+id/roadc2"
+            layout="@layout/fcard2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+			app:layout_constraintTop_toBottomOf="@id/landc6"
+            app:layout_constraintStart_toEndOf="@id/questc1"
+            app:layout_constraintEnd_toEndOf="parent"
+            />
+            
+            
+        <include
+            android:id="@+id/landc5"
+            layout="@layout/land_card"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/roadc7"
+			app:layout_constraintTop_toBottomOf="@id/roadc6"
+            app:layout_constraintHorizontal_chainStyle="spread"
+            
+		/>
+
+        <include
+            android:id="@+id/roadc7"
+            layout="@layout/fcard2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+			app:layout_constraintTop_toBottomOf="@id/roadc6"
+			app:layout_constraintStart_toEndOf="@id/landc5"
+            app:layout_constraintEnd_toStartOf="@id/landc2"
+            />
+
+        <include
+            android:id="@+id/landc2"
+            layout="@layout/land_card"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+			app:layout_constraintTop_toBottomOf="@id/roadc6"
+            app:layout_constraintStart_toEndOf="@id/roadc7"
+            app:layout_constraintEnd_toEndOf="parent"
+            />
+            
+            
+        <include
+            android:id="@+id/roadc5"
+            layout="@layout/fcard2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/questc2"
+			app:layout_constraintTop_toBottomOf="@id/landc5"
+            app:layout_constraintHorizontal_chainStyle="spread"
+            
+		/>
+
+        <include
+            android:id="@+id/questc2"
+            layout="@layout/fcard2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+			app:layout_constraintTop_toBottomOf="@id/landc5"
+			app:layout_constraintStart_toEndOf="@id/roadc5"
+            app:layout_constraintEnd_toStartOf="@id/roadc3"
+            />
+
+        <include
+            android:id="@+id/roadc3"
+            layout="@layout/fcard2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+			app:layout_constraintTop_toBottomOf="@id/landc5"
+            app:layout_constraintStart_toEndOf="@id/questc2"
+            app:layout_constraintEnd_toEndOf="parent"
+            />
+            
+            
+        <include
+            android:id="@+id/landc4"
+            layout="@layout/land_card"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/roadc4"
+			app:layout_constraintTop_toBottomOf="@id/roadc5"
+            app:layout_constraintHorizontal_chainStyle="spread"
+            
+		/>
+
+        <include
+            android:id="@+id/roadc4"
+            layout="@layout/fcard2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+			app:layout_constraintTop_toBottomOf="@id/roadc5"
+			app:layout_constraintStart_toEndOf="@id/landc4"
+            app:layout_constraintEnd_toStartOf="@id/landc3"
+            />
+
+        <include
+            android:id="@+id/landc3"
+            layout="@layout/land_card"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+			app:layout_constraintTop_toBottomOf="@id/roadc5"
+            app:layout_constraintStart_toEndOf="@id/roadc4"
+            app:layout_constraintEnd_toEndOf="parent"
+            />
+
+  <TableLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#000"
+    android:orientation="vertical"
+    android:stretchColumns="0,1,2"
+    app:layout_constraintTop_toBottomOf="@id/toolbar"
+    app:layout_constraintStart_toStartOf="parent"
+    android:id="@+id/boardTable"
+	>
+    
+      <TableRow
+          android:layout_width="match_parent"
+          android:layout_height="match_parent"
+              android:visibility="gone"
+           >
+
+      </TableRow>
 
     <include
         android:id="@+id/landc6"
@@ -37,17 +222,16 @@
         app:layout_constraintTop_toBottomOf="@id/boardTable"
         tools:visibility="gone" />
 
-    <include
-        android:id="@+id/roadc1"
-        layout="@layout/fcard2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="4dp"
-        app:layout_constraintBottom_toBottomOf="@+id/landc6"
-        app:layout_constraintEnd_toStartOf="@id/landc1"
-        app:layout_constraintStart_toEndOf="@id/landc6"
-        app:layout_constraintTop_toTopOf="@+id/landc6"
-        tools:visibility="gone" />
+    <TableRow style="@style/rowLayout"    
+    android:visibility="gone"
+>
+        <TextView
+            android:id="@+id/land6"
+            style="@style/textLayout"
+            android:layout_column="0"
+            android:layout_weight="0.35"
+            android:tag="6"
+            />
 
     <include
         android:id="@+id/landc1"
@@ -69,7 +253,15 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/landc6"
 
-        tools:visibility="gone" />
+    <TableRow style="@style/rowLayout"
+        android:visibility="gone"
+>
+        <TextView
+            android:id="@+id/road6"
+            style="@style/textLayout"
+            android:layout_column="0"
+            android:layout_weight="0.35"
+            />
 
     <include
         android:id="@+id/questc1"
@@ -84,15 +276,16 @@
         app:layout_constraintVertical_bias="0.0"
         tools:visibility="gone" />
 
-    <include
-        android:id="@+id/roadc2"
-        layout="@layout/fcard2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/questc1"
-        app:layout_constraintTop_toBottomOf="@id/landc6"
-        tools:visibility="gone" />
+    <TableRow style="@style/rowLayout"
+        android:visibility="gone"
+>
+        <TextView
+            android:id="@+id/land5"
+            style="@style/textLayout"
+            android:layout_column="0"
+            android:layout_weight="0.35"
+            android:tag="5"
+            />
 
 
     <include
@@ -107,15 +300,15 @@
         app:layout_constraintTop_toTopOf="@+id/landc5"
         tools:visibility="gone" />
 
-    <include
-        android:id="@+id/landc2"
-        layout="@layout/land_card"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/roadc7"
-        app:layout_constraintTop_toBottomOf="@id/roadc6"
-        tools:visibility="gone" />
+    <TableRow style="@style/rowLayout"
+        android:visibility="gone"
+>
+        <TextView
+            android:id="@+id/road5"
+            style="@style/textLayout"
+            android:layout_column="0"
+            android:layout_weight="0.35"
+            />
 
 
     <include
@@ -129,15 +322,16 @@
         app:layout_constraintTop_toTopOf="@+id/roadc5"
         tools:visibility="gone" />
 
-    <include
-        android:id="@+id/landc5"
-        layout="@layout/land_card"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintEnd_toStartOf="@id/roadc7"
-        app:layout_constraintHorizontal_chainStyle="spread"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/roadc6"
+    <TableRow style="@style/rowLayout"
+        android:visibility="gone"
+>
+        <TextView
+            android:id="@+id/land4"
+            style="@style/textLayout"
+            android:layout_column="0"
+            android:layout_weight="0.35"
+            android:tag="4"
+            />
 
         tools:visibility="gone" />
 
@@ -151,7 +345,73 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/landc5"
 
-        tools:visibility="gone" />
+        <Button
+            android:id="@+id/buttonFlyingCarpet"
+            style="@style/buttonLayout"
+            android:layout_column="2"
+            android:text="Flying Carpet"
+            android:textSize="8sp"
+            android:layout_weight="1"/>
+            
+        <Button
+            android:id="@+id/buttonStoreCards"
+            style="@style/buttonLayout"
+            android:layout_column="3"
+            android:text="Store Cards"
+            android:textSize="8sp"
+            android:layout_weight="1" />
+        
+        <Button
+            android:id="@+id/buttonStoreQuestCards"
+            style="@style/buttonLayout"
+            android:layout_column="4"
+            android:text="Quest Cards" 
+            android:textSize="8sp"
+            android:layout_weight="1"
+            />
+            
+        <Button
+            android:id="@+id/buttonDone"
+            style="@style/buttonLayout"
+            android:layout_column="5"
+            android:text="Done" 
+            android:textSize="8sp"
+            android:layout_weight="1"/>
+    </TableRow>
+      <TableRow style="@style/rowLayout">
+      <TextView
+          android:id="@+id/gems"
+          style="@style/textLayout"
+          android:layout_column="0"
+          android:layout_weight="0.35"
+          />
+          <TextView
+              android:id="@+id/vps"
+              style="@style/textLayout"
+              android:layout_column="1"
+              android:layout_weight="0.35"
+              />
+          <TextView
+              android:id="@+id/deck"
+              style="@style/textLayout"
+              android:layout_column="2"
+              android:layout_weight="0.35"
+              />
+          <TextView
+              android:id="@+id/discard"
+              style="@style/textLayout"
+              android:layout_column="3"
+              android:layout_weight="0.35"
+              />
+      </TableRow>
+      <TableRow android:layout_margin="10dp"
+      android:visibility="gone">
+        <TextView
+            android:id="@+id/hand1"
+            style="@style/textLayout"
+            android:layout_column="0"
+            android:layout_weight="0.4"
+            />
 
     <include
         android:id="@+id/roadc3"
@@ -164,15 +424,22 @@
         tools:visibility="gone" />
 
 
-    <include
-        android:id="@+id/landc4"
-        layout="@layout/land_card"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintEnd_toStartOf="@id/roadc4"
-        app:layout_constraintHorizontal_chainStyle="spread"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/roadc5"
+        <TextView
+            android:id="@+id/hand5"
+            style="@style/textLayout"
+            android:layout_column="4"
+            android:layout_weight="0.4"
+            />
+    </TableRow>
+    
+    <TableRow android:layout_margin="5dp"
+    android:visibility="gone">
+        <TextView
+            android:id="@+id/hand6"
+            style="@style/textLayout"
+            android:layout_column="0"
+            android:layout_weight="0.4"
+			/>
 
         tools:visibility="gone" />
 
@@ -495,24 +762,119 @@
 
         <TableRow android:layout_margin="5dp">
 
-            <TextView
-                android:id="@+id/storageCards"
-                style="@style/textLayout"
-                android:layout_column="0"
-                android:layout_weight="0.4"
-                android:text="Stored:" />
+        <TextView
+            android:id="@+id/stored0"
+            style="@style/textLayout"
+            android:layout_column="1"
+            android:layout_weight="0.4"
+            />
+        <TextView
+            android:id="@+id/stored1"
+            style="@style/textLayout"
+            android:layout_column="2"
+            android:layout_weight="0.4"
+            />
+        <TextView
+            android:id="@+id/stored2"
+            style="@style/textLayout"
+            android:layout_column="3"
+            android:layout_weight="0.4"
+            />
+        <TextView
+            android:id="@+id/stored3"
+            style="@style/textLayout"
+            android:layout_column="4"
+            android:layout_weight="0.4"
+            />
+        <TextView
+            android:id="@+id/stored4"
+            style="@style/textLayout"
+            android:layout_column="5"
+            android:layout_weight="0.4"
+            />
+    </TableRow>
+	<TableRow android:layout_margin="2dp"
+	android:visibility="gone">
+        <TextView
+            android:id="@+id/quest0"
+            style="@style/textLayout"
+            android:layout_column="0"
+            android:layout_weight="0.4"
+            />
 
-            <TextView
-                android:id="@+id/stored0"
-                style="@style/textLayout"
-                android:layout_column="1"
-                android:layout_weight="0.4" />
+        <TextView
+            android:id="@+id/quest00"
+            style="@style/textLayout"
+            android:layout_column="1"
+            android:layout_weight="0.4"
+            />
+        <TextView
+            android:id="@+id/quest01"
+            style="@style/textLayout"
+            android:layout_column="2"
+            android:layout_weight="0.4"
+            />
+        <TextView
+            android:id="@+id/quest02"
+            style="@style/textLayout"
+            android:layout_column="3"
+            android:layout_weight="0.4"
+            />
+        <TextView
+            android:id="@+id/quest03"
+            style="@style/textLayout"
+            android:layout_column="4"
+            android:layout_weight="0.4"
+            />
+        <TextView
+            android:id="@+id/quest04"
+            style="@style/textLayout"
+            android:layout_column="5"
+            android:layout_weight="0.4"
+            />
+    </TableRow>
+    <TableRow android:layout_margin="2dp"
+    android:visibility="gone">
+        <TextView
+            android:id="@+id/quest1"
+            style="@style/textLayout"
+            android:layout_column="0"
+            android:layout_weight="0.4"
+            android:text="EmptyQuest:" />
 
-            <TextView
-                android:id="@+id/stored1"
-                style="@style/textLayout"
-                android:layout_column="2"
-                android:layout_weight="0.4" />
+        <TextView
+            android:id="@+id/quest10"
+            style="@style/textLayout"
+            android:layout_column="1"
+            android:layout_weight="0.4"
+            />
+        <TextView
+            android:id="@+id/quest11"
+            style="@style/textLayout"
+            android:layout_column="2"
+            android:layout_weight="0.4"
+            />
+        <TextView
+            android:id="@+id/quest12"
+            style="@style/textLayout"
+            android:layout_column="3"
+            android:layout_weight="0.4"
+            />
+        <TextView
+            android:id="@+id/quest13"
+            style="@style/textLayout"
+            android:layout_column="4"
+            android:layout_weight="0.4"
+            />
+        <TextView
+            android:id="@+id/quest14"
+            style="@style/textLayout"
+            android:layout_column="5"
+            android:layout_weight="0.4"
+            />
+    </TableRow>
+</TableLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
 
             <TextView
                 android:id="@+id/stored2"

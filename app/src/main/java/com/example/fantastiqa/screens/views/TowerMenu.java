@@ -38,7 +38,5 @@ class TowerMenu extends ActionProvider implements PopupMenu.OnMenuItemClickListe
 		});
 
 		return view;
-	}
-	
-	
+	}	
 }

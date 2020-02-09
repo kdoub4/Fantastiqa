@@ -61,6 +61,7 @@ public interface ViewMvc {
     void setTowerTeleport(Boolean value);
 	
 	void onMoveClick(View v);
+	void onMoveClick();
 	void onDoneClick();
 	void onTowerVisitClick();
     void onLandClick(View v);
@@ -74,8 +75,8 @@ public interface ViewMvc {
 	void onFlyingCarpetClick();
 
     void removeHandCard(Card card, List<Card> hand);
-    void beginReleaseCards();
-
+	void beginReleaseCards();
+    
     interface ViewMvcListener {
 		List<spaceRegion> getValidAdventuring();
 
@@ -105,6 +106,7 @@ public interface ViewMvc {
 
 
         void beginDiscard();
+        void discardFromStorage(Card aCard);
 
         Boolean canCompleteQuest(Quest aQuest);
         void beginCompleteQuest(Quest aQuest);

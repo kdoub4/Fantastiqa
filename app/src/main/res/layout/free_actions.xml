@@ -14,27 +14,28 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:src="@drawable/futurist"
-        android:contentDescription="Teleport"
+        android:tooltipText="Flying Carpet"
         android:padding="8dp"
-        android:onClick="onTowerTeleportClick"/>
+        android:onClick="onFlyingCarpetClick"/>
 
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:src="@drawable/add_library"
-        android:contentDescription="New Cards"
+        android:tooltipText="Store Personal"
         android:padding="8dp"
-        android:onClick="onBuyCardsClick"/>
+        android:onClick="onStorePersonalClick"/>
 
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:src="@drawable/remove"
-        android:contentDescription="Release"
+        android:tooltipText="Store Quest"
         android:padding="8dp"
-        android:tooltipText="Release"
-        android:onClick="onReleaseClick"/>
+        android:onClick="onStoreQuestClick"/>
+        
+        
 
 </LinearLayout>

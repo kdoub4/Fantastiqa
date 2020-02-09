@@ -14,10 +14,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.ListIterator;
 
 public class Game {
     public Board board;
-    public int VPgoal=1;
+    public int VPgoal=4;
     public Deck<Card> creatureDeck;
     public Deck<Artifact> artifactDeck;
     public Deck<CreatureCard> bazaarDeck;
@@ -350,6 +351,17 @@ public class Game {
         return fullList;
     }
 
+	public Player nextPlayer(Player currentPlayer){
+		ListIterator<Player> playerIter = players.listIterator();
+		while (playerIter.hasNext()){
+			if (playerIter.next()==currentPlayer) {
+				if (playerIter.hasNext()) {
+					return playerIter.next();
+				}
+			}
+		}
+		return players.get(0);
+	}
 }
 
 enum deckTypes {
