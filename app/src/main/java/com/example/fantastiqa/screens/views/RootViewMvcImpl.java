@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.example.fantastiqa.GameState.Card;
+import com.example.fantastiqa.GameState.CreatureCard;
 import com.example.fantastiqa.GameState.Player;
 import com.example.fantastiqa.GameState.Quest;
 import com.example.fantastiqa.GameState.Region;
@@ -766,28 +767,40 @@ public class RootViewMvcImpl implements ViewMvc, handAdapter.HandClickListener  
         switch (location) {
             case N:
 				bindRoadCard(road1c, details);
-                road1.setText(details.creature.toString());break;
+                bindRoadTV(road1, details.creature);
+                break;
             case NE:
                 bindRoadCard(road2c, details);
-                road2.setText(details.creature.toString());break;
+                bindRoadTV(road2, details.creature);
+                break;
             case SE:
                 bindRoadCard(road3c, details);
-                road3.setText(details.creature.toString());break;
+                bindRoadTV(road3, details.creature);
+                break;
             case S:
                 bindRoadCard(road4c, details);
-                road4.setText(details.creature.toString());break;
+                bindRoadTV(road4, details.creature);
+                break;
             case SW:
                 bindRoadCard(road5c, details);
-                road5.setText(details.creature.toString());break;
+                bindRoadTV(road5, details.creature);
+                break;
             case NW:
                 bindRoadCard(road6c, details);
-                road6.setText(details.creature.toString());break;
+                bindRoadTV(road6, details.creature);
+                break;
             case MID:
                 bindRoadCard(road7c, details);
-                road7.setText(details.creature.toString());break;
+                bindRoadTV(road7, details.creature);
+                break;
         }
     }
-    
+
+    private void bindRoadTV(TextView road1, Card creature) {
+        road1.setText(creature.toString() + "\n" + ((CreatureCard)creature).values.get(0) +
+                (((CreatureCard)creature).values.size()>1 ? "2" : "") );
+    }
+
     private void bindRoadCard(CardView view, Road details){
 		setImage((ImageView)view.findViewById(R.id.power1),details.creature.values.get(0));
 		if (details.creature.values.size()>1){
@@ -880,7 +893,7 @@ public class RootViewMvcImpl implements ViewMvc, handAdapter.HandClickListener  
         for (Card aCard: hand
              ) {
 			TextView tvHandCard = (TextView)listIter.next();
-			tvHandCard.setText(aCard.toString());
+            bindRoadTV(tvHandCard, aCard);
             tvHandCard.setTag(aCard);
         }
     }
@@ -907,7 +920,7 @@ public class RootViewMvcImpl implements ViewMvc, handAdapter.HandClickListener  
         for (Card aCard: hand
              ) {
             TextView tvStorageCard = (TextView)listIter.next();
-			tvStorageCard.setText(aCard.toString());
+            bindRoadTV(tvStorageCard, aCard);
             tvStorageCard.setTag(aCard);
         }
     }
