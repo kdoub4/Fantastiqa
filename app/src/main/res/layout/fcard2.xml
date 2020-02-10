@@ -13,15 +13,17 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         >
-        
-		<ImageView
-            android:id="@+id/cardImage"
-            android:layout_width="60dp"
-            android:layout_height="70dp"
-            card_view:layout_constraintBottom_toBottomOf="parent"
-            card_view:layout_constraintEnd_toEndOf="parent"
-            card_view:layout_constraintStart_toStartOf="parent"
-            card_view:layout_constraintTop_toTopOf="parent"
+
+        <ImageView
+android:id="@+id/cardImage"
+android:layout_width="60dp"
+android:layout_height="70dp"
+card_view:layout_constraintBottom_toBottomOf="parent"
+card_view:layout_constraintEnd_toEndOf="parent"
+card_view:layout_constraintHorizontal_bias="0.0"
+card_view:layout_constraintStart_toStartOf="parent"
+card_view:layout_constraintTop_toTopOf="parent"
+            card_view:layout_constraintVertical_bias="1.0"
             card_view:srcCompat="@drawable/water" />
 
         <ImageView
@@ -35,8 +37,8 @@
             android:id="@+id/power2"
             style="@style/symbolLayout"
             android:visibility="invisible"
-            card_view:layout_constraintStart_toEndOf="@id/power1"
-            card_view:layout_constraintTop_toTopOf="parent"
+            card_view:layout_constraintStart_toStartOf="parent"
+            card_view:layout_constraintTop_toBottomOf="@+id/power1"
             card_view:srcCompat="@drawable/broom" />
 
         <ImageView
