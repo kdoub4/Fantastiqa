@@ -1,13 +1,8 @@
 package com.example.fantastiqa.GameState;
 
-import android.widget.ArrayAdapter;
-
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.math3.util.Combinations;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -154,7 +149,17 @@ public class Game {
 	}
 	* */
 //TODO 2 double requirements
-    public Boolean canCompleteQuest(Quest aQuest, List<Card> storedCards) {
+    public Boolean canCompleteQuest(Quest aQuest, List<Card> storedCards, Player aPlayer, RegionName aRegion) {
+        return canCompleteSymbols(aQuest, storedCards) &&
+                canCompleteLocations(aQuest, aRegion);
+        //TODO Goose Chase expansion
+    }
+
+    private Boolean canCompleteLocations(Quest aQuest, RegionName aRegion) {
+        return aQuest.land == aRegion;
+    }
+
+    private Boolean canCompleteSymbols(Quest aQuest, List<Card> storedCards) {
         Set<Card> used = new HashSet<>(5);
         int doubleCount = aQuest.getDoubleRequirement() == Symbol.NONE ? 2 : 0;
         int tripleCount = aQuest.getTripleRequirement() == Symbol.NONE ? 3 : 0;

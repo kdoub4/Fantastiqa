@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.View;
 
 import com.example.fantastiqa.GameState.Card;
+import com.example.fantastiqa.GameState.Player;
 import com.example.fantastiqa.GameState.Quest;
 import com.example.fantastiqa.GameState.Region;
 import com.example.fantastiqa.GameState.Road;
@@ -44,10 +45,10 @@ public interface ViewMvc {
 
     void bindLand(spaceRegion location, Region details);
     void bindRoad(spaceRoad location, Road details);
-    void bindQuest(int location, Quest details, Boolean canComplete);
+    void bindPublicQuest(int location, Quest details, Boolean canComplete);
     void bindHand(List<Card> theHand);
 	void bindStorage(List<Card> theHand);
-	void bindPlayerStorage(List<Card> theHand);
+	void bindPlayerQuests(List<Card> theHand);
 	void bindQuestStorage(Quest theQuest, List<Card> theCards);
 
 	void updateGems(int gems);
@@ -116,5 +117,5 @@ public interface ViewMvc {
 
     public void setListener(ViewMvcListener listner);
 
-    public void gameStateChange(GameStatus newState);
+    public void gameStateChange(GameStatus newState, Player aPlayer);
 }

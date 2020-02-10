@@ -115,13 +115,13 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
         bindAllQuests();
 
         rootView.bindHand(currentPlayer.hand);
-        rootView.bindPlayerStorage(currentPlayer.quests);
+        rootView.bindPlayerQuests(currentPlayer.quests);
         changeGameState(GameStatus.OPEN);
     }
 
     private void bindAllQuests() {
         for (Quest aQuest : theGame.board.quests) {
-                rootView.bindQuest(theGame.board.quests.indexOf(aQuest)+1, aQuest, canCompleteQuest(aQuest));
+                rootView.bindPublicQuest(theGame.board.quests.indexOf(aQuest)+1, aQuest, canCompleteQuest(aQuest));
             }
     }
 
@@ -170,7 +170,7 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 
     @Override
     public Boolean canCompleteQuest(Quest aQuest) {
-        return theGame.canCompleteQuest(aQuest, ListUtils.union(currentPlayer.storage, currentPlayer.hand));
+        return theGame.canCompleteQuest(aQuest, ListUtils.union(currentPlayer.storage, currentPlayer.hand), currentPlayer , currentLocation.name );
     }
 
     @Override
@@ -186,7 +186,7 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
                     currentPlayer.deck.discard(usedCard);
                 }
                 rootView.bindHand(currentPlayer.hand);
-                rootView.bindPlayerStorage(currentPlayer.storage);
+                rootView.bindStorage(currentPlayer.storage);
                 //TODO remove quest from board
             }
             changeGameState(GameStatus.OPEN);
@@ -212,6 +212,7 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
         }
 
         for (Quest newQuest : theGame.questDeck.draw(2-theGame.board.quests.size())) {
+            toast("draw Quest");
             theGame.board.quests.add(newQuest);
         }
         currentPlayer.drawCards(5-currentPlayer.hand.size());
@@ -225,13 +226,11 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
         bindAllQuests();
         bindAllRoads();
         rootView.bindHand(currentPlayer.hand);
-        rootView.bindPlayerStorage(currentPlayer.quests);
+        rootView.bindPlayerQuests(currentPlayer.quests);
         rootView.bindStorage(currentPlayer.storage);
         for (Card aQuest : currentPlayer.quests) {
             rootView.bindQuestStorage((Quest)aQuest, ((Quest) aQuest).stored);
         }
-        rootView.bindQuest(1, theGame.board.quests.get(0),canCompleteQuest(theGame.board.quests.get(0)));
-        rootView.bindQuest(2, theGame.board.quests.get(1),canCompleteQuest(theGame.board.quests.get(1)));
         rootView.updateVps(currentPlayer.getVps());
         rootView.updateGems(currentPlayer.getGems());
         rootView.updateDeck(currentPlayer.deck.size());
@@ -243,7 +242,7 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
     }
 
     private void changeGameState(GameStatus newState) {
-		rootView.gameStateChange(newState);
+		rootView.gameStateChange(newState, currentPlayer);
 		gameState = newState;
 		if (newState == GameStatus.OPEN) {
 		    moveTargets.clear();
@@ -569,7 +568,7 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 		//TODO in Game possiblePurchase list
 		if (visitingDeck == theGame.questDeck) {
             currentPlayer.quests.add(playerChoices.remove(buy));
-            rootView.bindPlayerStorage(currentPlayer.quests);
+            rootView.bindPlayerQuests(currentPlayer.quests);
         }
         else {
             currentPlayer.deck.discard(playerChoices.remove(buy));

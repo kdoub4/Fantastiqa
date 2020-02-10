@@ -14,7 +14,7 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.util.Log;
-import androidx.annotation.NonNull;
+
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -32,7 +32,6 @@ import com.example.fantastiqa.R;
 import com.example.fantastiqa.screens.GameStatus;
 import com.example.fantastiqa.screens.spaceRegion;
 import com.example.fantastiqa.screens.spaceRoad;
-import com.example.fantastiqa.screens.views.EqualSpacingItemDecoration;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -97,7 +96,7 @@ public class RootViewMvcImpl implements ViewMvc, handAdapter.HandClickListener  
 	
     LinkedList<TextView> theHandViews;
     LinkedList<TextView> storage;
-    LinkedList<TextView> quests;
+    LinkedList<TextView> playerQuests;
     LinkedList<TextView> quest1Storage;
     LinkedList<TextView> quest0Storage;
 
@@ -127,7 +126,7 @@ public class RootViewMvcImpl implements ViewMvc, handAdapter.HandClickListener  
         mHandRV.setLayoutManager(layoutManager);
         mHandRV.setHasFixedSize( false);
         mHandRV.addItemDecoration(new EqualSpacingItemDecoration(16));
-        mAdapter = new handAdapter(MAX_HAND_SIZE, this);
+        mAdapter = new handAdapter(startingHandSize, this);
         mHandRV.setAdapter(mAdapter);
 
 
@@ -361,7 +360,7 @@ public class RootViewMvcImpl implements ViewMvc, handAdapter.HandClickListener  
 		}
 
         
-        quests = new LinkedList<TextView>() { {
+        playerQuests = new LinkedList<TextView>() { {
 			add((TextView)mRootView.findViewById(R.id.quest0));
 			add((TextView)mRootView.findViewById(R.id.quest1));
 		}};
@@ -394,7 +393,7 @@ public class RootViewMvcImpl implements ViewMvc, handAdapter.HandClickListener  
 			});
 		}
 
-        listIter = quests.listIterator(0);;
+        listIter = playerQuests.listIterator(0);;
         while (listIter.hasNext()) {
             listIter.next().setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -426,6 +425,7 @@ public class RootViewMvcImpl implements ViewMvc, handAdapter.HandClickListener  
     public void onQuestClick(View v) {
         v.setClickable(false);
         mListener.beginCompleteQuest((Quest)v.getTag());
+        v.setVisibility(View.INVISIBLE);
     }
 	
 	@Override
@@ -588,8 +588,8 @@ public class RootViewMvcImpl implements ViewMvc, handAdapter.HandClickListener  
 	}
 	
 	@Override
-    public void gameStateChange(GameStatus newState) {
-		status.setText(newState.toString());
+    public void gameStateChange(GameStatus newState, Player aPlayer) {
+		status.setText(aPlayer.name + ":" + newState.toString());
         switch (newState) {
 		case MOVING:
 			moveButton.setEnabled(false);
@@ -839,25 +839,28 @@ public class RootViewMvcImpl implements ViewMvc, handAdapter.HandClickListener  
 	}
 
     @Override
-    public void bindQuest(int location, Quest details, Boolean canComplete) {
-        switch (location) {
+    public void bindPublicQuest(int location, Quest details, Boolean canComplete) {
+	    switch (location) {
             case 1:
 				bindQuestCard(publicQuest1c, details, canComplete);
-                publicQuest1.setText(details.name);
-                publicQuest1.setTag(details);
-                publicQuest1.setTextColor(canComplete ? Color.GREEN : Color.WHITE);
-                publicQuest1.setClickable(canComplete);
+                bindPublicQuest(details, canComplete, publicQuest1);
+
                 break;
             case 2:
 				bindQuestCard(publicQuest2c, details, canComplete);
-                publicQuest2.setText(details.name);
-                publicQuest2.setTag(details);
-                publicQuest2.setTextColor(canComplete ? Color.GREEN : Color.WHITE);
-                publicQuest2.setClickable(canComplete);
+                bindPublicQuest(details, canComplete, publicQuest2);
                 break;
         }
     }
-    
+
+    private void bindPublicQuest(Quest details, Boolean canComplete, TextView tvQuest) {
+        tvQuest.setText(details.name + "\n" + details.land.name());
+        tvQuest.setTag(details);
+        tvQuest.setTextColor(canComplete ? Color.GREEN : Color.WHITE);
+        tvQuest.setClickable(canComplete);
+        tvQuest.setVisibility(View.VISIBLE);
+    }
+
     private void bindQuestCard(CardView qCard, Quest details, Boolean canComplete ){
 		setImage((ImageView)qCard.findViewById(R.id.power1), details.getDoubleRequirement());
 		setImage((ImageView)qCard.findViewById(R.id.power2), details.getDoubleRequirement());
@@ -910,13 +913,14 @@ public class RootViewMvcImpl implements ViewMvc, handAdapter.HandClickListener  
     }
     
     @Override
-    public void bindPlayerStorage(List<Card> theHand) {
-		//TODO multiple quests
-        int i=0;
-		for (Card aQuest : theHand) {
-            quests.get(i++).setText(aQuest.name);
+    public void bindPlayerQuests(List<Card> theQuests) {
+		int i=0;
+        //TODO more than 2 playerQuests
+		for (Card aQuest : theQuests) {
+            playerQuests.get(i++).setText(aQuest.name);
             if (i==2) break;
         }
+
 	}
 	
 	@Override
@@ -1003,10 +1007,10 @@ public class RootViewMvcImpl implements ViewMvc, handAdapter.HandClickListener  
 	}
 	/*
 	public void addQuestStorage() {
-			//TODO multiple quests
+			//TODO multiple playerQuests
 		for (Card questCard : theHand) {
-			//for (TextView questText : quests)
-			TextView questText = quests.get(0); {
+			//for (TextView questText : playerQuests)
+			TextView questText = playerQuests.get(0); {
 				//if match add to next blank quest card spot
 				if (questCard.name = questText.getText()) {
 					for (TextView questCardText : quest0Storage) {

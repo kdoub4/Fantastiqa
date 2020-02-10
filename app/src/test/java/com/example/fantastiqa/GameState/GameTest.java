@@ -1,7 +1,5 @@
 package com.example.fantastiqa.GameState;
 
-import android.util.Log;
-
 import org.apache.commons.collections4.CollectionUtils;
 import org.junit.Test;
 
@@ -25,7 +23,7 @@ public class GameTest {
         cards.add(new CreatureCard(aCard.name(), aCard.getSubduedBy(), aCard.isGem(), aCard.isGem() ? Ability.NONE : aCard.getAbility(), aCard.getValue1()));
         cards.add(new CreatureCard(aCard.name(), aCard.getSubduedBy(), aCard.isGem(), aCard.isGem() ? Ability.NONE : aCard.getAbility(), aCard.getValue1()));
 
-        assert(aGame.canCompleteQuest(aQuest, cards));
+        assert(aGame.canCompleteQuest(aQuest, cards, aGame.players.get(0), RegionName.FIELDS ));
     }
     @Test
     public void canCompleteQuest_2symbol_1cardmatch() {
@@ -37,7 +35,7 @@ public class GameTest {
         aCard = CreatureCards.valueOf("Witch");
         cards.add(new CreatureCard(aCard.name(), aCard.getSubduedBy(), aCard.isGem(), aCard.isGem() ? Ability.NONE : aCard.getAbility(), aCard.getValue1()));
 
-        assertFalse(aGame.canCompleteQuest(aQuest, cards));
+        assertFalse(aGame.canCompleteQuest(aQuest, cards, aGame.players.get(0), RegionName.FIELDS ));
     }
 
     @Test
@@ -49,7 +47,7 @@ public class GameTest {
         cards.add(new CreatureCard(aCard.name(), aCard.getSubduedBy(), aCard.isGem(), aCard.isGem() ? Ability.NONE : aCard.getAbility(), aCard.getValue1()));
         cards.add(new CreatureCard(aCard.name(), aCard.getSubduedBy(), aCard.isGem(), aCard.isGem() ? Ability.NONE : aCard.getAbility(), aCard.getValue1()));
 
-        assertFalse(aGame.canCompleteQuest(aQuest, cards));
+        assertFalse(aGame.canCompleteQuest(aQuest, cards, aGame.players.get(0), RegionName.FIELDS ));
     }
 
     @Test
@@ -62,7 +60,7 @@ public class GameTest {
         cards.add(new CreatureCard(aCard.name(), aCard.getSubduedBy(), aCard.isGem(), aCard.isGem() ? Ability.NONE : aCard.getAbility(), aCard.getValue1()));
         cards.add(new CreatureCard(aCard.name(), aCard.getSubduedBy(), aCard.isGem(), aCard.isGem() ? Ability.NONE : aCard.getAbility(), aCard.getValue1()));
 
-        assert(aGame.canCompleteQuest(aQuest, cards));
+        assert(aGame.canCompleteQuest(aQuest, cards, aGame.players.get(0), RegionName.FIELDS ));
     }
 
     @Test
@@ -76,7 +74,7 @@ public class GameTest {
         cards.add(new CreatureCard(aCard.name(), aCard.getSubduedBy(), aCard.isGem(), aCard.isGem() ? Ability.NONE : aCard.getAbility(), aCard.getValue1()));
         cards.add(new CreatureCard(aCard.name(), aCard.getSubduedBy(), aCard.isGem(), aCard.isGem() ? Ability.NONE : aCard.getAbility(), aCard.getValue1()));
 
-        assertFalse(aGame.canCompleteQuest(aQuest, cards));
+        assertFalse(aGame.canCompleteQuest(aQuest, cards, aGame.players.get(0), RegionName.FIELDS ));
     }
 
     @Test
@@ -88,7 +86,7 @@ public class GameTest {
         cards.add(new CreatureCard(aCard.name(), aCard.getSubduedBy(), aCard.isGem(), aCard.isGem() ? Ability.NONE : aCard.getAbility(), aCard.getValue1(), aCard.getValue2()));
         cards.add(new CreatureCard(aCard.name(), aCard.getSubduedBy(), aCard.isGem(), aCard.isGem() ? Ability.NONE : aCard.getAbility(), aCard.getValue1(), aCard.getValue2()));
 
-        assert(aGame.canCompleteQuest(aQuest, cards));
+        assert(aGame.canCompleteQuest(aQuest, cards, aGame.players.get(0), RegionName.FIELDS ));
     }
 
     @Test
@@ -107,7 +105,7 @@ public class GameTest {
         cards.add(new CreatureCard(aCard.name(), aCard.getSubduedBy(), aCard.isGem(), aCard.isGem() ? Ability.NONE : aCard.getAbility(), aCard.getValue1(), aCard.getValue2()));
         cards.add(new CreatureCard(aCard.name(), aCard.getSubduedBy(), aCard.isGem(), aCard.isGem() ? Ability.NONE : aCard.getAbility(), aCard.getValue1()));
 
-        assert(aGame.canCompleteQuest(aQuest, cards));
+        assert(aGame.canCompleteQuest(aQuest, cards, aGame.players.get(0), RegionName.FIELDS ));
     }
 
     @Test
