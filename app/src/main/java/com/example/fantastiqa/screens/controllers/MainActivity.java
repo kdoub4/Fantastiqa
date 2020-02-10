@@ -286,20 +286,24 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 	//Go Adventuring
 	@Override
     public Boolean doMove(spaceRegion newSpace) {
-		Toast.makeText(MainActivity.this, newSpace.toString(), Toast.LENGTH_SHORT).show();
+		Boolean result=false;
+        Toast.makeText(MainActivity.this, newSpace.toString(), Toast.LENGTH_SHORT).show();
         if (gameState == GameStatus.MOVING && moveTargetIds.contains(newSpace)) {
 			//endAdventuring
             Pair<Road,Region> moveTarget = moveTargets.get(moveTargetIds.indexOf(newSpace));
             moveTargets.clear();
             moveTargets.add(moveTarget);
             if (subdue(moveTarget.first)) {
-				return finishMove(moveTarget.first, moveTarget.second);
+				result= finishMove(moveTarget.first, moveTarget.second);
             }
         } else if (gameState == GameStatus.FLYING_CARPET && moveTargetIds.contains(newSpace)) {
 			endFlyingCarpet(newSpace);
-			return true;
+			result=true;
 		}
-		return false;
+        if (result) {
+            bindAllQuests();
+        }
+		return result;
     }
     
     private Boolean finishMove(Road moveTarget, Region regionTarget){
@@ -649,6 +653,7 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 	
     @Override
     public Boolean storeCardPrivate(Card aCard) {
+        //TODO limit check
 		if (gameState == GameStatus.STORING_PRIVATE) {
 			if (aCard != null) {
 				currentPlayer.hand.remove(aCard);
