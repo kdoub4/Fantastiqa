@@ -26,9 +26,12 @@ public class Deck <T extends Card> {
 	public List<T> draw(int amount) {
 		List<T> result = new ArrayList<>(amount);
 		if (amount == 0) return result;
+
 		if (deck.size()<=0) {
 			shuffle(true);
 		}
+		if (deck.size()==0) return result;
+
 		result.add((T)deck.remove(0));
 		result.addAll(draw(amount-1));
 		return result;
