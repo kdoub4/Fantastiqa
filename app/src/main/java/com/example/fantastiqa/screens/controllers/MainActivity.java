@@ -653,9 +653,8 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 	
     @Override
     public Boolean storeCardPrivate(Card aCard) {
-        //TODO limit check
 		if (gameState == GameStatus.STORING_PRIVATE) {
-			if (aCard != null) {
+			if (currentPlayer.storage.size() < 5 && aCard != null) {
 				currentPlayer.hand.remove(aCard);
 				currentPlayer.storage.add(aCard);
                 rootView.bindStorage(currentPlayer.storage);
