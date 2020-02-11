@@ -24,7 +24,7 @@ public class MaterialActivity extends AppCompatActivity implements View.OnDragLi
         super.onCreate(savedInstanceState);
         setContentView(R.layout.material_l);
 		//tvExample = findViewById(R.id.card_view);
-        tvHandCard1 = findViewById(R.id.handm1);
+        tvHandCard1 = findViewById(R.id.aHandCard);
         tvLandCard1 = findViewById(R.id.landm1);
         tvHandCard1.setOnLongClickListener(new View.OnLongClickListener() {
             @Override

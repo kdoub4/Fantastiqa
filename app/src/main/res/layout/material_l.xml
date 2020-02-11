@@ -8,75 +8,264 @@
     android:layout_height="match_parent">
 
 
+    <ImageView
+        android:id="@+id/boardImage"
+        android:layout_width="0dp"
+        android:layout_height="450dp"
+        android:scaleType="fitXY"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:srcCompat="@tools:sample/backgrounds/scenic" />
+
+    <include
+        android:id="@+id/landm6"
+        layout="@layout/land_card"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@id/roadm6"
+        app:layout_constraintEnd_toStartOf="@id/roadm1"
+        app:layout_constraintHorizontal_chainStyle="spread"
+        app:layout_constraintStart_toStartOf="@id/boardImage"
+        app:layout_constraintTop_toTopOf="@id/boardImage"
+        app:layout_constraintVertical_chainStyle="spread" />
+
+    <include
+        android:id="@+id/roadm1"
+        layout="@layout/road_card"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toStartOf="@+id/landm1"
+        app:layout_constraintStart_toEndOf="@+id/landm6"
+        app:layout_constraintTop_toTopOf="@+id/landm6" />
+
     <include
         android:id="@+id/landm1"
-        layout="@layout/fcardm"
+        layout="@layout/land_card"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
-        android:layout_marginEnd="15dp"
-        android:layout_marginRight="15dp"
-        app:layout_constraintEnd_toStartOf="@+id/include5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toEndOf="@id/boardImage"
+        app:layout_constraintStart_toEndOf="@id/roadm1"
+        app:layout_constraintTop_toTopOf="@+id/roadm1" />
+
 
     <include
-        android:id="@+id/include5"
-        layout="@layout/fcardm"
+        android:id="@+id/roadm6"
+        layout="@layout/road_card"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
-        android:layout_marginEnd="14dp"
-        android:layout_marginRight="14dp"
-        app:layout_constraintEnd_toStartOf="@+id/include6"
-        app:layout_constraintStart_toEndOf="@+id/landm1"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintBottom_toTopOf="@id/landm5"
+        app:layout_constraintEnd_toStartOf="@+id/questm1"
+        app:layout_constraintHorizontal_chainStyle="spread"
+        app:layout_constraintStart_toStartOf="@id/boardImage"
+        app:layout_constraintTop_toBottomOf="@+id/landm6" />
 
     <include
-        android:id="@+id/include6"
-        layout="@layout/fcardm"
+        android:id="@+id/questm1"
+        layout="@layout/quest_card"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginRight="16dp"
+        app:layout_constraintEnd_toStartOf="@+id/roadm2"
+        app:layout_constraintStart_toEndOf="@+id/roadm6"
+        app:layout_constraintTop_toTopOf="@+id/roadm6" />
+
+    <include
+        android:id="@+id/roadm2"
+        layout="@layout/road_card"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="@id/boardImage"
+        app:layout_constraintStart_toEndOf="@+id/questm1"
+        app:layout_constraintTop_toTopOf="@+id/questm1" />
+
+    <include
+        android:id="@+id/landm5"
+        layout="@layout/land_card"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@id/roadm5"
+        app:layout_constraintEnd_toStartOf="@+id/roadm7"
+        app:layout_constraintHorizontal_chainStyle="spread"
+        app:layout_constraintStart_toStartOf="@id/boardImage"
+        app:layout_constraintTop_toBottomOf="@id/roadm6" />
+
+    <include
+        android:id="@+id/roadm7"
+        layout="@layout/road_card"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toStartOf="@+id/landm2"
+        app:layout_constraintStart_toEndOf="@+id/landm5"
+        app:layout_constraintTop_toTopOf="@id/landm5" />
+
+    <include
+        android:id="@+id/landm2"
+        layout="@layout/land_card"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="@id/boardImage"
+        app:layout_constraintStart_toEndOf="@+id/roadm7"
+        app:layout_constraintTop_toTopOf="@+id/roadm7" />
+
+    <include
+        android:id="@+id/roadm5"
+        layout="@layout/road_card"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@id/landm4"
+        app:layout_constraintEnd_toStartOf="@+id/questm2"
+        app:layout_constraintHorizontal_chainStyle="spread"
+        app:layout_constraintStart_toStartOf="@id/boardImage"
+        app:layout_constraintTop_toTopOf="@+id/landm5" />
+
+    <include
+        android:id="@+id/questm2"
+        layout="@layout/quest_card"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toStartOf="@+id/roadm3"
+        app:layout_constraintStart_toEndOf="@+id/roadm5"
+        app:layout_constraintTop_toTopOf="@+id/roadm5" />
+
+    <include
+        android:id="@+id/roadm3"
+        layout="@layout/road_card"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="@id/boardImage"
+        app:layout_constraintStart_toEndOf="@+id/questm2"
+        app:layout_constraintTop_toTopOf="@+id/questm2" />
+
+    <include
+        android:id="@+id/landm4"
+        layout="@layout/land_card"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="@id/boardImage"
+        app:layout_constraintEnd_toStartOf="@+id/roadm4"
+        app:layout_constraintHorizontal_chainStyle="spread"
+        app:layout_constraintStart_toStartOf="@id/boardImage"
+        app:layout_constraintTop_toBottomOf="@id/roadm5" />
+
+    <include
+        android:id="@+id/roadm4"
+        layout="@layout/road_card"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toStartOf="@+id/landm3"
+        app:layout_constraintStart_toEndOf="@+id/landm4"
+        app:layout_constraintTop_toTopOf="@+id/landm4" />
+
+    <include
+        android:id="@+id/landm3"
+        layout="@layout/land_card"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="@id/boardImage"
+        app:layout_constraintStart_toEndOf="@+id/roadm4"
+        app:layout_constraintTop_toTopOf="@+id/landm4" />
+
+    <include
+        android:id="@+id/personalStorage"
+        layout="@layout/quest_small_card"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintStart_toStartOf="@+id/boardImage"
+        app:layout_constraintTop_toBottomOf="@+id/boardImage" />
+
+    <include
+        layout="@layout/hand_card"
+        android:id="@+id/storage0"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toEndOf="@+id/personalStorage"
+        app:layout_constraintTop_toTopOf="@+id/personalStorage" />
+
+    <include
+        layout="@layout/hand_card"
+        android:id="@+id/storage1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toEndOf="@+id/storage0"
+        app:layout_constraintTop_toTopOf="@+id/personalStorage" />
+    <include
+        layout="@layout/hand_card"
+        android:id="@+id/storage2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toEndOf="@+id/storage1"
+        app:layout_constraintTop_toTopOf="@+id/personalStorage" />
+    <include
+        layout="@layout/hand_card"
+        android:id="@+id/storage3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toEndOf="@+id/storage2"
+        app:layout_constraintTop_toTopOf="@+id/personalStorage" />
+    <include
+        layout="@layout/hand_card"
+        android:id="@+id/storage4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toEndOf="@+id/storage3"
+        app:layout_constraintTop_toTopOf="@+id/personalStorage" />
+
+    <include
+        android:id="@+id/quest0"
+        layout="@layout/quest_small_card"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="@+id/personalStorage"
+        app:layout_constraintTop_toBottomOf="@+id/personalStorage" />
+
+    <TextView
+        android:id="@+id/drawPile"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:background="@drawable/add_library"
+        android:text="99"
+        android:shadowColor="#000"
+        android:shadowDx="0"
+        android:shadowDy="0"
+        android:shadowRadius="10"
+        app:layout_constraintBottom_toTopOf="@+id/discardPile"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/include5"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintStart_toEndOf="@+id/recyclerView"
+        app:layout_constraintTop_toTopOf="@+id/recyclerView"
+        app:layout_constraintVertical_chainStyle="packed" />
 
-
-    <include
-        android:id="@+id/handm1"
-        layout="@layout/fcardm"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="15dp"
-        android:layout_marginRight="15dp"
-        app:layout_constraintEnd_toStartOf="@+id/include7"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/include7" />
-
-    <include
-        android:id="@+id/include7"
-        layout="@layout/fcardm"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="14dp"
-        android:layout_marginRight="14dp"
-        app:layout_constraintEnd_toStartOf="@+id/include8"
-        app:layout_constraintStart_toEndOf="@+id/handm1"
-        app:layout_constraintTop_toTopOf="@+id/include8" />
-
-    <include
-        android:id="@+id/include8"
-        layout="@layout/fcardm"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginRight="16dp"
+    <TextView
+        android:id="@+id/discardPile"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/tent"
+        android:shadowColor="#000"
+        android:shadowDx="0"
+        android:shadowDy="0"
+        android:shadowRadius="10"
+        android:text="99"
+        android:textAppearance="@style/whiteText"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/include7"
-        app:layout_constraintTop_toBottomOf="@+id/include6" />
+        app:layout_constraintStart_toEndOf="@+id/recyclerView"
+        app:layout_constraintTop_toBottomOf="@+id/drawPile" />
+
+    <include
+        android:id="@+id/aHandCard"
+        layout="@layout/hand_card"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="@+id/recyclerView"
+        app:layout_constraintTop_toTopOf="@+id/recyclerView" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="370dp"
+        android:layout_height="@dimen/board_card_height"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
