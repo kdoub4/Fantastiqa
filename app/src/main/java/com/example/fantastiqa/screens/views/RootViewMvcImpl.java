@@ -495,7 +495,7 @@ public class RootViewMvcImpl implements ViewMvc, handAdapter.HandClickListener  
 		builder.show();
     }
 
-	@Override
+	//@Override
     public void beginReleaseCards() {
         for (Card releasable : mListener.beginReleaseCard()) {
 			mAdapter.setCardEnabled(releasable,true);
@@ -585,7 +585,7 @@ public class RootViewMvcImpl implements ViewMvc, handAdapter.HandClickListener  
 	}
 	
 	public void onStorageClick(View v){
-		if (v.getTag() instanceof Card) mListener.discardFromStorage((Card)v.getTag());
+		//if (v.getTag() instanceof Card) mListener.discardFromStorage((Card)v.getTag());
 	}
 	
 	@Override
