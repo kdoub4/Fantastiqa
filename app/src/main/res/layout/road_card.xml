@@ -1,28 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/cv"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    app:contentPadding="6dp"
-    app:cardCornerRadius="14dp"
     android:layout_gravity="center"
-    android:layout_marginBottom="@dimen/md_keylines"
     android:layout_marginLeft="@dimen/md_keylines"
     android:layout_marginRight="@dimen/md_keylines"
-    app:rippleColor="@color/colorAccent"
+    android:layout_marginBottom="@dimen/md_keylines"
     android:clickable="true"
     android:enabled="true"
     android:foreground="?attr/selectableItemBackground"
-    >
+    app:cardCornerRadius="10dp"
+    app:contentPadding="2dp"
+    app:rippleColor="@color/colorAccent">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/cardConstraint"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        >
+        android:layout_height="wrap_content">
 
         <ImageView
             android:id="@+id/cardImage"
@@ -50,8 +47,8 @@
         <ImageView
             android:id="@+id/power1"
             style="@style/symbolLayout"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="@id/cardImage"
+            app:layout_constraintTop_toTopOf="@id/cardImage"
             app:srcCompat="@drawable/broom" />
 
         <ImageView
@@ -65,23 +62,23 @@
         <ImageView
             android:id="@+id/ability"
             style="@style/symbolLayout"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="@id/cardImage"
+            app:layout_constraintTop_toTopOf="@id/cardImage"
             app:srcCompat="@mipmap/ic_launcher" />
 
         <ImageView
             android:id="@+id/subdueBy"
             style="@style/symbolLayout"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="@id/cardImage"
+            app:layout_constraintEnd_toEndOf="@id/cardImage"
             app:srcCompat="@drawable/water" />
 
         <ImageView
             android:id="@+id/gem"
             style="@style/symbolLayout"
             android:visibility="invisible"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="@id/cardImage"
+            app:layout_constraintStart_toStartOf="@id/cardImage"
             app:srcCompat="@drawable/diamond" />
 
 

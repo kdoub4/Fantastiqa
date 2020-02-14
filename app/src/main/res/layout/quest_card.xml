@@ -1,22 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/cv"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    app:contentPadding="6dp"
-    app:cardCornerRadius="14dp"
     android:layout_gravity="center"
-    android:layout_marginBottom="@dimen/md_keylines"
     android:layout_marginLeft="@dimen/md_keylines"
     android:layout_marginRight="@dimen/md_keylines"
-    app:rippleColor="@color/colorAccent"
+    android:layout_marginBottom="@dimen/md_keylines"
     android:clickable="true"
     android:enabled="true"
     android:foreground="?attr/selectableItemBackground"
-    >
+    app:cardCornerRadius="10dp"
+    app:contentPadding="2dp"
+    app:rippleColor="@color/colorAccent">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/cardConstraint"

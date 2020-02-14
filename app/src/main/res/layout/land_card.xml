@@ -7,16 +7,16 @@
 	android:padding="1dp">
 
 
-	<ImageView
-		android:id="@+id/landImage"
-		android:layout_width="105dp"
-		android:layout_height="80dp"
-		android:scaleType="fitXY"
-		card_view:layout_constraintBottom_toBottomOf="parent"
-		card_view:layout_constraintEnd_toEndOf="parent"
-		card_view:layout_constraintStart_toStartOf="parent"
-		card_view:layout_constraintTop_toTopOf="parent"
-		card_view:srcCompat="@drawable/hills" />
+    <ImageView
+        android:id="@+id/landImage"
+        android:layout_width="100dp"
+        android:layout_height="70dp"
+        android:scaleType="fitXY"
+        card_view:layout_constraintBottom_toBottomOf="parent"
+        card_view:layout_constraintEnd_toEndOf="parent"
+        card_view:layout_constraintStart_toStartOf="parent"
+        card_view:layout_constraintTop_toTopOf="parent"
+        card_view:srcCompat="@drawable/hills" />
 
 	<ImageView
 		android:id="@+id/tower"

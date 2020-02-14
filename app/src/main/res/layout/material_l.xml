@@ -11,12 +11,52 @@
     <ImageView
         android:id="@+id/boardImage"
         android:layout_width="0dp"
-        android:layout_height="450dp"
+        android:layout_height="420dp"
         android:scaleType="fitXY"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:srcCompat="@tools:sample/backgrounds/scenic" />
+
+    <include
+        android:id="@+id/roadm1"
+        layout="@layout/road_card"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="@+id/landm6"
+        app:layout_constraintEnd_toStartOf="@+id/landm1"
+        app:layout_constraintStart_toEndOf="@+id/landm6"
+        app:layout_constraintTop_toTopOf="@+id/landm6" />
+
+    <include
+        android:id="@+id/landm1"
+        layout="@layout/land_card"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="@id/boardImage"
+        app:layout_constraintStart_toEndOf="@id/roadm1"
+        app:layout_constraintTop_toTopOf="@+id/landm6" />
+
+
+    <include
+        android:id="@+id/roadm6"
+        layout="@layout/road_card"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@id/landm5"
+        app:layout_constraintStart_toStartOf="@+id/roadm5"
+        app:layout_constraintTop_toBottomOf="@+id/landm6" />
+
+    <include
+        android:id="@+id/landm4"
+        layout="@layout/land_card"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="@id/boardImage"
+        app:layout_constraintEnd_toStartOf="@+id/roadm4"
+        app:layout_constraintHorizontal_chainStyle="spread"
+        app:layout_constraintStart_toStartOf="@id/boardImage"
+        app:layout_constraintTop_toBottomOf="@id/roadm5" />
 
     <include
         android:id="@+id/landm6"
@@ -31,52 +71,14 @@
         app:layout_constraintVertical_chainStyle="spread" />
 
     <include
-        android:id="@+id/roadm1"
+        android:id="@+id/roadm5"
         layout="@layout/road_card"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintEnd_toStartOf="@+id/landm1"
-        app:layout_constraintStart_toEndOf="@+id/landm6"
-        app:layout_constraintTop_toTopOf="@+id/landm6" />
-
-    <include
-        android:id="@+id/landm1"
-        layout="@layout/land_card"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="@id/boardImage"
-        app:layout_constraintStart_toEndOf="@id/roadm1"
-        app:layout_constraintTop_toTopOf="@+id/roadm1" />
-
-
-    <include
-        android:id="@+id/roadm6"
-        layout="@layout/road_card"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toTopOf="@id/landm5"
-        app:layout_constraintEnd_toStartOf="@+id/questm1"
-        app:layout_constraintHorizontal_chainStyle="spread"
-        app:layout_constraintStart_toStartOf="@id/boardImage"
-        app:layout_constraintTop_toBottomOf="@+id/landm6" />
-
-    <include
-        android:id="@+id/questm1"
-        layout="@layout/quest_card"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintEnd_toStartOf="@+id/roadm2"
-        app:layout_constraintStart_toEndOf="@+id/roadm6"
-        app:layout_constraintTop_toTopOf="@+id/roadm6" />
-
-    <include
-        android:id="@+id/roadm2"
-        layout="@layout/road_card"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="@id/boardImage"
-        app:layout_constraintStart_toEndOf="@+id/questm1"
-        app:layout_constraintTop_toTopOf="@+id/questm1" />
+        app:layout_constraintBottom_toTopOf="@id/landm4"
+        app:layout_constraintEnd_toEndOf="@+id/landm5"
+        app:layout_constraintStart_toStartOf="@+id/landm5"
+        app:layout_constraintTop_toBottomOf="@+id/landm5" />
 
     <include
         android:id="@+id/landm5"
@@ -90,13 +92,31 @@
         app:layout_constraintTop_toBottomOf="@id/roadm6" />
 
     <include
+        android:id="@+id/questm1"
+        layout="@layout/quest_card"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="@+id/roadm1"
+        app:layout_constraintStart_toStartOf="@+id/roadm1"
+        app:layout_constraintTop_toTopOf="@+id/roadm6" />
+
+    <include
+        android:id="@+id/roadm2"
+        layout="@layout/road_card"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="@+id/landm1"
+        app:layout_constraintStart_toStartOf="@+id/landm1"
+        app:layout_constraintTop_toTopOf="@+id/questm1" />
+
+    <include
         android:id="@+id/roadm7"
         layout="@layout/road_card"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toStartOf="@+id/landm2"
         app:layout_constraintStart_toEndOf="@+id/landm5"
-        app:layout_constraintTop_toTopOf="@id/landm5" />
+        app:layout_constraintTop_toTopOf="@+id/landm5" />
 
     <include
         android:id="@+id/landm2"
@@ -105,17 +125,6 @@
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="@id/boardImage"
         app:layout_constraintStart_toEndOf="@+id/roadm7"
-        app:layout_constraintTop_toTopOf="@+id/roadm7" />
-
-    <include
-        android:id="@+id/roadm5"
-        layout="@layout/road_card"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toTopOf="@id/landm4"
-        app:layout_constraintEnd_toStartOf="@+id/questm2"
-        app:layout_constraintHorizontal_chainStyle="spread"
-        app:layout_constraintStart_toStartOf="@id/boardImage"
         app:layout_constraintTop_toTopOf="@+id/landm5" />
 
     <include
@@ -123,8 +132,8 @@
         layout="@layout/quest_card"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintEnd_toStartOf="@+id/roadm3"
-        app:layout_constraintStart_toEndOf="@+id/roadm5"
+        app:layout_constraintEnd_toEndOf="@+id/roadm7"
+        app:layout_constraintStart_toStartOf="@+id/roadm7"
         app:layout_constraintTop_toTopOf="@+id/roadm5" />
 
     <include
@@ -132,26 +141,16 @@
         layout="@layout/road_card"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="@id/boardImage"
-        app:layout_constraintStart_toEndOf="@+id/questm2"
+        app:layout_constraintEnd_toEndOf="@+id/landm2"
+        app:layout_constraintStart_toStartOf="@+id/landm2"
         app:layout_constraintTop_toTopOf="@+id/questm2" />
-
-    <include
-        android:id="@+id/landm4"
-        layout="@layout/land_card"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="@id/boardImage"
-        app:layout_constraintEnd_toStartOf="@+id/roadm4"
-        app:layout_constraintHorizontal_chainStyle="spread"
-        app:layout_constraintStart_toStartOf="@id/boardImage"
-        app:layout_constraintTop_toBottomOf="@id/roadm5" />
 
     <include
         android:id="@+id/roadm4"
         layout="@layout/road_card"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="@+id/landm4"
         app:layout_constraintEnd_toStartOf="@+id/landm3"
         app:layout_constraintStart_toEndOf="@+id/landm4"
         app:layout_constraintTop_toTopOf="@+id/landm4" />
@@ -171,68 +170,173 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
         app:layout_constraintStart_toStartOf="@+id/boardImage"
-        app:layout_constraintTop_toBottomOf="@+id/boardImage" />
+        app:layout_constraintTop_toBottomOf="@+id/status" />
 
     <include
-        layout="@layout/hand_card"
         android:id="@+id/storage0"
+        layout="@layout/hand_card"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:translationZ="2dp"
         app:layout_constraintStart_toEndOf="@+id/personalStorage"
         app:layout_constraintTop_toTopOf="@+id/personalStorage" />
 
     <include
-        layout="@layout/hand_card"
         android:id="@+id/storage1"
+        layout="@layout/hand_card"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:translationZ="2dp"
         app:layout_constraintStart_toEndOf="@+id/storage0"
         app:layout_constraintTop_toTopOf="@+id/personalStorage" />
+
     <include
-        layout="@layout/hand_card"
         android:id="@+id/storage2"
+        layout="@layout/hand_card"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:translationZ="2dp"
         app:layout_constraintStart_toEndOf="@+id/storage1"
         app:layout_constraintTop_toTopOf="@+id/personalStorage" />
+
     <include
-        layout="@layout/hand_card"
         android:id="@+id/storage3"
+        layout="@layout/hand_card"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:translationZ="2dp"
         app:layout_constraintStart_toEndOf="@+id/storage2"
         app:layout_constraintTop_toTopOf="@+id/personalStorage" />
+
     <include
-        layout="@layout/hand_card"
         android:id="@+id/storage4"
+        layout="@layout/hand_card"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:translationZ="2dp"
         app:layout_constraintStart_toEndOf="@+id/storage3"
         app:layout_constraintTop_toTopOf="@+id/personalStorage" />
+
+    <TextView
+        android:id="@+id/status"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Status"
+        app:layout_constraintEnd_toStartOf="@+id/nextButton"
+        app:layout_constraintStart_toStartOf="@+id/boardImage"
+        app:layout_constraintTop_toBottomOf="@+id/boardImage" />
 
     <include
         android:id="@+id/quest0"
         layout="@layout/quest_small_card"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="@+id/personalStorage"
-        app:layout_constraintTop_toBottomOf="@+id/personalStorage" />
+        app:layout_constraintStart_toEndOf="@+id/personalStorage"
+        app:layout_constraintTop_toBottomOf="@+id/status" />
+
+    <Button
+        android:id="@+id/nextButton"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:insetTop="0dp"
+        android:insetBottom="0dp"
+        android:padding="0dp"
+        android:text="Done"
+        android:textSize="8sp"
+        app:layout_constraintBottom_toBottomOf="@+id/status"
+        app:layout_constraintEnd_toEndOf="@+id/boardImage"
+        app:layout_constraintStart_toEndOf="@+id/status"
+        app:layout_constraintTop_toBottomOf="@+id/boardImage" />
+
+    <TextView
+        android:id="@+id/gems"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/diamond"
+        android:text="99"
+        app:layout_constraintBottom_toTopOf="@+id/drawPile"
+        app:layout_constraintEnd_toEndOf="@+id/boardImage" />
+
+    <Button
+        android:id="@+id/buttonMove"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:padding="0dp"
+        android:text="Move"
+        android:textSize="8sp"
+        app:layout_constraintBottom_toTopOf="@+id/recyclerView"
+        app:layout_constraintEnd_toStartOf="@+id/buttonTower"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/buttonTower"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Tower Visit"
+        android:textSize="8sp"
+        app:layout_constraintBottom_toTopOf="@+id/recyclerView"
+        app:layout_constraintEnd_toStartOf="@+id/buttonFreeActions"
+        app:layout_constraintStart_toEndOf="@+id/buttonMove" />
+
+    <Button
+        android:id="@+id/buttonFreeActions"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Free Actions"
+        android:textSize="8sp"
+        app:layout_constraintBottom_toTopOf="@+id/recyclerView"
+        app:layout_constraintEnd_toStartOf="@+id/buttonQuest"
+        app:layout_constraintStart_toEndOf="@+id/buttonTower" />
+
+    <Button
+        android:id="@+id/buttonQuest"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Complete Quest"
+        android:textSize="8sp"
+        app:layout_constraintBottom_toTopOf="@+id/recyclerView"
+        app:layout_constraintStart_toEndOf="@+id/buttonFreeActions" />
+
+    <TextView
+        android:id="@+id/carpet"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="56dp"
+        android:background="@drawable/stars"
+        android:text="3"
+        app:layout_constraintBottom_toTopOf="@+id/drawPile"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/gems" />
+
+    <TextView
+        android:id="@+id/reshuffle"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:background="@drawable/tent"
+        android:text="3"
+        app:layout_constraintBottom_toTopOf="@+id/gems"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/gems" />
 
     <TextView
         android:id="@+id/drawPile"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="0dp"
         android:background="@drawable/add_library"
-        android:text="99"
         android:shadowColor="#000"
         android:shadowDx="0"
         android:shadowDy="0"
         android:shadowRadius="10"
+        android:text="99"
         app:layout_constraintBottom_toTopOf="@+id/discardPile"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/recyclerView"
+        app:layout_constraintStart_toStartOf="@+id/gems"
         app:layout_constraintTop_toTopOf="@+id/recyclerView"
         app:layout_constraintVertical_chainStyle="packed" />
 
@@ -249,7 +353,7 @@
         android:textAppearance="@style/whiteText"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/recyclerView"
+        app:layout_constraintStart_toStartOf="@+id/gems"
         app:layout_constraintTop_toBottomOf="@+id/drawPile" />
 
     <include
