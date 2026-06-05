@@ -7,10 +7,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
-import android.util.Log;
-
-import android.graphics.Color;
-
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
@@ -18,7 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.fantastiqa.R;
 import com.example.fantastiqa.GameState.Card;
 import com.example.fantastiqa.GameState.CreatureCard;
-import com.example.fantastiqa.GameState.Symbol;
+import ca.kevin.worth.outlandiqa.Model.Symbol;
 
 public class handAdapter extends RecyclerView.Adapter<handAdapter.cardViewHolder>{
 

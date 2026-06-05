@@ -1,5 +1,7 @@
 package com.example.fantastiqa.GameState;
 
+import ca.kevin.worth.outlandiqa.Region;
+
 public class Road extends Area{
     public CreatureCard creature;
     public boolean gem;

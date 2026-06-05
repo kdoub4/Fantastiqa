@@ -5,7 +5,7 @@ import android.view.View;
 
 import com.example.fantastiqa.GameState.Card;
 import com.example.fantastiqa.GameState.Quest;
-import com.example.fantastiqa.GameState.Region;
+import ca.kevin.worth.outlandiqa.Model.Region;
 import com.example.fantastiqa.GameState.Road;
 import com.example.fantastiqa.screens.GameStatus;
 import com.example.fantastiqa.screens.spaceRegion;

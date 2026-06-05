@@ -2,6 +2,9 @@ package com.example.fantastiqa.GameState;
 
 import java.util.ArrayList;
 
+import ca.kevin.worth.outlandiqa.Model.Ability;
+import ca.kevin.worth.outlandiqa.Model.Symbol;
+
 public class CreatureCard extends Card {
     public boolean gem;
     public Ability ability;
@@ -40,6 +43,17 @@ enum CreatureCards {
     Bear(true, Ability.TOWER_KEY, Symbol.HELMET, Symbol.BAT, Symbol.BAT),
     Fairies(false, Ability.MAGIC_CARPET, Symbol.BAT, Symbol.WAND, Symbol.WAND)
     ;
+    CreatureCards(boolean gem, Ability ability, Symbol subdueBy, Symbol ... value) {
+        this.gem = gem;
+        this.ability = ability;
+        this.value1 = value[0];
+        if (value.length>1) {
+            this.value2 = value[1];
+        } else {
+            this.value2 = Symbol.NONE;
+        }
+        this.subduedBy = subdueBy;
+    }
 
     public boolean isGem() {
         return gem;
@@ -68,17 +82,7 @@ enum CreatureCards {
 
     private final Symbol subduedBy;
 
-    CreatureCards(boolean gem, Ability ability, Symbol subdueBy, Symbol ... value) {
-        this.gem = gem;
-        this.ability = ability;
-        this.value1 = value[0];
-        if (value.length>1) {
-            this.value2 = value[1];
-        } else {
-            this.value2 = Symbol.NONE;
-        }
-        this.subduedBy = subdueBy;
-    }
+
 
 }
 

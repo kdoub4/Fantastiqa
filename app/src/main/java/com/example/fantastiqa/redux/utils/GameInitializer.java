@@ -7,14 +7,14 @@ import com.example.fantastiqa.GameState.Card;
 import com.example.fantastiqa.GameState.Quest;
 import com.example.fantastiqa.GameState.CreatureCard;
 import com.example.fantastiqa.GameState.Artifact;
-import com.example.fantastiqa.GameState.Player;
-import com.example.fantastiqa.GameState.RegionName;
-import com.example.fantastiqa.GameState.TowerName;
-import com.example.fantastiqa.GameState.Region;
+import ca.kevin.worth.outlandiqa.Model.Player;
+import ca.kevin.worth.outlandiqa.Model.RegionName;
+
+import ca.kevin.worth.outlandiqa.Model.Region;
 import com.example.fantastiqa.GameState.Road;
-import com.example.fantastiqa.GameState.Symbol;
+import ca.kevin.worth.outlandiqa.Model.Symbol;
 import com.example.fantastiqa.GameState.CreatureCards;
-import com.example.fantastiqa.GameState.Ability;
+import ca.kevin.worth.outlandiqa.Model.Ability;
 
 import java.util.ArrayList;
 import java.util.Collections;

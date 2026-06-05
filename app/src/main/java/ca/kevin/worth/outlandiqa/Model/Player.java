@@ -1,8 +1,13 @@
-package com.example.fantastiqa.GameState;
+package ca.kevin.worth.outlandiqa.Model;
+
+import com.example.fantastiqa.GameState.Card;
+import com.example.fantastiqa.GameState.CreatureCard;
+import com.example.fantastiqa.GameState.Deck;
 
 import java.util.ArrayList;
 import java.util.List;
 
+//TODO convert to Kotlin and redux model
 public class Player {
     public List<Card> quests = new ArrayList<>();
     public Deck<Card> deck;
@@ -30,8 +35,8 @@ public class Player {
 		ArrayList<Card> deckSetup = new ArrayList<>();
         for (CreatureCards aCard: CreatureCards.values()
              ) {
-            if (aCard.getValue2()==Symbol.NONE) {
-                deckSetup.add(new CreatureCard(aCard.name(), Symbol.NONE, false, Ability.NONE, aCard.getValue1()));
+            if (aCard.getValues().length == 1) {
+                deckSetup.add(new CreatureCard(aCard.name(), Symbol.NONE, false, Ability.NONE, aCard.getValues()[0]));
             }
         }
         deckSetup.add(new CreatureCard("Peaceful Dragon", Symbol.NONE,false, Ability.DRAGON, Symbol.NONE));

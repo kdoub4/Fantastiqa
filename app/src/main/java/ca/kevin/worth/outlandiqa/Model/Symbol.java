@@ -1,4 +1,4 @@
-package com.example.fantastiqa.GameState;
+package ca.kevin.worth.outlandiqa.Model;
 
 public enum Symbol {
     NONE,

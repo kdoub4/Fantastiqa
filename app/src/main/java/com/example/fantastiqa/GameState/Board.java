@@ -4,8 +4,6 @@ import android.util.Pair;
 
 import com.google.common.graph.MutableNetwork;
 import com.google.common.graph.NetworkBuilder;
-import com.google.common.graph.ElementOrder;
-import com.google.common.graph.Network;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,6 +11,10 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+
+import ca.kevin.worth.outlandiqa.Region;
+import ca.kevin.worth.outlandiqa.Model.RegionName;
+import ca.kevin.worth.outlandiqa.Model.TowerName;
 
 public class Board {
     public final List<Quest> quests = new ArrayList<>(2);

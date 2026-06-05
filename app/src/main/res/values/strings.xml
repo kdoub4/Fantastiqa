@@ -4,5 +4,6 @@
     <string name="Vps">VP : %1d</string>
     <string name="Deck">Deck: %1d</string>
     <string name="Discard">Discard: %1d</string>
+    <string name="title_activity_main">MainActivity</string>
 
 </resources>

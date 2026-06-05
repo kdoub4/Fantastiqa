@@ -14,25 +14,24 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.util.Log;
-import androidx.annotation.NonNull;
+
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.example.fantastiqa.GameState.Card;
-import com.example.fantastiqa.GameState.Player;
+import ca.kevin.worth.outlandiqa.Model.Player;
 import com.example.fantastiqa.GameState.Quest;
-import com.example.fantastiqa.GameState.Region;
+import ca.kevin.worth.outlandiqa.Model.Region;
 import com.example.fantastiqa.GameState.Road;
-import com.example.fantastiqa.GameState.Symbol;
-import com.example.fantastiqa.GameState.RegionName;
-import com.example.fantastiqa.GameState.TowerName;
+import ca.kevin.worth.outlandiqa.Model.Symbol;
+import ca.kevin.worth.outlandiqa.Model.RegionName;
+import ca.kevin.worth.outlandiqa.Model.TowerName;
 import com.example.fantastiqa.R;
 import com.example.fantastiqa.screens.GameStatus;
 import com.example.fantastiqa.screens.spaceRegion;
 import com.example.fantastiqa.screens.spaceRoad;
-import com.example.fantastiqa.screens.views.EqualSpacingItemDecoration;
 
 import java.util.ArrayList;
 import java.util.EnumMap;

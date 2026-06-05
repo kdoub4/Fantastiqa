@@ -1,7 +1,5 @@
 package com.example.fantastiqa.GameState;
 
-import android.util.Log;
-
 import org.apache.commons.collections4.CollectionUtils;
 import org.junit.Test;
 
@@ -13,6 +11,10 @@ import java.util.ListIterator;
 import java.util.Set;
 
 import static org.junit.Assert.*;
+
+import ca.kevin.worth.outlandiqa.Model.Ability;
+import ca.kevin.worth.outlandiqa.Model.RegionName;
+import ca.kevin.worth.outlandiqa.Model.Symbol;
 
 public class GameTest {
 

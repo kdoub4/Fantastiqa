@@ -1,13 +1,8 @@
 package com.example.fantastiqa.GameState;
 
-import android.widget.ArrayAdapter;
-
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.math3.util.Combinations;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -15,6 +10,12 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.ListIterator;
+
+import ca.kevin.worth.outlandiqa.Model.Ability;
+import ca.kevin.worth.outlandiqa.Model.Player;
+import ca.kevin.worth.outlandiqa.Region;
+import ca.kevin.worth.outlandiqa.Model.RegionName;
+import ca.kevin.worth.outlandiqa.Model.Symbol;
 
 public class Game {
     public Board board;

@@ -1,10 +1,10 @@
 package com.example.fantastiqa.GameState;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
+
+import ca.kevin.worth.outlandiqa.Model.RegionName;
+import ca.kevin.worth.outlandiqa.Model.Symbol;
 
 public class Quest extends Card {
     public int vps;
