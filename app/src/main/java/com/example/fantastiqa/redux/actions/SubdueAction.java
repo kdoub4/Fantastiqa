@@ -1,8 +1,8 @@
 package com.example.fantastiqa.redux.actions;
 
 import com.example.fantastiqa.redux.Action;
-import com.example.fantastiqa.GameState.Road;
-import com.example.fantastiqa.GameState.CreatureCard;
+import com.example.fantastiqa.gameState.Road;
+import com.example.fantastiqa.gameState.CreatureCard;
 import java.util.Set;
 
 /**

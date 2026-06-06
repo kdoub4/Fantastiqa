@@ -1,8 +1,5 @@
-package com.example.fantastiqa.GameState;
+package com.example.fantastiqa.gameState;
 
-import androidx.annotation.NonNull;
-
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.ListIterator;
 

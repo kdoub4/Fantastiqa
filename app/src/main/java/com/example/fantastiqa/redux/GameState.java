@@ -1,12 +1,12 @@
 package com.example.fantastiqa.redux;
 
-import com.example.fantastiqa.GameState.Board;
-import com.example.fantastiqa.GameState.Deck;
-import com.example.fantastiqa.GameState.Card;
-import com.example.fantastiqa.GameState.Quest;
-import com.example.fantastiqa.GameState.Player;
-import com.example.fantastiqa.GameState.CreatureCard;
-import com.example.fantastiqa.GameState.Artifact;
+import com.example.fantastiqa.gameState.Board;
+import com.example.fantastiqa.gameState.Deck;
+import com.example.fantastiqa.gameState.Card;
+import com.example.fantastiqa.gameState.Quest;
+import com.example.fantastiqa.gameState.Player;
+import com.example.fantastiqa.gameState.CreatureCard;
+import com.example.fantastiqa.gameState.Artifact;
 
 import java.util.Collections;
 import java.util.List;

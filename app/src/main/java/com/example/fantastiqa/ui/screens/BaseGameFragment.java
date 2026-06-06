@@ -29,7 +29,7 @@ public abstract class BaseGameFragment extends Fragment {
         super.onCreate(savedInstanceState);
         
         // Get the shared GameViewModel
-        gameViewModel = new ViewModelProvider(requireActivity()).get(GameViewModel.class);
+        gameViewModel = new ViewModelProvider(requireActivity(), new ViewModelProvider.NewInstanceFactory()).get(GameViewModel.class);
         
         // If this is the first fragment, initialize the game
         if (gameViewModel.getCurrentGameState() == null) {

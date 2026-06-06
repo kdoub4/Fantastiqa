@@ -1,6 +1,4 @@
-package com.example.fantastiqa.GameState;
-
-import android.util.Log;
+package com.example.fantastiqa.gameState;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.junit.Test;
@@ -13,6 +11,8 @@ import java.util.ListIterator;
 import java.util.Set;
 
 import static org.junit.Assert.*;
+
+import com.example.fantastiqa.pieces.RegionName;
 
 public class GameTest {
 

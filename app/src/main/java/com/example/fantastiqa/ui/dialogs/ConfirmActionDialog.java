@@ -41,7 +41,7 @@ public class ConfirmActionDialog extends DialogFragment {
     
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        gameViewModel = new ViewModelProvider(requireActivity()).get(GameViewModel.class);
+        gameViewModel = new ViewModelProvider(requireActivity(), new ViewModelProvider.NewInstanceFactory()).get(GameViewModel.class);
         
         String title = getArguments() != null ? getArguments().getString(ARG_TITLE) : "Confirm";
         String message = getArguments() != null ? getArguments().getString(ARG_MESSAGE) : "Are you sure?";

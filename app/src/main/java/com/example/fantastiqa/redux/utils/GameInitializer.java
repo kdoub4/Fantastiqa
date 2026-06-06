@@ -1,20 +1,8 @@
 package com.example.fantastiqa.redux.utils;
 
 import com.example.fantastiqa.redux.GameState;
-import com.example.fantastiqa.GameState.Board;
-import com.example.fantastiqa.GameState.Deck;
-import com.example.fantastiqa.GameState.Card;
-import com.example.fantastiqa.GameState.Quest;
-import com.example.fantastiqa.GameState.CreatureCard;
-import com.example.fantastiqa.GameState.Artifact;
-import com.example.fantastiqa.GameState.Player;
-import com.example.fantastiqa.GameState.RegionName;
-import com.example.fantastiqa.GameState.TowerName;
-import com.example.fantastiqa.GameState.Region;
-import com.example.fantastiqa.GameState.Road;
-import com.example.fantastiqa.GameState.Symbol;
-import com.example.fantastiqa.GameState.CreatureCards;
-import com.example.fantastiqa.GameState.Ability;
+import com.example.fantastiqa.gameState.*;
+import com.example.fantastiqa.pieces.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -40,9 +28,9 @@ public class GameInitializer {
         Deck<Artifact> artifactDeck = new Deck<>(new ArrayList<>());  // TODO: Populate with artifacts
         
         // Set up quests on board
-        List<Card> initialQuests = questDeck.draw(2);
-        for (Card questCard : initialQuests) {
-            board.quests.add((Quest) questCard);
+        List<Quest> initialQuests = questDeck.draw(2);
+        for (Quest questCard : initialQuests) {
+            board.quests.add(questCard);
         }
         
         // Place creatures on roads

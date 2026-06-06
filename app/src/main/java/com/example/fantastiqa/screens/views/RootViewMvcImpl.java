@@ -14,25 +14,24 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.util.Log;
-import androidx.annotation.NonNull;
+
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
-import com.example.fantastiqa.GameState.Card;
-import com.example.fantastiqa.GameState.Player;
-import com.example.fantastiqa.GameState.Quest;
-import com.example.fantastiqa.GameState.Region;
-import com.example.fantastiqa.GameState.Road;
-import com.example.fantastiqa.GameState.Symbol;
-import com.example.fantastiqa.GameState.RegionName;
-import com.example.fantastiqa.GameState.TowerName;
+import com.example.fantastiqa.gameState.Card;
+import com.example.fantastiqa.gameState.Player;
+import com.example.fantastiqa.gameState.Quest;
+import com.example.fantastiqa.gameState.Region;
+import com.example.fantastiqa.gameState.Road;
+import com.example.fantastiqa.gameState.Symbol;
+import com.example.fantastiqa.pieces.RegionName;
+import com.example.fantastiqa.pieces.TowerName;
 import com.example.fantastiqa.R;
 import com.example.fantastiqa.screens.GameStatus;
 import com.example.fantastiqa.screens.spaceRegion;
 import com.example.fantastiqa.screens.spaceRoad;
-import com.example.fantastiqa.screens.views.EqualSpacingItemDecoration;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -127,7 +126,7 @@ public class RootViewMvcImpl implements ViewMvc, handAdapter.HandClickListener  
         mHandRV.setLayoutManager(layoutManager);
         mHandRV.setHasFixedSize( false);
         mHandRV.addItemDecoration(new EqualSpacingItemDecoration(16));
-        mAdapter = new handAdapter(MAX_HAND_SIZE, this);
+        mAdapter = new handAdapter(startingHandSize, this);
         mHandRV.setAdapter(mAdapter);
 
 
@@ -304,17 +303,17 @@ public class RootViewMvcImpl implements ViewMvc, handAdapter.HandClickListener  
         road1 = mRootView.findViewById(R.id.road1);
         road2 = mRootView.findViewById(R.id.road2);
         road3 = mRootView.findViewById(R.id.road3);
-        road4 = mRootView.findViewById(R.id.road4);
+        road4 = mRootView.findViewById(R.id.road4_2);
         road5 = mRootView.findViewById(R.id.road5);
         road6 = mRootView.findViewById(R.id.road6);
-        road7 = mRootView.findViewById(R.id.road7);
+        road7 = mRootView.findViewById(R.id.road7_2);
 
         road1c = mRootView.findViewById(R.id.roadc1);
         road2c = mRootView.findViewById(R.id.roadc2);
         road3c = mRootView.findViewById(R.id.roadc3);
         road4c = mRootView.findViewById(R.id.roadc4);
         road5c = mRootView.findViewById(R.id.roadc5);
-        road6c = mRootView.findViewById(R.id.roadc6);
+        road6c = mRootView.findViewById(R.id.roadc6_2);
         road7c = mRootView.findViewById(R.id.roadc7);
 
         publicQuest1 = mRootView.findViewById(R.id.publicQuest1);

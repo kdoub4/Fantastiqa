@@ -1,13 +1,12 @@
 package com.example.fantastiqa;
 
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 import java.util.HashSet;
 
-import com.example.fantastiqa.GameState.Board;
-import com.example.fantastiqa.GameState.TowerName;
-import com.example.fantastiqa.GameState.Region;
+import com.example.fantastiqa.gameState.Board;
+import com.example.fantastiqa.pieces.TowerName;
+import com.example.fantastiqa.gameState.Region;
 
 public class BoardTest {
 	

@@ -28,7 +28,7 @@ public class GameActivity extends AppCompatActivity {
         
         // Get or create the GameViewModel
         // It will survive configuration changes (screen rotation, etc.)
-        gameViewModel = new ViewModelProvider(this).get(GameViewModel.class);
+        gameViewModel = new ViewModelProvider(this, new ViewModelProvider.NewInstanceFactory()).get(GameViewModel.class);
         
         // If this is the first time, initialize the game
         if (gameViewModel.getCurrentGameState() == null) {

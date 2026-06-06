@@ -12,16 +12,16 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import com.example.fantastiqa.GameState.Ability;
-import com.example.fantastiqa.GameState.Card;
-import com.example.fantastiqa.GameState.CreatureCard;
-import com.example.fantastiqa.GameState.Deck;
-import com.example.fantastiqa.GameState.Game;
-import com.example.fantastiqa.GameState.Player;
-import com.example.fantastiqa.GameState.Quest;
-import com.example.fantastiqa.GameState.Region;
-import com.example.fantastiqa.GameState.Road;
-import com.example.fantastiqa.GameState.Symbol;
+import com.example.fantastiqa.gameState.Ability;
+import com.example.fantastiqa.gameState.Card;
+import com.example.fantastiqa.gameState.CreatureCard;
+import com.example.fantastiqa.gameState.Deck;
+import com.example.fantastiqa.gameState.Game;
+import com.example.fantastiqa.gameState.Player;
+import com.example.fantastiqa.gameState.Quest;
+import com.example.fantastiqa.gameState.Region;
+import com.example.fantastiqa.gameState.Road;
+import com.example.fantastiqa.gameState.Symbol;
 import com.example.fantastiqa.screens.GameStatus;
 import com.example.fantastiqa.screens.spaceRegion;
 import com.example.fantastiqa.screens.spaceRoad;
@@ -139,12 +139,13 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-			case R.id.adventuring :
-				rootView.onMoveClick();
-				return true;
-			case R.id.discard:
-				finishPhase();
+		int id = item.getItemId();
+		if (id == R.id.adventuring) {
+			rootView.onMoveClick();
+			return true;
+		} else if (id == R.id.discard) {
+			finishPhase();
+			return true;
 		}
 		return false;
 	}

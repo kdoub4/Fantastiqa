@@ -1,10 +1,4 @@
-package com.example.fantastiqa.GameState;
+package com.example.fantastiqa.gameState
 
-public class Tower {
-    public String name;
-
-    public Tower(String name) {
-        this.name = name;
-    }
-}
+class Tower(var name: String?)
 

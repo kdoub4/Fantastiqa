@@ -32,9 +32,10 @@ public class MiddlewarePipeline {
     public Middleware build() {
         return (store, next, action) -> {
             if (middlewares.isEmpty()) {
-                return next.dispatch(action);
+                next.dispatch(action);
+                return;
             }
-            return executeMiddleware(0, store, next, action);
+            executeMiddleware(0, store, next, action);
         };
     }
 

@@ -3,10 +3,10 @@ package com.example.fantastiqa.screens.views;
 import android.os.Bundle;
 import android.view.View;
 
-import com.example.fantastiqa.GameState.Card;
-import com.example.fantastiqa.GameState.Quest;
-import com.example.fantastiqa.GameState.Region;
-import com.example.fantastiqa.GameState.Road;
+import com.example.fantastiqa.gameState.Card;
+import com.example.fantastiqa.gameState.Quest;
+import com.example.fantastiqa.gameState.Region;
+import com.example.fantastiqa.gameState.Road;
 import com.example.fantastiqa.screens.GameStatus;
 import com.example.fantastiqa.screens.spaceRegion;
 import com.example.fantastiqa.screens.spaceRoad;

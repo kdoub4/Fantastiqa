@@ -1,6 +1,6 @@
-package com.example.fantastiqa.GameState;
+package com.example.fantastiqa.gameState
 
-public enum Symbol {
+enum class Symbol {
     NONE,
     SWORD,
     FIRE,
@@ -10,7 +10,5 @@ public enum Symbol {
     NET,
     HELMET,
     BAT,
-    WAND;
-    //TODO SHOVEL
-
+    WAND //TODO SHOVEL
 }

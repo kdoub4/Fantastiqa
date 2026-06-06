@@ -2,6 +2,7 @@ package com.example.fantastiqa.redux;
 
 import com.example.fantastiqa.redux.actions.PlayerAction;
 import com.example.fantastiqa.redux.actions.TurnAction;
+import com.example.fantastiqa.redux.utils.GameInitializer;
 import java.util.ArrayList;
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package com.example.fantastiqa.GameState;
+package com.example.fantastiqa.gameState;
 
 import java.util.ListIterator;
 

@@ -12,10 +12,10 @@ import com.example.fantastiqa.redux.actions.QuestAction;
 import com.example.fantastiqa.redux.actions.SubdueAction;
 import com.example.fantastiqa.redux.actions.TurnAction;
 import com.example.fantastiqa.redux.utils.GameInitializer;
-import com.example.fantastiqa.GameState.Card;
-import com.example.fantastiqa.GameState.Quest;
-import com.example.fantastiqa.GameState.Road;
-import com.example.fantastiqa.GameState.CreatureCard;
+import com.example.fantastiqa.gameState.Card;
+import com.example.fantastiqa.gameState.Quest;
+import com.example.fantastiqa.gameState.Road;
+import com.example.fantastiqa.gameState.CreatureCard;
 
 import java.util.List;
 import java.util.Set;
@@ -39,8 +39,12 @@ public class GameViewModel extends ViewModel {
     
     private Store gameStore;
     private final MutableLiveData<GameState> gameStateLiveData = new MutableLiveData<>();
-    private final MutableLiveData<UIState> uiStateLiveData = new MutableLiveData<>(UIState.IDLE);
+    private final MutableLiveData<UIState> uiStateLiveData = new MutableLiveData<>();
     private final MutableLiveData<String> errorMessageLiveData = new MutableLiveData<>();
+
+    public GameViewModel() {
+        uiStateLiveData.setValue(UIState.IDLE);
+    }
     
     /**
      * UI state flags for managing loading, errors, dialogs, etc.

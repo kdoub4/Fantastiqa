@@ -1,13 +1,13 @@
-package com.example.fantastiqa.GameState;
+package com.example.fantastiqa.gameState;
 
-import android.widget.ArrayAdapter;
+import com.example.fantastiqa.pieces.RegionName;
+import com.example.fantastiqa.pieces.CreatureCards;
+import com.example.fantastiqa.gameState.Symbol;
+import com.example.fantastiqa.gameState.Ability;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.math3.util.Combinations;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -20,7 +20,7 @@ public class Game {
     public Board board;
     public int VPgoal=4;
     public Deck<Card> creatureDeck;
-    public Deck<Artifact> artifactDeck;
+    public Deck<ArtifactCard> artifactDeck;
     public Deck<CreatureCard> bazaarDeck;
     public Deck<Quest> questDeck;
     public List<Player> players = new ArrayList<>();

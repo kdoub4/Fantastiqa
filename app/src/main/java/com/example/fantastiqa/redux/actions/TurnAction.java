@@ -1,7 +1,8 @@
 package com.example.fantastiqa.redux.actions;
 
 import com.example.fantastiqa.redux.Action;
-import com.example.fantastiqa.GameState.GameState;
+import com.example.fantastiqa.gameState.*;
+import com.example.fantastiqa.redux.GameState;
 
 /**
  * Actions related to game turns and phases

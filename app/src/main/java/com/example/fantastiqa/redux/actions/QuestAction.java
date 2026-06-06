@@ -1,8 +1,8 @@
 package com.example.fantastiqa.redux.actions;
 
 import com.example.fantastiqa.redux.Action;
-import com.example.fantastiqa.GameState.Quest;
-import com.example.fantastiqa.GameState.Card;
+import com.example.fantastiqa.gameState.Quest;
+import com.example.fantastiqa.gameState.Card;
 import java.util.List;
 
 /**

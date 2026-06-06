@@ -1,4 +1,6 @@
-package com.example.fantastiqa.GameState;
+package com.example.fantastiqa.gameState;
+
+import com.example.fantastiqa.pieces.CreatureCards;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -29,7 +29,7 @@ public class GameErrorDialog extends DialogFragment {
     
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        gameViewModel = new ViewModelProvider(requireActivity()).get(GameViewModel.class);
+        gameViewModel = new ViewModelProvider(requireActivity(), new ViewModelProvider.NewInstanceFactory()).get(GameViewModel.class);
         
         String message = getArguments() != null ? getArguments().getString(ARG_MESSAGE) : "Unknown error";
         

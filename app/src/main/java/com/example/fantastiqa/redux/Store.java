@@ -2,7 +2,7 @@ package com.example.fantastiqa.redux;
 
 import kotlinx.coroutines.flow.MutableStateFlow;
 import kotlinx.coroutines.flow.StateFlow;
-import kotlinx.coroutines.flow.AsFlowKt;
+import kotlinx.coroutines.flow.StateFlowKt;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +29,7 @@ public class Store {
      */
     public Store(GameState initialState) {
         this.gameEngine = new GameEngine();
-        this.stateFlow = new MutableStateFlow<>(initialState);
+        this.stateFlow = StateFlowKt.MutableStateFlow(initialState);
         this.listeners = new ArrayList<>();
     }
 
