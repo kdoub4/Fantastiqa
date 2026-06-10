@@ -200,16 +200,25 @@ public class MainActivity extends AppCompatActivity implements ViewMvc.ViewMvcLi
         if (currentPlayer.getVps() >= theGame.VPgoal ) {
             toast("Game Over " + currentPlayer.name );
         }
+        
+        
+        List<Road> newRoads = List<Road>();
+        Road newRoad;
         for (Road aRoad : theGame.board.roads()) {
             if (aRoad.creature == emptyRoadCard) {
                 Card nextCard = theGame.creatureDeck.drawOne();
                 if (nextCard instanceof CreatureCard) {
+                  //newRoad = aroa
                     aRoad.creature = (CreatureCard)nextCard;
+                    
                 }
                 else {
-                    //Event?
+                    //Event? Can we fill the board first? or just return
                 }
             }
+          newRoads.add(aRoad)
+        }
+        
         }
 
         for (Quest newQuest : theGame.questDeck.draw(2-theGame.board.quests.size())) {

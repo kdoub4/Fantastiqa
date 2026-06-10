@@ -155,6 +155,26 @@ public class GameEngine {
     }
 
     private GameState handleNextTurn(GameState state, TurnAction action) {
+        
+        //refill board
+        if (state.currentPlayer.getVps() >= theGame.VPgoal ) {
+            toast("Game Over " + currentPlayer.name );
+        }
+        for (Road aRoad :  theGame.board.roads()) {
+            if (aRoad.creature == emptyRoadCard) {
+                Card nextCard = theGame.creatureDeck.drawOne();
+                if (nextCard instanceof CreatureCard) {
+                    aRoad.creature = (CreatureCard)nextCard;
+                }
+                else {
+                    //Event?
+                }
+            }
+        }
+
+        for (Quest newQuest : theGame.questDeck.draw(2-theGame.board.quests.size())) {
+            theGame.board.quests.add(newQuest);
+        }
         // Advance to next player
         int nextPlayerIndex = (state.currentPlayerIndex + 1) % state.players.size();
         
