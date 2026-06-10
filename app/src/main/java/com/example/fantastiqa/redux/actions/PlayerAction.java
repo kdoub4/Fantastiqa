@@ -17,7 +17,13 @@ public class PlayerAction extends Action {
         GAIN_TROPHIES,
         LOSE_TROPHIES,
         USE_TENT,
-        STORE_CARD_FOR_QUEST
+        STORE_CARD_FOR_QUEST,
+        USE_ABILITY,
+        STORE_IN_BACKPACK,
+        RELEASE_CARDS,
+        GAIN_CARD,
+        START_TOWER_DRAW,
+        RESOLVE_TOWER_DRAW
     }
 
     protected final int playerIndex;
@@ -28,6 +34,13 @@ public class PlayerAction extends Action {
         this.playerIndex = playerIndex;
         this.actionType = actionType;
         this.payload = payload;
+    }
+
+    public com.example.fantastiqa.gameState.Player getCurrentPlayer(com.example.fantastiqa.redux.GameState state) {
+        if (state.players != null && playerIndex >= 0 && playerIndex < state.players.size()) {
+            return state.players.get(playerIndex);
+        }
+        return null;
     }
 
     public int getPlayerIndex() {

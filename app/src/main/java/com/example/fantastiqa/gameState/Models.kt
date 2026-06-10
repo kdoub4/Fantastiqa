@@ -20,7 +20,7 @@ data class Quest(
     @JvmField val doubleReq: Symbol,
     @JvmField val tripleReq: Symbol,
     @JvmField val land: RegionName,
-    @JvmField val stored: MutableList<Card> = mutableListOf()
+    @JvmField val stored: List<Card> = emptyList()
 ) : Card(_id, _name) {
     constructor(name: String, vps: Int, gems: Int, doubleReq: Symbol, tripleReq: Symbol, land: RegionName) :
             this(name, name, name, vps, gems, doubleReq, tripleReq, land)
@@ -34,12 +34,53 @@ data class Quest(
     fun getDoubleRequirement(): Symbol = doubleReq
     fun getTripleRequirement(): Symbol = tripleReq
 
-    fun getRequirements(): List<Symbol> = listOf(doubleReq, tripleReq)
+    fun getRequirements(): List<Symbol> {
+        val list = mutableListOf<Symbol>()
+        if (doubleReq != Symbol.NONE) {
+            repeat(2) { list.add(doubleReq) }
+        }
+        if (tripleReq != Symbol.NONE) {
+            repeat(3) { list.add(tripleReq) }
+        }
+        return list
+    }
+
+    fun canStoreCard(card: Card): Boolean {
+        if (card !is CreatureCard) return false
+        val reqs = getRequirements()
+        val fulfilled = getFulfilledIndices()
+        
+        if (fulfilled.size >= reqs.size) return false
+
+        // Check if card matches any unmet requirement
+        for (i in reqs.indices) {
+            if (i !in fulfilled && card.values.contains(reqs[i])) {
+                return true
+            }
+        }
+        return false
+    }
+
+    fun getFulfilledIndices(): Set<Int> {
+        val reqs = getRequirements()
+        val fulfilled = mutableSetOf<Int>()
+        val providedSymbols = stored.filterIsInstance<CreatureCard>().flatMap { it.values }.toMutableList()
+
+        for (i in reqs.indices) {
+            val req = reqs[i]
+            if (providedSymbols.remove(req)) {
+                fulfilled.add(i)
+            }
+        }
+        return fulfilled
+    }
+
+    fun withIncrementedVp(): Quest = copy(vps = vps + 1)
 }
 
 data class PlayerQuest(
     val quest: Quest,
-    val stored: MutableList<Card> = mutableListOf()
+    val stored: List<Card> = emptyList()
 )
 
 class ArtifactCard(id: String, name: String, val cost: Int) : Card(id, name)

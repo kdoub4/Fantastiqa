@@ -16,7 +16,7 @@ public class BoardTest {
 	public void getTowerMatch_Quest() {
 		
 		Region start = null;
-		for (Region aRegion : theBoard.regionsRoads.nodes()) {
+		for (Region aRegion : theBoard.regions()) {
 			if (aRegion.tower == TowerName.QUEST) {
 				start = aRegion;
 				break;
@@ -31,7 +31,7 @@ public class BoardTest {
 	public void confirmUniqueRegions() {
 		//6 unique names
 		HashSet<String> regionNames = new HashSet();
-		for (Region aRegion : theBoard.regionsRoads.nodes()) {
+		for (Region aRegion : theBoard.regions()) {
 			assert(regionNames.add(aRegion.name.toString()));
 		}
 		assert(regionNames.size()==6);
@@ -42,7 +42,7 @@ public class BoardTest {
 		//3 unique towers 2 each
 		HashSet<String> towerNames1 = new HashSet();
 		HashSet<String> towerNames2 = new HashSet();
-		for (Region aRegion : theBoard.regionsRoads.nodes()) {
+		for (Region aRegion : theBoard.regions()) {
 			if (!towerNames1.add(aRegion.tower.toString()))
 				assert(towerNames2.add(aRegion.tower.toString()));
 		}
@@ -55,7 +55,7 @@ public class BoardTest {
 	@Test
 	public void boardBuild_7Uniqueroads() {
 		HashSet<Object> roads = new HashSet();
-		for (Object aRoad : theBoard.regionsRoads.edges()) {
+		for (Object aRoad : theBoard.roads()) {
 			assert(roads.add(aRoad));
 		}
 		assert(roads.size()==7);

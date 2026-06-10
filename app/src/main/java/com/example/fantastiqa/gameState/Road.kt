@@ -1,24 +1,21 @@
 package com.example.fantastiqa.gameState
 
-class Road : Area {
-    @JvmField
-    var creature: CreatureCard? = null
-    @JvmField
-    var gem: Boolean = false
+import java.util.UUID
 
-    constructor()
+/**
+ * Immutable Road representation.
+ */
+data class Road(
+    @JvmField val creature: CreatureCard? = null,
+    @JvmField val gem: Boolean = false,
+    @JvmField val id: String = UUID.randomUUID().toString()
+) : Area() {
+    
+    fun getName(): String? = creature?._name
 
-    fun getName(): String? {
-        return creature?.name
-    }
-
-    constructor(creature: CreatureCard, gem: Boolean) {
-        this.creature = creature
-        this.gem = gem
-    }
-
-    fun getConnectedRegion(starter: Region?): Region? {
-        val reg0 = adjacencies.get(0) as Region?
-        return if (reg0 === starter) adjacencies.get(1) as Region? else reg0
+    fun getConnectedRegion(starter: Region?, board: Board): Region? {
+        val adjacent = board.getAdjacentAreas(starter!!)
+        // Logic depends on finding the other side of this road in the board
+        return adjacent.find { it?.first == this }?.second as? Region
     }
 }

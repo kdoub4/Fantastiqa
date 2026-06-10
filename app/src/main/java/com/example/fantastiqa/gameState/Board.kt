@@ -3,91 +3,118 @@ package com.example.fantastiqa.gameState
 import android.util.Pair
 import com.example.fantastiqa.pieces.RegionName
 import com.example.fantastiqa.pieces.TowerName
-import com.google.common.graph.MutableNetwork
-import com.google.common.graph.NetworkBuilder
-import java.util.Arrays
-import java.util.LinkedList
-import java.util.Random
+import java.util.*
 
-class Board {
-    @JvmField
-    val quests: MutableList<Quest?> = ArrayList<Quest?>(2)
-    @JvmField
-    var regionsRoads: MutableNetwork<Region, Road?> =
-        NetworkBuilder.undirected().expectedEdgeCount(7).expectedNodeCount(6)
-            .build<Region, Road?>()
+/**
+ * Immutable Board representation.
+ */
+data class Board(
+    @JvmField val quests: List<Quest?> = listOf(null, null),
+    @JvmField val adjacencies: Map<Region, Map<Region, Road>> = emptyMap()
+) {
 
-    init {
-        val r = Random()
-
-        val regions: MutableList<RegionName?> =
-            ArrayList<RegionName?>(Arrays.asList<RegionName>(*RegionName.values()))
-        val towers: MutableList<TowerName?> =
-            ArrayList<TowerName?>(Arrays.asList<TowerName>(*TowerName.values()))
-        towers.addAll(Arrays.asList<TowerName>(*TowerName.values()))
-
-        while (regions.size > 0) {
-            regionsRoads.addNode(
-                Region(
-                    regions.removeAt(r.nextInt(regions.size))!!,
-                    towers.removeAt(r.nextInt(towers.size))!!
-                )
-            )
-        }
-
-        val regionsIter = regionsRoads.nodes().iterator()
-        if (regionsIter.hasNext()) {
-            var regionCount = 0
-            var regionMiddle1: Region? = null
-            var regionFirst = regionsIter.next()
-            val regionVeryFirst = regionFirst
-            while (regionsIter.hasNext()) {
-                val regionSecond = regionsIter.next()
-                if (regionCount == 1) {
-                    regionMiddle1 = regionFirst
-                }
-                if (regionCount == 4) {
-                    regionsRoads.addEdge(regionMiddle1!!, regionFirst, Road())
-                }
-                regionsRoads.addEdge(regionFirst, regionSecond, Road())
-                regionFirst = regionSecond
-                regionCount++
-            }
-            regionsRoads.addEdge(regionFirst, regionVeryFirst, Road())
-        }
+    /**
+     * Returns a new board with the quest at [index] replaced.
+     */
+    fun withQuest(index: Int, newQuest: Quest?): Board {
+        val newQuests = quests.toMutableList()
+        newQuests[index] = newQuest
+        return copy(quests = newQuests)
     }
 
-    fun getAdjacentAreas(starting: Region): MutableList<Pair<Road?, Region?>?> {
-        val result: MutableList<Pair<Road?, Region?>?> = LinkedList<Pair<Road?, Region?>?>()
-        for (adjRegion in regionsRoads.adjacentNodes(starting)) {
-            result.add(
-                Pair<Road?, Region?>(
-                    regionsRoads.edgeConnectingOrNull(starting, adjRegion),
-                    adjRegion
-                )
-            )
+    /**
+     * Returns a new board with the road between [r1] and [r2] replaced.
+     */
+    fun withRoad(r1: Region, r2: Region, newRoad: Road): Board {
+        val newAdjacencies = adjacencies.toMutableMap()
+        
+        val r1Map = newAdjacencies[r1]?.toMutableMap() ?: mutableMapOf()
+        r1Map[r2] = newRoad
+        newAdjacencies[r1] = r1Map
+
+        val r2Map = newAdjacencies[r2]?.toMutableMap() ?: mutableMapOf()
+        r2Map[r1] = newRoad
+        newAdjacencies[r2] = r2Map
+
+        return copy(adjacencies = newAdjacencies)
+    }
+
+    fun getAdjacentAreas(starting: Region): List<Pair<Road, Region>> {
+        return adjacencies[starting]?.map { (adjRegion, road) ->
+            Pair(road, adjRegion)
+        } ?: emptyList()
+    }
+
+    fun regions(): List<Region> = adjacencies.keys.toList()
+
+    fun roads(): List<Road> {
+        val identitySet = Collections.newSetFromMap(IdentityHashMap<Road, Boolean>())
+        adjacencies.values.forEach { innerMap ->
+            identitySet.addAll(innerMap.values)
         }
-        return result
-    }
-
-    fun regions(): MutableList<Region?> {
-        return ArrayList<Region?>(regionsRoads.nodes())
-    }
-
-    fun roads(): MutableList<Road?> {
-        return ArrayList<Road?>(regionsRoads.edges())
+        return identitySet.toList()
     }
 
     fun getTowerMatch(startRegion: Region): Region? {
-        for (aRegion in regionsRoads.nodes()) {
-            if (aRegion != startRegion && aRegion.tower == startRegion.tower) {
-                return aRegion
-            }
-        }
-        return null
+        return adjacencies.keys.find { it != startRegion && it.tower == startRegion.tower }
     }
 
-    fun getRoad(r1: Region, r2: Region): Road? {
-        return regionsRoads.edgeConnectingOrNull(r1, r2)
+    fun getRoad(r1: Region, r2: Region): Road? = adjacencies[r1]?.get(r2)
+
+    companion object {
+        /**
+         * Factory method to create an initial board.
+         */
+        @JvmStatic
+        fun createInitialBoard(): Board {
+            val r = Random()
+            val regionsNames = RegionName.values().toMutableList()
+            val towers = (TowerName.values().toList() + TowerName.values().toList()).toMutableList()
+
+            val regionNodes = mutableListOf<Region>()
+            while (regionsNames.isNotEmpty()) {
+                val region = Region(
+                    regionsNames.removeAt(r.nextInt(regionsNames.size)),
+                    towers.removeAt(r.nextInt(towers.size))
+                )
+                regionNodes.add(region)
+            }
+
+            var tempBoard = Board(adjacencies = regionNodes.associateWith { emptyMap<Region, Road>() })
+
+            if (regionNodes.isNotEmpty()) {
+                var regionMiddle1: Region? = null
+                var regionFirst = regionNodes[0]
+                val regionVeryFirst = regionFirst
+
+                for (i in 1 until regionNodes.size) {
+                    val regionSecond = regionNodes[i]
+                    if (i == 2) regionMiddle1 = regionNodes[1]
+                    
+                    if (i == 5 && regionMiddle1 != null) {
+                        tempBoard = tempBoard.addRoad(regionMiddle1, regionFirst, Road())
+                    }
+                    
+                    tempBoard = tempBoard.addRoad(regionFirst, regionSecond, Road())
+                    regionFirst = regionSecond
+                }
+                tempBoard = tempBoard.addRoad(regionFirst, regionVeryFirst, Road())
+            }
+            return tempBoard
+        }
+
+        private fun Board.addRoad(r1: Region, r2: Region, road: Road): Board {
+            val newAdjacencies = adjacencies.toMutableMap()
+            
+            val r1Map = newAdjacencies[r1]?.toMutableMap() ?: mutableMapOf()
+            r1Map[r2] = road
+            newAdjacencies[r1] = r1Map
+
+            val r2Map = newAdjacencies[r2]?.toMutableMap() ?: mutableMapOf()
+            r2Map[r1] = road
+            newAdjacencies[r2] = r2Map
+
+            return copy(adjacencies = newAdjacencies)
+        }
     }
 }

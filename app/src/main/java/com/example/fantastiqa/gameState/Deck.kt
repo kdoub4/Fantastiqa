@@ -1,48 +1,71 @@
-package com.example.fantastiqa.gameState;
+package com.example.fantastiqa.gameState
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*
 
-public class Deck <T extends Card> {
-	ArrayList<Card> deck= new ArrayList<>();
-	private ArrayList<Card> discardPile = new ArrayList<>();
-	
-	public Deck(ArrayList<T> initDeck) {
-		deck.addAll(initDeck);
-	}
+/**
+ * Immutable Deck implementation.
+ * Drawing a card returns a new Deck instance without the drawn card.
+ */
+data class Deck<T : Card> @JvmOverloads constructor(
+    @JvmField val cards: List<T> = emptyList(),
+    @JvmField val discardPile: List<T> = emptyList()
+) {
+    @JvmName("getSize")
+    fun size(): Int = cards.size
+    
+    @JvmName("getDiscardSize")
+    fun discardSize(): Int = discardPile.size
 
-	public int size() { return deck.size();}
-	public int discardSize() { return discardPile.size();}
+    fun sizeToString(): String = "Deck${cards.size} Discard${discardPile.size}"
 
-	public String sizeToString() {
-		return "Deck" + (deck.size()) + " Discard" + discardPile.size();
-	}
+    fun drawOne(): Pair<T?, Deck<T>> {
+        val result = draw(1)
+        return Pair(result.first.getOrNull(0), result.second)
+    }
 
-	public T drawOne() {
-		return draw(1).get(0);
-	}
+    fun draw(amount: Int): Pair<List<T>, Deck<T>> {
+        if (amount <= 0) return Pair(emptyList(), this)
 
-	public List<T> draw(int amount) {
-		List<T> result = new ArrayList<>(amount);
-		if (amount == 0) return result;
-		if (deck.size()<=0) {
-			shuffle(true);
-		}
-		result.add((T)deck.remove(0));
-		result.addAll(draw(amount-1));
-		return result;
-	}
+        if (cards.isEmpty() && discardPile.isEmpty()) return Pair(emptyList(), this)
 
-	public void discard(T aCard) {
-		discardPile.add(aCard);
-	}
+        val currentDeck = cards.ifEmpty {
+            cards + discardPile.shuffled()
+        }
 
-	public void shuffle(Boolean includeDiscard) {
-		if (includeDiscard) {
-			deck.addAll(discardPile);
-			discardPile.clear();
-		}
-		Collections.shuffle(deck);
-	}
+        val nextDiscard = if (cards.isEmpty()) emptyList() else discardPile
+
+        val drawn = currentDeck.take(amount)
+        val remaining = currentDeck.drop(amount)
+
+        val newDeck = Deck(remaining, nextDiscard)
+        
+        if (drawn.size < amount && newDeck.discardPile.isNotEmpty()) {
+            val (additionalDrawn, finalDeck) = newDeck.draw(amount - drawn.size)
+            return Pair(drawn + additionalDrawn, finalDeck)
+        }
+
+        return Pair(drawn, newDeck)
+    }
+
+    fun discard(card: T): Deck<T> {
+        return copy(discardPile = discardPile + card)
+    }
+
+    @JvmOverloads
+    fun shuffle(includeDiscard: Boolean = false): Deck<T> {
+        val newCards = if (includeDiscard) (cards + discardPile).shuffled() else cards.shuffled()
+        val newDiscard = if (includeDiscard) emptyList() else discardPile
+        return Deck(newCards, newDiscard)
+    }
+
+    fun remove(card: T): Deck<T> {
+        return copy(
+            cards = cards - card,
+            discardPile = discardPile - card
+        )
+    }
+
+    fun putOnBottom(newCards: List<T>): Deck<T> {
+        return copy(cards = cards + newCards)
+    }
 }

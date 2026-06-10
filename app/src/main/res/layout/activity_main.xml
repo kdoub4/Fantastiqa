@@ -556,6 +556,46 @@
                 android:textSize="8sp" />
         </TableRow>
 
+        <TableRow
+            android:id="@+id/towerActionsRow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:weightSum="4">
+
+            <Button
+                android:id="@+id/buttonTeleport"
+                style="@style/buttonLayout"
+                android:layout_column="0"
+                android:layout_weight="1"
+                android:text="Teleport"
+                android:textSize="8sp" />
+
+            <Button
+                android:id="@+id/buttonRelease"
+                style="@style/buttonLayout"
+                android:layout_column="1"
+                android:layout_weight="1"
+                android:text="Release"
+                android:textSize="8sp" />
+
+            <Button
+                android:id="@+id/buttonDraw"
+                style="@style/buttonLayout"
+                android:layout_column="2"
+                android:layout_weight="1"
+                android:text="Draw"
+                android:textSize="8sp" />
+
+            <Button
+                android:id="@+id/buttonExitTower"
+                style="@style/buttonLayout"
+                android:layout_column="3"
+                android:layout_weight="1"
+                android:text="Exit"
+                android:textSize="8sp" />
+        </TableRow>
+
         <TableRow style="@style/rowLayout">
 
             <TextView

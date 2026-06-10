@@ -1,177 +1,187 @@
-package com.example.fantastiqa.redux.utils;
+package com.example.fantastiqa.redux.utils
 
-import com.example.fantastiqa.redux.GameState;
-import com.example.fantastiqa.gameState.*;
-import com.example.fantastiqa.pieces.*;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import com.example.fantastiqa.gameState.*
+import com.example.fantastiqa.pieces.CreatureCards
+import com.example.fantastiqa.pieces.RegionName
+import com.example.fantastiqa.redux.GameState
 
 /**
  * Utility class for initializing a new game state.
  * This is used to set up the initial GameState that will be used by the Store.
  */
-public class GameInitializer {
-    
+object GameInitializer {
     /**
      * Create a new game with initialized state
      */
-    public static GameState initializeNewGame() {
-        // Create board with all regions and roads
-        Board board = new Board();
-        
+    @JvmStatic
+    fun initializeNewGame(): GameState {
+        // Create initial empty board structure
+        var board = Board.createInitialBoard()
+
         // Create and shuffle decks
-        Deck<Card> creatureDeck = initializeCreatureDeck();
-        Deck<CreatureCard> bazaarDeck = initializeBazaarDeck();
-        Deck<Quest> questDeck = initializeQuestDeck();
-        Deck<Artifact> artifactDeck = new Deck<>(new ArrayList<>());  // TODO: Populate with artifacts
-        
-        // Set up quests on board
-        List<Quest> initialQuests = questDeck.draw(2);
-        for (Quest questCard : initialQuests) {
-            board.quests.add(questCard);
+        var creatureDeck = initializeCreatureDeck()
+        val bazaarDeck = initializeBazaarDeck()
+        var questDeck = initializeQuestDeck()
+        val artifactDeck = Deck<Artifact>(emptyList(), emptyList())
+
+        // Set up initial quests on board
+        val (initialQuests, remainingQuestDeck) = questDeck.draw(2)
+        questDeck = remainingQuestDeck
+
+        val boardQuests = initialQuests.map { q ->
+            Quest(
+                q._id,
+                q._name,
+                q.title,
+                q.vps + 1,
+                q.gems,
+                q.doubleReq,
+                q.tripleReq,
+                q.land,
+                q.stored
+            )
         }
-        
+        board = board.copy(quests = boardQuests, adjacencies = board.adjacencies)
+
         // Place creatures on roads
-        for (Road road : board.roads()) {
-            CreatureCard roadCreature = (CreatureCard) creatureDeck.drawOne();
-            road.creature = roadCreature;
-            road.gem = roadCreature.gem;
+        for (road in board.roads()) {
+            val (card, nextDeck) = creatureDeck.drawOne()
+            val roadCreature = card as CreatureCard
+            creatureDeck = nextDeck
+
+            // Find regions for this road to update board immutably
+            var reg1: Region? = null
+            var reg2: Region? = null
+            for (r in board.regions()) {
+                val innerMap = board.adjacencies[r] ?: continue
+                for ((targetRegion, targetRoad) in innerMap) {
+                    if (targetRoad === road) {
+                        reg1 = r
+                        reg2 = targetRegion
+                        break
+                    }
+                }
+                if (reg1 != null) break
+            }
+
+            if (reg1 != null && reg2 != null) {
+                board = board.withRoad(reg1, reg2, Road(roadCreature, roadCreature.gem))
+            }
         }
+
+        // Create and initialize players
+        val startingRegion = board.regions().getOrElse(1) { board.regions().first() }
         
-        // Create players
-        List<Player> players = new ArrayList<>();
-        Player player1 = new Player("Player 1");
-        Player player2 = new Player("Player 2");
-        players.add(player1);
-        players.add(player2);
+        var player1 = Player("Player 1").drawCards(5)
+        //var player2 = Player("Player 2").drawCards(5)
+
+        // Add one quest to each player immutably
+        val (p1Quest, qDeck2) = questDeck.drawOne()
+        player1 = player1.copy(quests = player1.quests + listOfNotNull(p1Quest))
         
-        // Initialize players
-        Region startingRegion = (Region) board.regions().get(1);
-        startingRegion.players.add(player1);
-        startingRegion.players.add(player2);
+        //val (p2Quest, qDeck3) = qDeck2.drawOne()
+        //player2 = player2.copy(quests = player2.quests + listOfNotNull(p2Quest))
         
-        player1.drawCards(5);
-        player2.drawCards(5);
-        
-        player1.quests.add(questDeck.drawOne());
-        player2.quests.add(questDeck.drawOne());
-        
+        //questDeck = qDeck3
+        questDeck = qDeck2
+        val players = listOf(player1) //, player2)
+
+        // Initialize player positions
+        //TODO random or select
+        val playerPositions = mapOf(
+            player1.name to startingRegion)
+        //,player2.name to startingRegion)
+
         // Build and return initial game state
-        return new GameState.Builder()
-                .board(board)
-                .vpGoal(4)
-                .creatureDeck(creatureDeck)
-                .artifactDeck(artifactDeck)
-                .bazaarDeck(bazaarDeck)
-                .questDeck(questDeck)
-                .players(players)
-                .currentPlayerIndex(0)
-                .selectedCards(new ArrayList<>())
-                .gamePhase(GameState.GamePhase.PLAYER_TURN)
-                .isGameOver(false)
-                .build();
+        return GameState(
+            board = board,
+            vpGoal = 4,
+            creatureDeck = creatureDeck,
+            artifactDeck = artifactDeck,
+            bazaarDeck = bazaarDeck,
+            questDeck = questDeck,
+            players = players,
+            currentPlayerIndex = 0,
+            playerPositions = playerPositions,
+            selectedCards = emptyList(),
+            gamePhase = GameState.GamePhase.PLAYER_TURN,
+            isGameOver = false
+        )
     }
-    
+
     /**
      * Initialize the creature deck
      */
-    private static Deck<Card> initializeCreatureDeck() {
-        ArrayList<Card> tempDeck = new ArrayList<>();
-        ArrayList<Card> tempTop = new ArrayList<>();
-        
-        // Single symbol creatures (appear twice in top deck)
-        for (CreatureCards aCard : CreatureCards.values()) {
-            if (aCard.getValue2() == Symbol.NONE) {
-                for (int j = 0; j < 2; j++) {
-                    tempDeck.add(new CreatureCard(
-                            aCard.name(),
-                            aCard.getSubduedBy(),
-                            aCard.isGem(),
-                            aCard.isGem() ? Ability.NONE : aCard.getAbility(),
-                            aCard.getValue1()
-                    ));
+    private fun initializeCreatureDeck(): Deck<Card> {
+        val singleSymbolCards = CreatureCards.entries
+            .filter { it.value2 == Symbol.NONE }
+            .flatMap { aCard ->
+                List(2) {
+                    CreatureCard(
+                        java.util.UUID.randomUUID().toString(),
+                        aCard.name,
+                        aCard.isGem,
+                        listOf(aCard.value1),
+                        aCard.subduedBy,
+                        if (aCard.isGem) Ability.NONE else aCard.ability
+                    )
                 }
-            }
-        }
-        
-        tempTop.addAll(tempDeck);
-        Collections.shuffle(tempTop);
-        tempDeck.clear();
-        
-        // Double symbol creatures (bottom deck)
-        for (CreatureCards aCard : CreatureCards.values()) {
-            if (aCard.getValue2() != Symbol.NONE) {
-                tempDeck.add(new CreatureCard(
-                        aCard.name(),
-                        aCard.getSubduedBy(),
-                        aCard.isGem(),
-                        aCard.isGem() ? Ability.NONE : aCard.getAbility(),
-                        aCard.getValue1(),
-                        aCard.getValue2()
-                ));
-                tempDeck.add(new CreatureCard(
-                        aCard.name(),
-                        aCard.getSubduedBy(),
-                        aCard.isGem(),
-                        aCard.isGem() ? Ability.NONE : aCard.getAbility(),
-                        aCard.getValue1(),
-                        aCard.getValue2()
-                ));
-            }
-        }
-        
-        Collections.shuffle(tempDeck);
-        tempTop.addAll(tempDeck);
-        
-        return new Deck<>(tempTop);
+            }.shuffled()
+
+        val doubleSymbolCards = CreatureCards.entries
+            .filter { it.value2 != Symbol.NONE }
+            .flatMap { aCard ->
+                List(2) {
+                    CreatureCard(
+                        java.util.UUID.randomUUID().toString(),
+                        aCard.name,
+                        aCard.isGem,
+                        listOf(aCard.value1, aCard.value2),
+                        aCard.subduedBy,
+                        if (aCard.isGem) Ability.NONE else aCard.ability
+                    )
+                }
+            }.shuffled()
+
+        return Deck<Card>(singleSymbolCards + doubleSymbolCards)
     }
-    
+
     /**
      * Initialize the bazaar deck
      */
-    private static Deck<CreatureCard> initializeBazaarDeck() {
-        ArrayList<CreatureCard> tempBazaar = new ArrayList<>();
-        
-        for (CreatureCards aCard : CreatureCards.values()) {
-            if (aCard.getValue2() != Symbol.NONE) {
-                for (int i = 0; i < 3; i++) {
-                    tempBazaar.add(new CreatureCard(
-                            aCard.name(),
-                            aCard.getSubduedBy(),
-                            false,
-                            aCard.getAbility(),
-                            aCard.getValue1(),
-                            aCard.getValue2()
-                    ));
+    private fun initializeBazaarDeck(): Deck<CreatureCard> {
+        val bazaarCards = CreatureCards.entries
+            .filter { it.value2 != Symbol.NONE }
+            .flatMap { aCard ->
+                List(3) {
+                    CreatureCard(
+                        java.util.UUID.randomUUID().toString(),
+                        aCard.name,
+                        false,
+                        listOf(aCard.value1, aCard.value2),
+                        aCard.subduedBy,
+                        aCard.ability
+                    )
                 }
             }
-        }
-        
-        Deck<CreatureCard> bazaarDeck = new Deck<>(tempBazaar);
-        bazaarDeck.shuffle(true);
-        return bazaarDeck;
+        return Deck(bazaarCards).shuffle(true)
     }
-    
+
     /**
      * Initialize the quest deck
      */
-    private static Deck<Quest> initializeQuestDeck() {
-        ArrayList<Quest> tempQuest = new ArrayList<>();
-        
-        tempQuest.add(new Quest("FIRE", 1, 3, Symbol.FIRE, Symbol.NONE, RegionName.WETLANDS));
-        tempQuest.add(new Quest("WATER", 1, 3, Symbol.WATER, Symbol.NONE, RegionName.FIELDS));
-        tempQuest.add(new Quest("BAT", 1, 3, Symbol.BAT, Symbol.NONE, RegionName.HIGHLANDS));
-        tempQuest.add(new Quest("BROOM", 1, 3, Symbol.BROOM, Symbol.NONE, RegionName.FIELDS));
-        tempQuest.add(new Quest("NET", 1, 3, Symbol.NET, Symbol.NONE, RegionName.HILLS));
-        tempQuest.add(new Quest("HELMET", 1, 3, Symbol.HELMET, Symbol.NONE, RegionName.TUNDRA));
-        tempQuest.add(new Quest("SWORD", 1, 3, Symbol.SWORD, Symbol.NONE, RegionName.HILLS));
-        tempQuest.add(new Quest("TOOTH", 1, 3, Symbol.TOOTH, Symbol.NONE, RegionName.TUNDRA));
-        tempQuest.add(new Quest("WAND", 1, 3, Symbol.WAND, Symbol.NONE, RegionName.WETLANDS));
-        
-        Deck<Quest> questDeck = new Deck<>(tempQuest);
-        questDeck.shuffle(true);
-        return questDeck;
+    private fun initializeQuestDeck(): Deck<Quest> {
+        val quests = listOf(
+            Quest(java.util.UUID.randomUUID().toString(), "FIRE Q", "FIRE Q", 1, 3, Symbol.FIRE, Symbol.NONE, RegionName.WETLANDS),
+            Quest(java.util.UUID.randomUUID().toString(), "WATER Q", "WATER Q", 1, 3, Symbol.WATER, Symbol.NONE, RegionName.FIELDS),
+            Quest(java.util.UUID.randomUUID().toString(), "BAT Q", "BAT Q", 1, 3, Symbol.BAT, Symbol.NONE, RegionName.HIGHLANDS),
+            Quest(java.util.UUID.randomUUID().toString(), "BROOM Q", "BROOM Q", 1, 3, Symbol.BROOM, Symbol.NONE, RegionName.FIELDS),
+            Quest(java.util.UUID.randomUUID().toString(), "NET Q", "NET Q", 1, 3, Symbol.NET, Symbol.NONE, RegionName.HILLS),
+            Quest(java.util.UUID.randomUUID().toString(), "HELMET Q", "HELMET Q", 1, 3, Symbol.HELMET, Symbol.NONE, RegionName.TUNDRA),
+            Quest(java.util.UUID.randomUUID().toString(), "SWORD Q", "SWORD Q", 1, 3, Symbol.SWORD, Symbol.NONE, RegionName.HILLS),
+            Quest(java.util.UUID.randomUUID().toString(), "TOOTH Q", "TOOTH Q", 1, 3, Symbol.TOOTH, Symbol.NONE, RegionName.TUNDRA),
+            Quest(java.util.UUID.randomUUID().toString(), "WAND Q", "WAND Q", 1, 3, Symbol.WAND, Symbol.NONE, RegionName.WETLANDS)
+        )
+        return Deck(quests).shuffle(true)
     }
 }

@@ -1,5 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: 'org.jetbrains.kotlin.android'
+apply plugin: 'org.jetbrains.kotlin.plugin.compose'
 
 android {
     namespace 'com.example.fantastiqa'
@@ -18,6 +19,18 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    buildFeatures {
+        compose true
+    }
+    sourceSets {
+        main {
+            java {
+                exclude '**/MainActivity.java'
+                exclude '**/Game.java'
+                exclude '**/RootViewMvcImpl.java'
+            }
+        }
+    }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
@@ -28,10 +41,17 @@ android {
 }
 
 dependencies {
+    implementation 'androidx.activity:activity-compose:1.13.0'
+    implementation 'androidx.compose.material3:material3:1.1.1'
+    implementation 'androidx.compose.ui:ui:1.5.0'
+    implementation 'androidx.compose.ui:ui-tooling-preview:1.5.0'
+    debugImplementation 'androidx.compose.ui:ui-tooling:1.5.0'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.10.0'
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'androidx.appcompat:appcompat:1.0.2'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     implementation 'com.google.guava:guava:23.5-android'
+    implementation 'com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava'
     implementation 'org.apache.commons:commons-collections4:4.4'
     implementation 'org.apache.commons:commons-math3:3.6.1'
     testImplementation 'junit:junit:4.12'

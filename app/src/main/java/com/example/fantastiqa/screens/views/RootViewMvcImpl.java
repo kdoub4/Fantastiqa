@@ -57,6 +57,12 @@ public class RootViewMvcImpl implements ViewMvc, handAdapter.HandClickListener  
     private Button doneButton;
     private Button storeQuestButton;
     private Button carpetButton;
+    private Button teleportButton;
+    private Button releaseButton;
+    private Button drawButton;
+    private Button exitTowerButton;
+    private TableRow towerActionsRow;
+    private TableRow mainActionsRow;
     
     private TextView land1;
     private TextView land2;
@@ -183,6 +189,21 @@ public class RootViewMvcImpl implements ViewMvc, handAdapter.HandClickListener  
                 onFlyingCarpetClick();
             }
         });
+
+        towerActionsRow = mRootView.findViewById(R.id.towerActionsRow);
+        mainActionsRow = (TableRow) moveButton.getParent();
+
+        teleportButton = mRootView.findViewById(R.id.buttonTeleport);
+        teleportButton.setOnClickListener(v -> mListener.towerTeleport());
+
+        releaseButton = mRootView.findViewById(R.id.buttonRelease);
+        releaseButton.setOnClickListener(v -> beginReleaseCards());
+
+        drawButton = mRootView.findViewById(R.id.buttonDraw);
+        drawButton.setOnClickListener(v -> beginTowerCards());
+
+        exitTowerButton = mRootView.findViewById(R.id.buttonExitTower);
+        exitTowerButton.setOnClickListener(v -> mListener.finishPhase());
         
         land1 = (TextView) mRootView.findViewById(R.id.land1);
         regionTextView.put(spaceRegion.NE,land1);
@@ -473,22 +494,7 @@ public class RootViewMvcImpl implements ViewMvc, handAdapter.HandClickListener  
 
 	@Override
 	public void onTowerVisitClick() {
-		AlertDialog.Builder builder = new AlertDialog.Builder(mRootView.getContext());
-		CharSequence[] items = {"Teleport","Cards","Remove"}; 
-		builder.setItems(items, new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int which) {
-				switch (which) {
-					case 0: mListener.towerTeleport(); break;
-					case 1: beginTowerCards(); break;// mListener.beginVisitTowerCards(); break;
-                    case 2:
-                        beginReleaseCards();
-                        break;
-
-				}
-			}
-		}
-		);
-		builder.show();
+        gameStateChange(GameStatus.TOWER_MENU);
     }
 
 	@Override
@@ -607,7 +613,13 @@ public class RootViewMvcImpl implements ViewMvc, handAdapter.HandClickListener  
 			setLandColor(Color.WHITE);
 			setStoredColor(Color.WHITE);
 			enableHandClicks(false);
+            mainActionsRow.setVisibility(View.VISIBLE);
+            towerActionsRow.setVisibility(View.GONE);
 			break;
+        case TOWER_MENU:
+            mainActionsRow.setVisibility(View.GONE);
+            towerActionsRow.setVisibility(View.VISIBLE);
+            break;
 		case STORING_PRIVATE:
 			//TODO is this controller logic
 			setHandColor(Color.YELLOW);

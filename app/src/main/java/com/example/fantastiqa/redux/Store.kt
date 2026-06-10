@@ -1,107 +1,88 @@
-package com.example.fantastiqa.redux;
+package com.example.fantastiqa.redux
 
-import kotlinx.coroutines.flow.MutableStateFlow;
-import kotlinx.coroutines.flow.StateFlow;
-import kotlinx.coroutines.flow.StateFlowKt;
-
-import java.util.ArrayList;
-import java.util.List;
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 /**
  * Central store for game state using reactive StateFlow.
  * The Store holds the current GameState and processes Actions through the GameEngine.
- * 
+ *
  * UI components observe the StateFlow and automatically recompose when state changes.
  * This implements the Observer pattern for reactive state management.
  */
-public class Store {
-    private final GameEngine gameEngine;
-    private final MutableStateFlow<GameState> stateFlow;
-    private final List<StateChangeListener> listeners;
+class Store(initialState: GameState) {
+    private val gameEngine = GameEngine()
+    
+    private val _stateFlow = MutableStateFlow(initialState)
+    
+    /**
+     * Get the StateFlow for reactive observation.
+     * Use this in Composable functions or with collectLatest in Coroutines.
+     */
+    val stateFlow: StateFlow<GameState> = _stateFlow.asStateFlow()
 
-    public interface StateChangeListener {
-        void onStateChanged(GameState oldState, GameState newState);
+    private val listeners = mutableListOf<StateChangeListener>()
+
+    /**
+     * Functional interface for state changes, compatible with Java SAM.
+     */
+    fun interface StateChangeListener {
+        fun onStateChanged(oldState: GameState, newState: GameState)
     }
 
     /**
-     * Create a new Store with an initial game state
-     * @param initialState The initial GameState
+     * Get the current immutable GameState.
+     * This is accessible from Java via getState().
      */
-    public Store(GameState initialState) {
-        this.gameEngine = new GameEngine();
-        this.stateFlow = StateFlowKt.MutableStateFlow(initialState);
-        this.listeners = new ArrayList<>();
-    }
-
-    /**
-     * Get the current game state
-     * @return The current immutable GameState
-     */
-    public GameState getState() {
-        return stateFlow.getValue();
-    }
-
-    /**
-     * Get the StateFlow for reactive observation
-     * @return StateFlow that emits whenever the state changes
-     */
-    public StateFlow<GameState> getStateFlow() {
-        return stateFlow;
-    }
+    val state: GameState get() = _stateFlow.value
 
     /**
      * Dispatch an action to the store.
      * The action is processed by the GameEngine, which returns a new state.
-     * If the new state is different, listeners are notified and the StateFlow is updated.
-     * 
+     * If the new state is different, the StateFlow is updated and listeners are notified.
+     *
      * @param action The action to dispatch
      */
-    public void dispatch(Action action) {
-        if (action == null) {
-            throw new IllegalArgumentException("Action cannot be null");
-        }
+    fun dispatch(action: Action) {
+        val currentState = state
+        val newState = gameEngine.reduce(currentState, action)
 
-        GameState currentState = getState();
-        GameState newState = gameEngine.reduce(currentState, action);
-
-        // Only update if state actually changed
-        if (newState != currentState) {
-            stateFlow.setValue(newState);
-            notifyListeners(currentState, newState);
+        // Only update if state actually changed (Redux principle)
+        if (newState !== currentState) {
+            _stateFlow.value = newState
+            notifyListeners(currentState, newState)
         }
     }
 
     /**
-     * Add a listener to be notified of state changes
-     * @param listener The listener to add
+     * Add a listener to be notified of state changes.
+     * Useful for legacy Java components or non-coroutine observers.
      */
-    public void subscribe(StateChangeListener listener) {
-        if (listener != null && !listeners.contains(listener)) {
-            listeners.add(listener);
+    fun subscribe(listener: StateChangeListener) {
+        if (listener !in listeners) {
+            listeners.add(listener)
         }
     }
 
     /**
-     * Remove a listener from state change notifications
-     * @param listener The listener to remove
+     * Remove a listener from state change notifications.
      */
-    public void unsubscribe(StateChangeListener listener) {
-        listeners.remove(listener);
+    fun unsubscribe(listener: StateChangeListener) {
+        listeners.remove(listener)
     }
 
     /**
-     * Notify all listeners of a state change
+     * Notify all listeners of a state change.
      */
-    private void notifyListeners(GameState oldState, GameState newState) {
-        for (StateChangeListener listener : listeners) {
-            listener.onStateChanged(oldState, newState);
-        }
+    private fun notifyListeners(oldState: GameState, newState: GameState) {
+        listeners.forEach { it.onStateChanged(oldState, newState) }
     }
 
     /**
-     * Clear all listeners (useful for cleanup)
+     * Clear all listeners (useful for cleanup).
      */
-    public void clearListeners() {
-        listeners.clear();
+    fun clearListeners() {
+        listeners.clear()
     }
 }

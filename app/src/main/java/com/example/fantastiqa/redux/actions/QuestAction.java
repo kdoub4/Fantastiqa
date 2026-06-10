@@ -16,7 +16,8 @@ public class QuestAction extends Action {
         COMPLETE_QUEST,
         STORE_CARD_FOR_QUEST,
         DRAW_QUEST,
-        QUEST_AVAILABLE
+        QUEST_AVAILABLE,
+        SELECT_QUEST
     }
 
     private final ActionType actionType;
