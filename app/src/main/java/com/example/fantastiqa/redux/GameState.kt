@@ -20,10 +20,10 @@ data class GameState(
     val vpGoal: Int = 4,
     
     // Deck management
-    val creatureDeck: Deck<Card>?,
-    val artifactDeck: Deck<Artifact>?,
-    val bazaarDeck: Deck<CreatureCard>?,
-    val questDeck: Deck<Quest>?,
+    val creatureDeck: Deck<Card>? = null,
+    val artifactDeck: Deck<Artifact>? = null,
+    val bazaarDeck: Deck<CreatureCard>? = null,
+    val questDeck: Deck<Quest>? = null,
     
     // Players and turn management
     @JvmField val players: List<Player> = emptyList(),

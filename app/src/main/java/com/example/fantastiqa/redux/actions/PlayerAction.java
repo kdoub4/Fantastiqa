@@ -23,7 +23,8 @@ public class PlayerAction extends Action {
         RELEASE_CARDS,
         GAIN_CARD,
         START_TOWER_DRAW,
-        RESOLVE_TOWER_DRAW
+        RESOLVE_TOWER_DRAW,
+        SELECT_PLUS_CARDS
     }
 
     protected final int playerIndex;

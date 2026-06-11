@@ -471,21 +471,39 @@ class GameEngine {
         val playerPos = state.playerPositions[player.name] ?: return state
         val tower = playerPos.tower ?: return state
 
+        // Check for PLUS_CARD ability in selected cards
+        val plusCards = state.selectedCards.filter { 
+            it is CreatureCard && it.ability == Ability.PLUS_CARD && it in player.hand
+        }.filterNotNull()
+        
+        val drawAmount = 3 + plusCards.size
+
         val result = when (tower) {
-            TowerName.BAZAAR -> state.bazaarDeck?.draw(3)
-            TowerName.QUEST -> state.questDeck?.draw(3)
-            TowerName.ARTIFACT -> state.artifactDeck?.draw(3)
+            TowerName.BAZAAR -> state.bazaarDeck?.draw(drawAmount)
+            TowerName.QUEST -> state.questDeck?.draw(drawAmount)
+            TowerName.ARTIFACT -> state.artifactDeck?.draw(drawAmount)
             else -> null
         }
 
         val drawn = result?.first ?: emptyList<Card>()
         val nextDeck = result?.second
 
+        // Discard the used plus cards
+        var updatedPlayer = player
+        if (plusCards.isNotEmpty()) {
+            updatedPlayer = player.discardFromHand(plusCards)
+        }
+        
+        val updatedPlayers = state.players.toMutableList()
+        updatedPlayers[action.playerIndex] = updatedPlayer
+
         return state.copy(
+            players = updatedPlayers,
             towerDrawnCards = drawn,
             bazaarDeck = if (tower == TowerName.BAZAAR) nextDeck as? Deck<CreatureCard> else state.bazaarDeck,
             questDeck = if (tower == TowerName.QUEST) nextDeck as? Deck<Quest> else state.questDeck,
-            artifactDeck = if (tower == TowerName.ARTIFACT) nextDeck as? Deck<Artifact> else state.artifactDeck
+            artifactDeck = if (tower == TowerName.ARTIFACT) nextDeck as? Deck<Artifact> else state.artifactDeck,
+            selectedCards = emptyList() // Clear selection after use
         )
     }
 
