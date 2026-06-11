@@ -16,7 +16,8 @@ data class Player(
     @JvmField val hand: List<Card> = emptyList(),
     @JvmField val quests: List<Card> = emptyList(),
     @JvmField val storage: List<Card> = emptyList(),
-    @JvmField val deck: Deck<Card> = Deck()
+    @JvmField val deck: Deck<Card> = Deck(),
+    @JvmField val isComputer: Boolean = false
 ) {
     fun getGems(): Int = gems
     fun getVps(): Int = vps
@@ -25,11 +26,17 @@ data class Player(
     fun getTents(): Int = tents
 
     /**
+     * Total cards owned by the player.
+     */
+    fun totalCardCount(): Int = hand.size + storage.size + deck.size() + deck.discardSize()
+
+    /**
      * Secondary constructor for initial setup
      */
-    constructor(thename: String) : this(
+    constructor(thename: String, isComputer: Boolean = false) : this(
         name = thename,
-        deck = createInitialDeck()
+        deck = createInitialDeck(),
+        isComputer = isComputer
     )
 
     override fun toString(): String = name

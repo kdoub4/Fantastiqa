@@ -12,7 +12,8 @@ public class SubdueAction extends Action {
     public enum ActionType {
         SUBDUE_CREATURE,
         CONQUER_ROAD,
-        PLACE_CREATURE_ON_ROAD
+        PLACE_CREATURE_ON_ROAD,
+        SELECT_ROAD
     }
 
     private final ActionType actionType;

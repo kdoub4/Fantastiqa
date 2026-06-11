@@ -31,6 +31,8 @@ import com.example.fantastiqa.gameState.*
 import com.example.fantastiqa.pieces.TowerName
 import com.example.fantastiqa.redux.*
 import com.example.fantastiqa.redux.actions.*
+import com.example.fantastiqa.redux.middleware.BasicComputerStrategy
+import com.example.fantastiqa.redux.middleware.ComputerPlayerMiddleware
 import com.example.fantastiqa.redux.utils.GameInitializer
 import com.example.fantastiqa.ui.*
 
@@ -49,9 +51,46 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun BoardGameScreen() {
-    val store = remember { Store(GameInitializer.initializeNewGame()) }
+    val store = remember { 
+        val s = Store(GameInitializer.initializeNewGame())
+        val middleware = ComputerPlayerMiddleware(s, BasicComputerStrategy())
+        s.subscribe(middleware)
+        s
+    }
     val state by store.stateFlow.collectAsState()
-    BoardGameContent(state = state, onAction = { store.dispatch(it) })
+    
+    Box {
+        BoardGameContent(state = state, onAction = { store.dispatch(it) })
+        
+        if (state.isGameOver) {
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                color = Color.Black.copy(alpha = 0.7f)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            "GAME OVER",
+                            style = MaterialTheme.typography.displayLarge,
+                            color = Color.White
+                        )
+                        val winner = state.players.maxByOrNull { it.totalCardCount() }
+                        Text(
+                            "${winner?.name ?: "Unknown"} Wins!",
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = Color.Yellow
+                        )
+                        Button(
+                            onClick = { /* Restart logic could go here */ },
+                            modifier = Modifier.padding(top = 20.dp)
+                        ) {
+                            Text("New Game")
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -59,7 +98,6 @@ fun BoardGameScreen() {
 fun BoardGameContent(state: GameState, onAction: (Action) -> Unit) {
     // UI Local selections (keeping some local for non-permanent board/road focus)
     var selectedRegion by remember { mutableStateOf<Region?>(null) }
-    var selectedRoad by remember { mutableStateOf<Road?>(null) }
     var towerMenuOpen by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -67,11 +105,11 @@ fun BoardGameContent(state: GameState, onAction: (Action) -> Unit) {
     ) { padding ->
         Column(modifier = Modifier.padding(padding).fillMaxSize().verticalScroll(rememberScrollState())) {
             // Top: Status Bar (stretches all the way across)
-            GameHeader(state, selectedRoad, onAction)
+            GameHeader(state, state.selectedRoad, onAction)
             BoardLayout(
                 state = state,
                 selectedRegion = selectedRegion,
-                selectedRoad = selectedRoad,
+                selectedRoad = state.selectedRoad,
                 onRegionSelect = { region ->
                     val currentRegion = state.playerPositions[state.currentPlayer?.name]
                     val hasRoad = currentRegion?.let { state.board?.getRoad(it, region) } != null
@@ -83,7 +121,7 @@ fun BoardGameContent(state: GameState, onAction: (Action) -> Unit) {
                     }
 
                     selectedRegion = region
-                    selectedRoad = null
+                    onAction(SubdueAction(SubdueAction.ActionType.SELECT_ROAD, state.currentPlayerIndex, null, null, null))
                     onAction(QuestAction(QuestAction.ActionType.SELECT_QUEST, state.currentPlayerIndex, null, emptyList()))
                 },
                 onRoadSelect = { road ->
@@ -94,15 +132,9 @@ fun BoardGameContent(state: GameState, onAction: (Action) -> Unit) {
 
                     if (destination != null && (state.selectedCards.isNotEmpty() || road.creature == null)) {
                         onAction(MoveAction(state.currentPlayerIndex, destination, MoveType.ADJACENT, useAbility = false))
-                        selectedRoad = null
                     } else {
-                        if (selectedRoad == road) {
-                            selectedRoad = null
-                        } else {
-                            selectedRoad = road
-                            selectedRegion = null
-                            onAction(QuestAction(QuestAction.ActionType.SELECT_QUEST, state.currentPlayerIndex, null, emptyList()))
-                        }
+                        onAction(SubdueAction(SubdueAction.ActionType.SELECT_ROAD, state.currentPlayerIndex, road, null, null))
+                        selectedRegion = null
                     }
                 }
             )
@@ -116,7 +148,7 @@ fun BoardGameContent(state: GameState, onAction: (Action) -> Unit) {
                         onQuestSelect = { quest ->
                             onAction(QuestAction(QuestAction.ActionType.SELECT_QUEST, state.currentPlayerIndex, quest, emptyList()))
                             selectedRegion = null
-                            selectedRoad = null
+                            onAction(SubdueAction(SubdueAction.ActionType.SELECT_ROAD, state.currentPlayerIndex, null, null, null))
                         }
                     )
                     Spacer(modifier = Modifier.height(16.dp))
@@ -146,7 +178,7 @@ fun BoardGameContent(state: GameState, onAction: (Action) -> Unit) {
                         onTowerMenuToggle = { towerMenuOpen = it },
                         onRegionClear = { selectedRegion = null },
                         onCardClear = { /* Handled by Redux */ },
-                        onRoadClear = { selectedRoad = null },
+                        onRoadClear = { onAction(SubdueAction(SubdueAction.ActionType.SELECT_ROAD, state.currentPlayerIndex, null, null, null)) },
                         onAction = onAction,
                         onTowerDraw = {
                             onAction(PlayerAction(state.currentPlayerIndex, PlayerAction.ActionType.START_TOWER_DRAW, null))

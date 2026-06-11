@@ -73,24 +73,24 @@ object GameInitializer {
         val startingRegion = board.regions().getOrElse(1) { board.regions().first() }
         
         var player1 = Player("Player 1").drawCards(5)
-        //var player2 = Player("Player 2").drawCards(5)
+        var player2 = Player("Computer", isComputer = true).drawCards(5)
 
         // Add one quest to each player immutably
         val (p1Quest, qDeck2) = questDeck.drawOne()
         player1 = player1.copy(quests = player1.quests + listOfNotNull(p1Quest))
         
-        //val (p2Quest, qDeck3) = qDeck2.drawOne()
-        //player2 = player2.copy(quests = player2.quests + listOfNotNull(p2Quest))
+        val (p2Quest, qDeck3) = qDeck2.drawOne()
+        player2 = player2.copy(quests = player2.quests + listOfNotNull(p2Quest))
         
-        //questDeck = qDeck3
-        questDeck = qDeck2
-        val players = listOf(player1) //, player2)
+        questDeck = qDeck3
+        val players = listOf(player1, player2)
 
         // Initialize player positions
         //TODO random or select
         val playerPositions = mapOf(
-            player1.name to startingRegion)
-        //,player2.name to startingRegion)
+            player1.name to startingRegion,
+            player2.name to startingRegion
+        )
 
         // Build and return initial game state
         return GameState(

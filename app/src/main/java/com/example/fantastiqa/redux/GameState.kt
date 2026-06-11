@@ -8,6 +8,7 @@ import com.example.fantastiqa.gameState.Deck
 import com.example.fantastiqa.gameState.Player
 import com.example.fantastiqa.gameState.Quest
 import com.example.fantastiqa.gameState.Region
+import com.example.fantastiqa.gameState.Road
 
 /**
  * Immutable game state object that serves as the single source of truth.
@@ -36,6 +37,7 @@ data class GameState(
     // Card selection state
     val selectedCards: List<Card?> = emptyList(),
     val selectedQuest: Quest? = null,
+    val selectedRoad: Road? = null,
     val towerDrawnCards: List<Card> = emptyList(),
     
     // Game state flags

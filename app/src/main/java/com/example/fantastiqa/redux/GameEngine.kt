@@ -24,13 +24,27 @@ class GameEngine {
         requireNotNull(currentState) { "Current state cannot be null" }
         requireNotNull(action) { "Action cannot be null" }
 
-        return when (action) {
+        val newState = when (action) {
             is PlayerAction -> handlePlayerAction(currentState, action)
             is QuestAction -> handleQuestAction(currentState, action)
+            is SubdueAction -> handleSubdueAction(currentState, action)
             is CardAction -> handleCardAction(currentState, action)
             is TurnAction -> handleTurnAction(currentState, action)
             is MoveAction -> handleMovePlayer(currentState, action)
             else -> currentState
+        }
+
+        return checkWinConditions(newState)
+    }
+
+    private fun checkWinConditions(state: GameState): GameState {
+        if (state.isGameOver) return state
+        
+        val winner = state.players.find { it.totalCardCount() >= 25 }
+        return if (winner != null) {
+            state.copy(isGameOver = true)
+        } else {
+            state
         }
     }
 
@@ -82,6 +96,20 @@ class GameEngine {
         }
 
         return newState
+    }
+
+    private fun handleSubdueAction(state: GameState, action: SubdueAction): GameState {
+        return when (action.getActionType()) {
+            SubdueAction.ActionType.SELECT_ROAD -> {
+                val road = action.road
+                if (state.selectedRoad == road) {
+                    state.copy(selectedRoad = null)
+                } else {
+                    state.copy(selectedRoad = road, selectedQuest = null)
+                }
+            }
+            else -> state
+        }
     }
 
     private fun handleCardAction(state: GameState, action: CardAction): GameState {
@@ -186,7 +214,8 @@ class GameEngine {
             board = updatedBoard,
             players = updatedPlayers,
             playerPositions = updatedPositions,
-            selectedCards = emptyList()
+            selectedCards = emptyList(),
+            selectedRoad = null
         )
     }
 
