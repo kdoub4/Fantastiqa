@@ -12,7 +12,8 @@ public class TurnAction extends Action {
         NEXT_TURN,
         ADVANCE_PHASE,
         END_GAME,
-        START_PLAYER_TURN
+        START_PLAYER_TURN,
+        DONE_ADVENTURING
     }
 
     private final ActionType actionType;

@@ -44,6 +44,14 @@ data class GameState(
 ) {
     enum class GamePhase {
         INITIALIZATION,
+        START,
+        OPEN,
+        SUBDUE,
+        TOWER,
+        QUEST,
+        DISCARD_OPEN,
+        DRAW,
+        NEXT_TURN,
         MAIN_PHASE,
         PLAYER_TURN,
         CARD_SELECTION,

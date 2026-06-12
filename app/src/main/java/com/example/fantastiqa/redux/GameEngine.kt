@@ -24,7 +24,20 @@ class GameEngine {
         requireNotNull(currentState) { "Current state cannot be null" }
         requireNotNull(action) { "Action cannot be null" }
 
-        return when (action) {
+        val phase = currentState.gamePhase
+
+        // 1. Check Free Action Constraints
+        if (isFreeAction(action)) {
+            if (phase != GameState.GamePhase.OPEN && phase != GameState.GamePhase.DISCARD_OPEN) {
+                // Exception: PLUS_CARD selection during TOWER phase
+                if (!(phase == GameState.GamePhase.TOWER && isTowerPlusCardSelection(currentState, action))) {
+                    return currentState
+                }
+            }
+        }
+
+        // 2. Main Reduction
+        val stateAfterAction = when (action) {
             is PlayerAction -> handlePlayerAction(currentState, action)
             is QuestAction -> handleQuestAction(currentState, action)
             is CardAction -> handleCardAction(currentState, action)
@@ -32,6 +45,127 @@ class GameEngine {
             is MoveAction -> handleMovePlayer(currentState, action)
             else -> currentState
         }
+
+        // 3. Automated Phase Transitions
+        return processAutomatedTransitions(stateAfterAction)
+    }
+
+    private fun isFreeAction(action: Action): Boolean {
+        return when (action) {
+            is PlayerAction -> when (action.getActionType()) {
+                PlayerAction.ActionType.STORE_FOR_BOARD_QUEST,
+                PlayerAction.ActionType.DISCARD_FROM_HAND,
+                PlayerAction.ActionType.USE_ABILITY,
+                PlayerAction.ActionType.USE_TENT,
+                PlayerAction.ActionType.USE_FLYING_CARPET -> true
+                else -> false
+            }
+            is CardAction -> action.getActionType() == CardAction.ActionType.SELECT_CARDS
+            else -> false
+        }
+    }
+
+    private fun isTowerPlusCardSelection(state: GameState, action: Action): Boolean {
+        if (action !is CardAction || action.getActionType() != CardAction.ActionType.SELECT_CARDS) return false
+        val card = action.getCards()?.firstOrNull() ?: return false
+        return card is CreatureCard && card.ability == Ability.PLUS_CARD
+    }
+
+    private fun processAutomatedTransitions(state: GameState): GameState {
+        var currentState = state
+        var lastPhase: GameState.GamePhase? = null
+        
+        // Loop as long as we are in an automated transition phase and the phase actually changed
+        while (currentState.gamePhase != lastPhase) {
+            lastPhase = currentState.gamePhase
+            currentState = when (currentState.gamePhase) {
+                GameState.GamePhase.START -> handleStartPhase(currentState)
+                GameState.GamePhase.QUEST -> handleQuestPhase(currentState)
+                GameState.GamePhase.DRAW -> handleDrawPhase(currentState)
+                GameState.GamePhase.NEXT_TURN -> handleAdvancePlayer(currentState)
+                else -> return currentState // Break early if not an automated phase
+            }
+        }
+        return currentState
+    }
+
+    private fun handleStartPhase(state: GameState): GameState {
+        var currentBoard = state.board ?: return state
+        var currentCreatureDeck = state.creatureDeck ?: return state
+        var currentQuestDeck = state.questDeck ?: return state
+
+        // Refill Empty Roads
+        val regions = currentBoard.regions()
+        for (r1 in regions) {
+            val adj = currentBoard.adjacencies[r1] ?: continue
+            for ((r2, road) in adj) {
+                if (road.creature == null) {
+                    val (newCreature, nextDeck) = currentCreatureDeck.drawOne()
+                    if (newCreature is CreatureCard) {
+                        currentBoard = currentBoard.withRoad(r1, r2, road.copy(creature = newCreature))
+                        currentCreatureDeck = nextDeck
+                    }
+                }
+            }
+        }
+
+        // Refill Empty Quests
+        val updatedQuests = currentBoard.quests.toMutableList()
+        for (i in updatedQuests.indices) {
+            if (updatedQuests[i] == null) {
+                val (newQuest, nextDeck) = currentQuestDeck.drawOne()
+                if (newQuest != null) {
+                    updatedQuests[i] = newQuest.copy(vps = newQuest.vps + 1)
+                    currentQuestDeck = nextDeck
+                }
+            }
+        }
+        currentBoard = currentBoard.copy(quests = updatedQuests)
+
+        return state.copy(
+            board = currentBoard,
+            creatureDeck = currentCreatureDeck,
+            questDeck = currentQuestDeck,
+            gamePhase = GameState.GamePhase.OPEN
+        )
+    }
+
+    private fun handleQuestPhase(state: GameState): GameState {
+        // Quest completion logic is already handled in handleCompleteQuest.
+        // This automated transition just moves it to DISCARD_OPEN.
+        return state.copy(gamePhase = GameState.GamePhase.DISCARD_OPEN)
+    }
+
+    private fun handleDrawPhase(state: GameState): GameState {
+        val playerIndex = state.currentPlayerIndex
+        var player = state.players.getOrNull(playerIndex) ?: return state
+
+        // Draw up to 5
+        val cardsToDraw = (5 - player.hand.size).coerceAtLeast(0)
+        if (cardsToDraw > 0) {
+            player = player.drawCards(cardsToDraw)
+        }
+
+        val updatedPlayers = state.players.toMutableList()
+        updatedPlayers[playerIndex] = player
+
+        return state.copy(
+            players = updatedPlayers,
+            gamePhase = GameState.GamePhase.NEXT_TURN
+        )
+    }
+
+    private fun handleAdvancePlayer(state: GameState): GameState {
+        val nextPlayerIndex = (state.currentPlayerIndex + 1) % state.players.size
+        val nextTurnCount = state.turnCount + 1
+
+        return state.copy(
+            currentPlayerIndex = nextPlayerIndex,
+            turnCount = nextTurnCount,
+            selectedCards = emptyList(),
+            selectedQuest = null,
+            gamePhase = GameState.GamePhase.START
+        )
     }
 
     private fun handlePlayerAction(state: GameState, action: PlayerAction): GameState {
@@ -42,7 +176,7 @@ class GameEngine {
             PlayerAction.ActionType.GAIN_TROPHIES -> handleGainTrophies(state, action)
             PlayerAction.ActionType.DISCARD_FROM_HAND -> handleDiscardCards(state, action)
             PlayerAction.ActionType.USE_ABILITY -> handleUseAbility(state, action)
-            PlayerAction.ActionType.STORE_IN_BACKPACK -> handleBackpack(state, action)
+            PlayerAction.ActionType.STORE_FOR_BOARD_QUEST -> handleBoardQuest(state, action)
             PlayerAction.ActionType.USE_TENT -> handleUseTent(state, action)
             PlayerAction.ActionType.RELEASE_CARDS -> handleReleaseCards(state, action)
             PlayerAction.ActionType.GAIN_CARD -> handleGainCardFromTower(state, action)
@@ -93,7 +227,8 @@ class GameEngine {
 
     private fun handleTurnAction(state: GameState, action: TurnAction): GameState {
         return when (action.getActionType()) {
-            TurnAction.ActionType.NEXT_TURN -> handleNextTurn(state, action)
+            TurnAction.ActionType.NEXT_TURN -> state.copy(gamePhase = GameState.GamePhase.DRAW)
+            TurnAction.ActionType.DONE_ADVENTURING -> state.copy(gamePhase = GameState.GamePhase.DISCARD_OPEN)
             TurnAction.ActionType.ADVANCE_PHASE -> handleAdvancePhase(state, action)
             else -> state
         }
@@ -113,7 +248,14 @@ class GameEngine {
         val player = state.players.getOrNull(action.playerIndex) ?: return state
         val currentRegion = state.playerPositions[player.name] ?: return state
 
-        // 1. Validate the specific movement rules
+        // 1. Validate Phase for Flying Carpet
+        if (action.moveType == MoveType.FLYING_CARPET) {
+            if (state.gamePhase != GameState.GamePhase.OPEN && state.gamePhase != GameState.GamePhase.DISCARD_OPEN) {
+                return state
+            }
+        }
+
+        // 2. Validate the specific movement rules
         val selectedCards = state.selectedCards.filterNotNull()
         
         // Storage cards cannot be used for movement/subduing
@@ -123,16 +265,19 @@ class GameEngine {
             MoveType.ADJACENT -> {
                 val theRoad = state.board?.getRoad(currentRegion, action.destination) ?: return state
                 if (action.useAbility) {
-                    // Region selection: Must use Magic Carpet ability
+                    // Region selection: Must use Magic Carpet ability (Free Action)
+                    (state.gamePhase == GameState.GamePhase.OPEN || state.gamePhase == GameState.GamePhase.DISCARD_OPEN) &&
                     selectedCards.size == 1 &&
                             selectedCards[0] is CreatureCard &&
                             (selectedCards[0] as CreatureCard).ability == Ability.MAGIC_CARPET
                 } else {
-                    // Road selection: Subdue or clear road
+                    // Road selection: Subdue or clear road (Turn Action)
                     if (theRoad.creature == null) {
                         false // Road is used, can not move except by flying
                     } else {
-                        if (selectedCards.isEmpty()) {
+                        if (state.gamePhase != GameState.GamePhase.OPEN && state.gamePhase != GameState.GamePhase.SUBDUE) {
+                            false
+                        } else if (selectedCards.isEmpty()) {
                             false // Must select cards to subdue
                         } else {
                             // NORMAL SUBDUE
@@ -148,15 +293,18 @@ class GameEngine {
             }
             MoveType.TOWER_KEY -> {
                 // currentRegion and action.destination must have the same tower type
+                state.gamePhase == GameState.GamePhase.OPEN &&
                 currentRegion.tower != null && currentRegion.tower == action.destination.tower && player.gems >= 2
             }
         }
 
         if (!isLegal) return state
 
-        // 2. Apply "Costs" and update board
+        // 3. Apply "Costs" and update board
         var updatedBoard = state.board
         var updatedPlayer = player
+        var nextPhase = state.gamePhase
+
         when (action.moveType) {
             MoveType.FLYING_CARPET -> updatedPlayer = player.useFlyingCarpet()
             MoveType.ADJACENT -> {
@@ -169,13 +317,17 @@ class GameEngine {
                     updatedBoard = state.board?.withRoad(currentRegion, action.destination, theRoad.copy(creature = null))
                     val gemBonus = if (theRoad.creature.gem) 1 else 0
                     updatedPlayer = player.gainCard(theRoad.creature).discardFromHand(selectedCards).withGems(player.gems + gemBonus)
+                    nextPhase = GameState.GamePhase.SUBDUE
                 }
             }
-            MoveType.TOWER_KEY -> updatedPlayer = player.withGems(player.gems - 2)
+            MoveType.TOWER_KEY -> {
+                updatedPlayer = player.withGems(player.gems - 2)
+                nextPhase = GameState.GamePhase.DISCARD_OPEN // Teleporting is a Turn Action
+            }
             else -> {}
         }
 
-        // 3. Update the state
+        // 4. Update the state
         val updatedPlayers = state.players.toMutableList()
         updatedPlayers[action.playerIndex] = updatedPlayer
 
@@ -186,7 +338,8 @@ class GameEngine {
             board = updatedBoard,
             players = updatedPlayers,
             playerPositions = updatedPositions,
-            selectedCards = emptyList()
+            selectedCards = emptyList(),
+            gamePhase = nextPhase
         )
     }
 
@@ -258,16 +411,16 @@ class GameEngine {
         )
     }
 
-    private fun handleBackpack(state: GameState, action: PlayerAction): GameState {
+    private fun handleBoardQuest(state: GameState, action: PlayerAction): GameState {
         val player = action.getCurrentPlayer(state) ?: return state
         val selectedCards = state.selectedCards.filterNotNull()
 
         if (selectedCards.isEmpty()) return state
         
-        // Cannot backpack cards already in storage
+        // Cannot store cards already in storage
         if (selectedCards.any { it in player.storage }) return state
 
-        val updatedPlayer = player.storeCards(selectedCards)
+        val updatedPlayer = player.storeForBoardQuest(selectedCards)
         val updatedPlayers = state.players.toMutableList()
         updatedPlayers[action.playerIndex] = updatedPlayer
 
@@ -344,7 +497,8 @@ class GameEngine {
             players = updatedPlayers,
             board = updatedBoard,
             selectedCards = emptyList(),
-            selectedQuest = null
+            selectedQuest = null,
+            gamePhase = GameState.GamePhase.QUEST
         )
     }
 
@@ -503,7 +657,8 @@ class GameEngine {
             bazaarDeck = if (tower == TowerName.BAZAAR) nextDeck as? Deck<CreatureCard> else state.bazaarDeck,
             questDeck = if (tower == TowerName.QUEST) nextDeck as? Deck<Quest> else state.questDeck,
             artifactDeck = if (tower == TowerName.ARTIFACT) nextDeck as? Deck<Artifact> else state.artifactDeck,
-            selectedCards = emptyList() // Clear selection after use
+            selectedCards = emptyList(), // Clear selection after use
+            gamePhase = GameState.GamePhase.TOWER
         )
     }
 
@@ -592,7 +747,7 @@ class GameEngine {
         val playerIndex = action.playerIndex
         val player =  action.getCurrentPlayer(state) ?: return state
 
-        val updatedPlayer = player.storeCards(cardsToStore)
+        val updatedPlayer = player.storeForBoardQuest(cardsToStore)
 
         val updatedPlayers = state.players.toMutableList()
         updatedPlayers[playerIndex] = updatedPlayer
@@ -617,73 +772,6 @@ class GameEngine {
             players = updatedPlayers,
             selectedCards = emptyList(),
             gamePhase = state.gamePhase ?: GameState.GamePhase.PLAYER_TURN
-        )
-    }
-
-    private fun handleNextTurn(state: GameState, action: TurnAction): GameState {
-        var currentBoard = state.board ?: return state
-        var currentCreatureDeck = state.creatureDeck ?: return state
-        var currentQuestDeck = state.questDeck ?: return state
-
-        // 1. Process current player's end-of-turn (Discard selected and draw up to 5)
-        val currentPlayerIndex = state.currentPlayerIndex
-        var currentPlayer = state.players.getOrNull(currentPlayerIndex) ?: return state
-        
-        // Discard selected cards
-        val selectedCards = state.selectedCards.filterNotNull()
-        currentPlayer = currentPlayer.discardFromHand(selectedCards)
-        
-        // Draw up to 5
-        val cardsToDraw = (5 - currentPlayer.hand.size).coerceAtLeast(0)
-        if (cardsToDraw > 0) {
-            currentPlayer = currentPlayer.drawCards(cardsToDraw)
-        }
-
-        val updatedPlayers = state.players.toMutableList()
-        updatedPlayers[currentPlayerIndex] = currentPlayer
-
-        // 2. Refill Empty Roads
-        val regions = currentBoard.regions()
-        for (r1 in regions) {
-            val adj = currentBoard.adjacencies[r1] ?: continue
-            for ((r2, road) in adj) {
-                if (road.creature == null) {
-                    val (newCreature, nextDeck) = currentCreatureDeck.drawOne()
-                    if (newCreature is CreatureCard) {
-                        currentBoard = currentBoard.withRoad(r1, r2, road.copy(creature = newCreature))
-                        currentCreatureDeck = nextDeck
-                    }
-                }
-            }
-        }
-
-        // 3. Refill Empty Quests
-        val updatedQuests = currentBoard.quests.toMutableList()
-        for (i in updatedQuests.indices) {
-            if (updatedQuests[i] == null) {
-                val (newQuest, nextDeck) = currentQuestDeck.drawOne()
-                if (newQuest != null) {
-                    updatedQuests[i] = newQuest.copy(vps = newQuest.vps + 1)
-                    currentQuestDeck = nextDeck
-                }
-            }
-        }
-        currentBoard = currentBoard.copy(quests = updatedQuests)
-
-        // 4. Advance Player Index
-        val nextPlayerIndex = (state.currentPlayerIndex + 1) % state.players.size
-        val nextTurnCount = state.turnCount + 1
-
-        return state.copy(
-            board = currentBoard,
-            creatureDeck = currentCreatureDeck,
-            questDeck = currentQuestDeck,
-            players = updatedPlayers,
-            currentPlayerIndex = nextPlayerIndex,
-            turnCount = nextTurnCount,
-            selectedCards = emptyList(),
-            selectedQuest = null,
-            gamePhase = GameState.GamePhase.PLAYER_TURN
         )
     }
 
