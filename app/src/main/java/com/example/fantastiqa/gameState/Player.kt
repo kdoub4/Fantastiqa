@@ -129,7 +129,7 @@ data class Player(
         return this
     }
 
-    fun storeCards(cards: List<Card>): Player {
+    fun storeForBoardQuest(cards: List<Card>): Player {
         val validCards = cards.filter { hand.contains(it) }
         if (validCards.isEmpty()) return this
         return copy(

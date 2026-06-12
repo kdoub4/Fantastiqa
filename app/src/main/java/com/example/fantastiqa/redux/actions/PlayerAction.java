@@ -19,7 +19,7 @@ public class PlayerAction extends Action {
         USE_TENT,
         STORE_CARD_FOR_QUEST,
         USE_ABILITY,
-        STORE_IN_BACKPACK,
+        STORE_FOR_BOARD_QUEST,
         RELEASE_CARDS,
         GAIN_CARD,
         START_TOWER_DRAW,

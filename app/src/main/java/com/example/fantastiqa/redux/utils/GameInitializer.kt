@@ -104,7 +104,7 @@ object GameInitializer {
             currentPlayerIndex = 0,
             playerPositions = playerPositions,
             selectedCards = emptyList(),
-            gamePhase = GameState.GamePhase.PLAYER_TURN,
+            gamePhase = GameState.GamePhase.OPEN,
             isGameOver = false
         )
     }

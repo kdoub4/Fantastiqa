@@ -558,11 +558,21 @@ fun ActionControls(
     val currentRegion = state.playerPositions[state.currentPlayer?.name]
     val towerDestination = currentRegion?.let { state.board?.getTowerMatch(it) }
 
+    val phase = state.gamePhase
+    val isSubduePhase = phase == GameState.GamePhase.SUBDUE
+    val isTowerPhase = phase == GameState.GamePhase.TOWER
+    val isQuestPhase = phase == GameState.GamePhase.QUEST
+    val isTurnActionPhase = isSubduePhase || isTowerPhase || isQuestPhase
+    val canFreeAction = phase == GameState.GamePhase.OPEN || phase == GameState.GamePhase.DISCARD_OPEN
+
     if (!towerMenuOpen) {
-        Button(
-            onClick = { onTowerMenuToggle(true) },
-            modifier = Modifier.fillMaxWidth()
-        ) { Text("Tower") }
+        if (!isTurnActionPhase) {
+            Button(
+                onClick = { onTowerMenuToggle(true) },
+                enabled = phase == GameState.GamePhase.OPEN,
+                modifier = Modifier.fillMaxWidth()
+            ) { Text("Tower") }
+        }
 
         val playerInQuestRegion = currentRegion?.name == selectedQuest?.land
         val isPlayerQuest = state.currentPlayer?.quests?.any { it.id == selectedQuest?.id } == true
@@ -578,31 +588,33 @@ fun ActionControls(
             } == true
         } else false
 
-        Button(
-            onClick = {
-                onAction(QuestAction(QuestAction.ActionType.COMPLETE_QUEST, state.currentPlayerIndex, selectedQuest!!, emptyList()))
-            },
-            enabled = playerInQuestRegion && questComplete,
-            modifier = Modifier.fillMaxWidth()
-        ) { Text("Quest") }
+        if (!isTurnActionPhase) {
+            Button(
+                onClick = {
+                    onAction(QuestAction(QuestAction.ActionType.COMPLETE_QUEST, state.currentPlayerIndex, selectedQuest!!, emptyList()))
+                },
+                enabled = phase == GameState.GamePhase.OPEN && playerInQuestRegion && questComplete,
+                modifier = Modifier.fillMaxWidth()
+            ) { Text("Quest") }
+        }
 
         Button(
             onClick = { onAction(PlayerAction(state.currentPlayerIndex, PlayerAction.ActionType.USE_ABILITY, null)) },
-            enabled = selectedCards.size == 1,
+            enabled = canFreeAction && selectedCards.size == 1,
             modifier = Modifier.fillMaxWidth()
         ) { Text("Ability") }
 
         Button(
-            onClick = { onAction(PlayerAction(state.currentPlayerIndex, PlayerAction.ActionType.STORE_IN_BACKPACK, null)) },
-            enabled = selectedCards.isNotEmpty(),
+            onClick = { onAction(PlayerAction(state.currentPlayerIndex, PlayerAction.ActionType.STORE_FOR_BOARD_QUEST, null)) },
+            enabled = canFreeAction && selectedCards.isNotEmpty(),
             modifier = Modifier.fillMaxWidth()
-        ) { Text("Backpack") }
+        ) { Text("Board Quest") }
 
         Button(
             onClick = {
                 onAction(PlayerAction(state.currentPlayerIndex, PlayerAction.ActionType.DISCARD_FROM_HAND, state.selectedCards.filterNotNull()))
             },
-            enabled = selectedCards.isNotEmpty(),
+            enabled = canFreeAction && selectedCards.isNotEmpty(),
             modifier = Modifier.fillMaxWidth()
         ) { Text("Discard") }
     } else {
@@ -617,7 +629,7 @@ fun ActionControls(
                     onTowerMenuToggle(false)
                 }
             },
-            enabled = towerDestination != null && (state.currentPlayer?.gems ?: 0) >= 2,
+            enabled = phase == GameState.GamePhase.OPEN && towerDestination != null && (state.currentPlayer?.gems ?: 0) >= 2,
             modifier = Modifier.fillMaxWidth()
         ) { Text("Teleport") }
 
@@ -631,13 +643,13 @@ fun ActionControls(
                 onAction(PlayerAction(state.currentPlayerIndex, PlayerAction.ActionType.RELEASE_CARDS, state.selectedCards.filterNotNull()))
                 onTowerMenuToggle(false)
             },
-            enabled = canRelease,
+            enabled = canFreeAction && canRelease,
             modifier = Modifier.fillMaxWidth()
         ) { Text("Release") }
 
         Button(
             onClick = { onTowerDraw() },
-            enabled = currentRegion?.tower != null,
+            enabled = currentRegion?.tower != null && (phase == GameState.GamePhase.OPEN || phase == GameState.GamePhase.TOWER),
             modifier = Modifier.fillMaxWidth()
         ) { 
             val plusCount = state.selectedCards.count { it is CreatureCard && it.ability == Ability.PLUS_CARD }
@@ -658,11 +670,18 @@ fun ActionControls(
             onRegionClear()
             onCardClear()
             onRoadClear()
-            onAction(TurnAction(TurnAction.ActionType.NEXT_TURN))
+            if (isSubduePhase) {
+                onAction(TurnAction(TurnAction.ActionType.DONE_ADVENTURING))
+            } else {
+                onAction(TurnAction(TurnAction.ActionType.NEXT_TURN))
+            }
         },
-        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50)),
+        enabled = phase == GameState.GamePhase.OPEN || phase == GameState.GamePhase.DISCARD_OPEN || isSubduePhase,
+        colors = ButtonDefaults.buttonColors(containerColor = if (isSubduePhase) Color(0xFF2196F3) else Color(0xFF4CAF50)),
         modifier = Modifier.fillMaxWidth()
-    ) { Text("End Turn") }
+    ) { 
+        Text(if (isSubduePhase) "Done Adventuring" else "End Turn") 
+    }
 }
 
 @Preview(showBackground = false, device = "spec:parent=pixel_9,orientation=portrait")
