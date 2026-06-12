@@ -27,9 +27,13 @@ class BasicComputerStrategy : ComputerPlayerStrategy {
 
         // 1. If a road is selected, focus on subduing its creature
         if (selectedRoad != null) {
-            val roadCreature = selectedRoad.creature ?: return SubdueAction(SubdueAction.ActionType.SELECT_ROAD, state.currentPlayerIndex, null, null, null)
+            val roadCreature = selectedRoad.creature
+            if (roadCreature == null) {
+                // Cannot subdue this creature (it might be gone), deselect road
+                return SubdueAction(SubdueAction.ActionType.SELECT_ROAD, state.currentPlayerIndex, null, null, null)
+            }
             
-            val validCombos = engine.canSubdueSingle(roadCreature, hand) + engine.canSubdueDouble(roadCreature, hand)
+            val validCombos = engine.canSubdue(roadCreature, hand)
             if (validCombos.isEmpty()) {
                 // Cannot subdue this creature, deselect road
                 return SubdueAction(SubdueAction.ActionType.SELECT_ROAD, state.currentPlayerIndex, null, null, null)
@@ -66,7 +70,7 @@ class BasicComputerStrategy : ComputerPlayerStrategy {
                 val road = pair.first
                 val roadCreature = road.creature ?: continue
                 
-                val validCombos = engine.canSubdueSingle(roadCreature, hand) + engine.canSubdueDouble(roadCreature, hand)
+                val validCombos = engine.canSubdue(roadCreature, hand)
                 if (validCombos.isNotEmpty()) {
                     // SELECT ROAD FIRST
                     return SubdueAction(SubdueAction.ActionType.SELECT_ROAD, state.currentPlayerIndex, road, null, null)
@@ -83,7 +87,7 @@ class BasicComputerStrategy : ComputerPlayerStrategy {
                         val destRoad = destPair.first
                         val destCreature = destRoad.creature ?: continue
                         
-                        val validCombos = engine.canSubdueSingle(destCreature, hand) + engine.canSubdueDouble(destCreature, hand)
+                        val validCombos = engine.canSubdue(destCreature, hand)
                         if (validCombos.isNotEmpty()) {
                             // Track that we moved (will move by flying)
                             lastMoveTurn = state.turnCount
@@ -107,6 +111,9 @@ class BasicComputerStrategy : ComputerPlayerStrategy {
             }
 
             // Nothing left to do
+            if (state.gamePhase == GameState.GamePhase.SUBDUE) {
+                return TurnAction(TurnAction.ActionType.DONE_ADVENTURING)
+            }
             return TurnAction(TurnAction.ActionType.NEXT_TURN)
 
         } else {

@@ -64,7 +64,7 @@ class TurnPhaseTest {
     }
 
     @Test
-    fun `Free Actions should be disabled in SUBDUE phase`() {
+    fun `Discard (Free Action) should be disabled in SUBDUE phase`() {
         val state = createInitialState().copy(gamePhase = GameState.GamePhase.SUBDUE)
         val card = state.players[0].hand[0]
         
@@ -72,7 +72,7 @@ class TurnPhaseTest {
         val discardAction = PlayerAction(0, PlayerAction.ActionType.DISCARD_FROM_HAND, listOf(card))
         val newState = engine.reduce(state, discardAction)
         
-        assertEquals("Action should be ignored in SUBDUE phase", state, newState)
+        assertEquals("Discard action should be ignored in SUBDUE phase", state, newState)
     }
 
     @Test
@@ -116,5 +116,30 @@ class TurnPhaseTest {
         
         assertNotEquals("Selection should have changed", state, newState)
         assertEquals(1, newState.selectedCards.size)
+    }
+
+    @Test
+    fun `Card selection should be allowed in SUBDUE phase`() {
+        val state = createInitialState().copy(gamePhase = GameState.GamePhase.SUBDUE)
+        val card = state.players[0].hand[0]
+        
+        val selectAction = CardAction(CardAction.ActionType.SELECT_CARDS, 0, listOf(card))
+        val newState = engine.reduce(state, selectAction)
+        
+        assertNotEquals("Selection should have changed", state, newState)
+        assertEquals(1, newState.selectedCards.size)
+    }
+
+    @Test
+    fun `RESOLVE_TOWER_DRAW should move to DISCARD_OPEN phase`() {
+        val state = createInitialState().copy(
+            gamePhase = GameState.GamePhase.TOWER,
+            towerDrawnCards = listOf(CreatureCard("D1", "D1", false, listOf(Symbol.FIRE), Symbol.FIRE, Ability.NONE))
+        )
+        
+        val action = PlayerAction(0, PlayerAction.ActionType.RESOLVE_TOWER_DRAW, emptyList<Card>())
+        val newState = engine.reduce(state, action)
+        
+        assertEquals(GameState.GamePhase.DISCARD_OPEN, newState.gamePhase)
     }
 }

@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.ui.window.DialogProperties
 import com.example.fantastiqa.gameState.*
 import com.example.fantastiqa.pieces.TowerName
 import com.example.fantastiqa.redux.*
@@ -202,7 +203,6 @@ fun BoardGameContent(state: GameState, onAction: (Action) -> Unit) {
             cards = state.towerDrawnCards,
             tower = state.playerPositions[state.currentPlayer?.name]?.tower ?: TowerName.QUEST,
             playerGems = state.currentPlayer?.gems ?: 0,
-            onDismiss = { onAction(PlayerAction(state.currentPlayerIndex, PlayerAction.ActionType.RESOLVE_TOWER_DRAW, emptyList<Card>())) },
             onDone = { selected: List<Card> ->
                 onAction(PlayerAction(state.currentPlayerIndex, PlayerAction.ActionType.RESOLVE_TOWER_DRAW, selected))
                 towerMenuOpen = false
@@ -216,17 +216,24 @@ fun TowerDrawDialog(
     cards: List<Card>,
     tower: TowerName,
     playerGems: Int,
-    onDismiss: () -> Unit,
     onDone: (List<Card>) -> Unit
 ) {
     var selectedCards by remember { mutableStateOf(setOf<Card>()) }
     var currentGems by remember { mutableStateOf(playerGems) }
 
     AlertDialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = { /* Modal - do nothing */ },
+        properties = DialogProperties(
+            dismissOnBackPress = false,
+            dismissOnClickOutside = false,
+            usePlatformDefaultWidth = false
+        ),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 16.dp, start = 16.dp, end = 16.dp),
         title = { Text("Tower Draw - $tower") },
         text = {
-            Column {
+            Column(modifier = Modifier.widthIn(min = 320.dp)) {
                 Text("Gems: $currentGems", style = MaterialTheme.typography.bodySmall)
                 Spacer(Modifier.height(8.dp))
                 LazyRow(
@@ -274,11 +281,6 @@ fun TowerDrawDialog(
         confirmButton = {
             TextButton(onClick = { onDone(selectedCards.toList()) }) {
                 Text("Done")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
             }
         }
     )
@@ -608,7 +610,7 @@ fun ActionControls(
             onClick = { onAction(PlayerAction(state.currentPlayerIndex, PlayerAction.ActionType.STORE_FOR_BOARD_QUEST, null)) },
             enabled = canFreeAction && selectedCards.isNotEmpty(),
             modifier = Modifier.fillMaxWidth()
-        ) { Text("Board Quest") }
+        ) { Text("Storage") }
 
         Button(
             onClick = {
@@ -648,7 +650,10 @@ fun ActionControls(
         ) { Text("Release") }
 
         Button(
-            onClick = { onTowerDraw() },
+            onClick = { 
+                onTowerDraw()
+                onTowerMenuToggle(false)
+            },
             enabled = currentRegion?.tower != null && (phase == GameState.GamePhase.OPEN || phase == GameState.GamePhase.TOWER),
             modifier = Modifier.fillMaxWidth()
         ) { 

@@ -3,12 +3,20 @@ package com.example.fantastiqa.pieces
 import com.example.fantastiqa.gameState.Ability
 import com.example.fantastiqa.gameState.Symbol
 
+interface SymbolCard {
+    val isGem : Boolean
+    val ability : Ability
+    val subduedBy: Symbol
+    val value1 : Symbol
+    val value2 : Symbol
+}
+
 enum class CreatureCards(
-        val isGem: Boolean,
-        val ability: Ability,
-        subdueBy: Symbol,
+        override val isGem: Boolean,
+        override val ability: Ability,
+        override val subduedBy: Symbol,
         vararg value: Symbol
-    ) {
+    ) : SymbolCard {
         Knight(true, Ability.NONE, Symbol.WAND, Symbol.SWORD),
         BabyDragon(true, Ability.NONE, Symbol.SWORD, Symbol.FIRE),
         FenFairy(false, Ability.PLUS_CARD, Symbol.FIRE, Symbol.WATER),
@@ -28,18 +36,14 @@ enum class CreatureCards(
         Bear(true, Ability.TOWER_KEY, Symbol.HELMET, Symbol.BAT, Symbol.BAT),
         Fairies(false, Ability.MAGIC_CARPET, Symbol.BAT, Symbol.WAND, Symbol.WAND);
 
-        val value1: Symbol
-        val value2: Symbol
-
-        val subduedBy: Symbol
+        override val value1: Symbol = value[0]
+        override val value2: Symbol
 
         init {
-            this.value1 = value[0]
             if (value.size > 1) {
                 this.value2 = value[1]
             } else {
                 this.value2 = Symbol.NONE
             }
-            this.subduedBy = subdueBy
         }
     }

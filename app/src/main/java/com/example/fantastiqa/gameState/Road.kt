@@ -16,6 +16,6 @@ data class Road(
     fun getConnectedRegion(starter: Region?, board: Board): Region? {
         val adjacent = board.getAdjacentAreas(starter!!)
         // Logic depends on finding the other side of this road in the board
-        return adjacent.find { it?.first == this }?.second as? Region
+        return adjacent.find { it.first == this }?.second
     }
 }

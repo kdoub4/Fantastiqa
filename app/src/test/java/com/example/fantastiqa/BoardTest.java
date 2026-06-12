@@ -1,6 +1,7 @@
 package com.example.fantastiqa;
 
 import org.junit.Test;
+import static org.junit.Assert.*;
 
 import java.util.HashSet;
 
@@ -10,7 +11,7 @@ import com.example.fantastiqa.gameState.Region;
 
 public class BoardTest {
 	
-	Board theBoard = new Board();
+	Board theBoard = Board.createInitialBoard();
 	
 	@Test
 	public void getTowerMatch_Quest() {
@@ -22,42 +23,44 @@ public class BoardTest {
 				break;
 			}
 		}
-		if (start == null) assert(false);
+		assertNotNull(start);
 		Region result = theBoard.getTowerMatch(start);
-		assert(result!=start && result.tower==TowerName.QUEST);
+		assertNotSame(start, result);
+		assertEquals(TowerName.QUEST, result.tower);
 	}
 	
 	@Test
 	public void confirmUniqueRegions() {
 		//6 unique names
-		HashSet<String> regionNames = new HashSet();
+		HashSet<String> regionNames = new HashSet<>();
 		for (Region aRegion : theBoard.regions()) {
-			assert(regionNames.add(aRegion.name.toString()));
+			assertTrue(regionNames.add(aRegion.name.toString()));
 		}
-		assert(regionNames.size()==6);
+		assertEquals(6, regionNames.size());
 	}
 	
 	@Test
 	public void confirmTowerSemiUnique() {
 		//3 unique towers 2 each
-		HashSet<String> towerNames1 = new HashSet();
-		HashSet<String> towerNames2 = new HashSet();
+		HashSet<String> towerNames1 = new HashSet<>();
+		HashSet<String> towerNames2 = new HashSet<>();
 		for (Region aRegion : theBoard.regions()) {
 			if (!towerNames1.add(aRegion.tower.toString()))
-				assert(towerNames2.add(aRegion.tower.toString()));
+				assertTrue(towerNames2.add(aRegion.tower.toString()));
 		}
 		for (String aName1 : towerNames1) {
-			assert(towerNames2.contains(aName1));
+			assertTrue(towerNames2.contains(aName1));
 		}
-		assert(towerNames1.size()==3 && towerNames2.size()==3);
+		assertEquals(3, towerNames1.size());
+		assertEquals(3, towerNames2.size());
 	}
 	
 	@Test
 	public void boardBuild_7Uniqueroads() {
-		HashSet<Object> roads = new HashSet();
+		HashSet<Object> roads = new HashSet<>();
 		for (Object aRoad : theBoard.roads()) {
-			assert(roads.add(aRoad));
+			assertTrue(roads.add(aRoad));
 		}
-		assert(roads.size()==7);
+		assertEquals(7, roads.size());
 	}
 }

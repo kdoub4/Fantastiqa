@@ -18,11 +18,24 @@ class ComputerPlayerMiddleware(
     private val scope = CoroutineScope(Dispatchers.Main)
     private var isProcessing = false
 
+    private fun isComputerActivePhase(phase: GameState.GamePhase?): Boolean {
+        return when (phase) {
+            GameState.GamePhase.OPEN,
+            GameState.GamePhase.SUBDUE,
+            GameState.GamePhase.TOWER,
+            GameState.GamePhase.QUEST,
+            GameState.GamePhase.DISCARD_OPEN,
+            GameState.GamePhase.PLAYER_TURN,
+            GameState.GamePhase.CARD_SELECTION -> true
+            else -> false
+        }
+    }
+
     override fun onStateChanged(oldState: GameState, newState: GameState) {
         val player = newState.currentPlayer ?: return
         
         if (player.isComputer && 
-            newState.gamePhase == GameState.GamePhase.PLAYER_TURN && 
+            isComputerActivePhase(newState.gamePhase) && 
             !newState.isGameOver &&
             !isProcessing) {
             
@@ -30,7 +43,7 @@ class ComputerPlayerMiddleware(
             scope.launch {
                 var currentState = newState
                 while (currentState.currentPlayer?.isComputer == true && 
-                       currentState.gamePhase == GameState.GamePhase.PLAYER_TURN &&
+                       isComputerActivePhase(currentState.gamePhase) &&
                        !currentState.isGameOver) {
                     
                     delay(1000) // Simulate "thinking" time
@@ -41,7 +54,8 @@ class ComputerPlayerMiddleware(
                         currentState = store.state
                         // If it's a TurnAction (NEXT_TURN), break the loop as game phase or player will change
                         if (action is com.example.fantastiqa.redux.actions.TurnAction && 
-                            action.getActionType() == com.example.fantastiqa.redux.actions.TurnAction.ActionType.NEXT_TURN) {
+                            (action.getActionType() == com.example.fantastiqa.redux.actions.TurnAction.ActionType.NEXT_TURN ||
+                             action.getActionType() == com.example.fantastiqa.redux.actions.TurnAction.ActionType.DONE_ADVENTURING)) {
                             break
                         }
                     } else {

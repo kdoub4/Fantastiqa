@@ -1,6 +1,5 @@
 package com.example.fantastiqa.gameState
 
-import android.util.Pair
 import com.example.fantastiqa.pieces.RegionName
 import com.example.fantastiqa.pieces.TowerName
 import java.util.*

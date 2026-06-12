@@ -24,7 +24,8 @@ class GameEngineTest {
         val initialState = GameState(
             board = board,
             players = listOf(player),
-            playerPositions = mapOf(player.name to startRegion)
+            playerPositions = mapOf(player.name to startRegion),
+            gamePhase = GameState.GamePhase.OPEN
         )
 
         val action = MoveAction(
@@ -58,7 +59,8 @@ class GameEngineTest {
         val initialState = GameState(
             board = board,
             players = listOf(player),
-            playerPositions = mapOf(player.name to startRegion)
+            playerPositions = mapOf(player.name to startRegion),
+            gamePhase = GameState.GamePhase.OPEN
         )
 
         val action = MoveAction(0, endRegion, MoveType.FLYING_CARPET)
@@ -92,7 +94,8 @@ class GameEngineTest {
             players = listOf(player),
             playerPositions = mapOf(player.name to region),
             questDeck = questDeck,
-            selectedCards = listOf(plusCard)
+            selectedCards = listOf(plusCard),
+            gamePhase = GameState.GamePhase.OPEN
         )
 
         val action = PlayerAction(0, PlayerAction.ActionType.START_TOWER_DRAW, null)

@@ -1,6 +1,7 @@
 package com.example.fantastiqa.gameState
 
 import com.example.fantastiqa.pieces.CreatureCards
+import com.example.fantastiqa.pieces.SymbolCard
 
 /**
  * Immutable Player representation for Redux.
@@ -119,10 +120,9 @@ data class Player(
     }
 
     fun subdue(road: Road?): Player {
-        if (road == null) return this
+        if (road == null || road.creature == null || road.creature.values.isEmpty()) return this
         for (card in hand) {
-            if (card is CreatureCard && card.subduedBy == road.creature?.values?.get(0)) {
-
+            if (card is CreatureCard && card.subduedBy == road.creature.values[0]) {
                 return discardFromHand(listOf(card))
             }
         }
@@ -147,23 +147,41 @@ data class Player(
             val deckSetup = mutableListOf<Card>()
             
             // Standard starter cards from enums
-            CreatureCards.values().forEach { aCard ->
+            CreatureCards.entries.forEach { aCard ->
                 if (aCard.value2 == Symbol.NONE) {
                     deckSetup.add(CreatureCard(
+                        java.util.UUID.randomUUID().toString(),
                         aCard.name,
-                        Symbol.NONE,
                         false,
-                        Ability.NONE,
-                        aCard.value1
+                        listOf(aCard.value1, aCard.value2),
+                        aCard.subduedBy,
+                        Ability.NONE
                     ))
                 }
             }
-            
+
             // Special starter cards
-            deckSetup.add(CreatureCard("Peaceful Dragon", Symbol.NONE, false, Ability.DRAGON, Symbol.NONE))
-            deckSetup.add(CreatureCard("Dog", Symbol.NONE, false, Ability.GEM, Symbol.NONE))
+            deckSetup.add(CreatureCard(java.util.UUID.randomUUID().toString(),"Peaceful Dragon",  false, emptyList<Symbol>() , Symbol.NONE,Ability.DRAGON,))
+            deckSetup.add(CreatureCard(java.util.UUID.randomUUID().toString(),"Dog",  false,emptyList<Symbol>() , Symbol.NONE, Ability.GEM))
             
             return Deck(deckSetup).shuffle(true)
         }
+
+        private fun playerCardName(card: CreatureCards): String {
+            return when (card) {
+                CreatureCards.Knight -> "Spatula"
+                CreatureCards.BabyDragon -> "Candle"
+                CreatureCards.FenFairy -> "Pail"
+                CreatureCards.Witch -> "Broom"
+                CreatureCards.Rabbits -> "Cat"
+                CreatureCards.Spiders -> "Net"
+                CreatureCards.BillyGoat -> "Helmet"
+                CreatureCards.Troll -> "Bat"
+                CreatureCards.Enchantress -> "Toothbrush"
+                else -> throw IllegalArgumentException("Unknown card: $card")
+            }
+        }
     }
 }
+
+

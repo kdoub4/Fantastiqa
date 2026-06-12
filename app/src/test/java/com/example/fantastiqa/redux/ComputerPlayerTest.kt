@@ -19,13 +19,15 @@ class ComputerPlayerTest {
 
     @Test
     fun `AI should prioritize Dog ability`() {
+        val forest = Region(RegionName.FOREST, TowerName.QUEST)
         val dog = createCard("Dog", Ability.GEM)
         val player = Player(name = "Computer", hand = listOf(dog), isComputer = true)
         val state = GameState(
             board = Board(),
             players = listOf(player),
+            playerPositions = mapOf(player.name to forest),
             currentPlayerIndex = 0,
-            gamePhase = GameState.GamePhase.PLAYER_TURN
+            gamePhase = GameState.GamePhase.OPEN
         )
 
         val action = strategy.evaluateNextAction(state)
@@ -38,13 +40,15 @@ class ComputerPlayerTest {
 
     @Test
     fun `AI should use ability when Dog is selected`() {
+        val forest = Region(RegionName.FOREST, TowerName.QUEST)
         val dog = createCard("Dog", Ability.GEM)
         val player = Player(name = "Computer", hand = listOf(dog), isComputer = true)
         val state = GameState(
             board = Board(),
             players = listOf(player),
+            playerPositions = mapOf(player.name to forest),
             currentPlayerIndex = 0,
-            gamePhase = GameState.GamePhase.PLAYER_TURN,
+            gamePhase = GameState.GamePhase.OPEN,
             selectedCards = listOf(dog)
         )
 
@@ -56,7 +60,7 @@ class ComputerPlayerTest {
     }
 
     @Test
-    fun `AI should select cards for subduing an adjacent creature`() {
+    fun `AI should select road for subduing an adjacent creature`() {
         val forest = Region(RegionName.FOREST, TowerName.QUEST)
         val hills = Region(RegionName.HILLS, TowerName.QUEST)
         
@@ -72,24 +76,26 @@ class ComputerPlayerTest {
             players = listOf(player),
             playerPositions = mapOf(player.name to forest),
             currentPlayerIndex = 0,
-            gamePhase = GameState.GamePhase.PLAYER_TURN
+            gamePhase = GameState.GamePhase.OPEN
         )
 
         val action = strategy.evaluateNextAction(state)
+        assertNotNull("Action should not be null", action)
 
-        assertTrue(action is CardAction)
-        val cardAction = action as CardAction
-        assertEquals(wandCard.id, cardAction.cards[0].id)
+        assertTrue("Should return SubdueAction to select road", action is SubdueAction)
+        val subdueAction = action as SubdueAction
+        assertEquals(SubdueAction.ActionType.SELECT_ROAD, subdueAction.actionType)
     }
 
     @Test
-    fun `AI should move after selecting full combo`() {
+    fun `AI should select cards after selecting road`() {
         val forest = Region(RegionName.FOREST, TowerName.QUEST)
         val hills = Region(RegionName.HILLS, TowerName.QUEST)
         val knight = CreatureCard(UUID.randomUUID().toString(), "Knight", true, listOf(Symbol.SWORD), Symbol.WAND, Ability.NONE)
         val wandCard = createCard("WandCard", value = Symbol.WAND)
         
-        val board = Board().withRoad(forest, hills, Road(knight, true))
+        val road = Road(knight, true)
+        val board = Board().withRoad(forest, hills, road)
         val player = Player(name = "Computer", hand = listOf(wandCard), isComputer = true)
         
         val state = GameState(
@@ -97,13 +103,43 @@ class ComputerPlayerTest {
             players = listOf(player),
             playerPositions = mapOf(player.name to forest),
             currentPlayerIndex = 0,
-            gamePhase = GameState.GamePhase.PLAYER_TURN,
+            gamePhase = GameState.GamePhase.OPEN,
+            selectedRoad = road
+        )
+
+        val action = strategy.evaluateNextAction(state)
+        assertNotNull("Action should not be null", action)
+
+        assertTrue("Should return CardAction to select cards", action is CardAction)
+        val cardAction = action as CardAction
+        assertEquals(wandCard.id, cardAction.cards[0].id)
+    }
+
+    @Test
+    fun `AI should move after selecting road and combo`() {
+        val forest = Region(RegionName.FOREST, TowerName.QUEST)
+        val hills = Region(RegionName.HILLS, TowerName.QUEST)
+        val knight = CreatureCard(UUID.randomUUID().toString(), "Knight", true, listOf(Symbol.SWORD), Symbol.WAND, Ability.NONE)
+        val wandCard = createCard("WandCard", value = Symbol.WAND)
+        
+        val road = Road(knight, true)
+        val board = Board().withRoad(forest, hills, road)
+        val player = Player(name = "Computer", hand = listOf(wandCard), isComputer = true)
+        
+        val state = GameState(
+            board = board,
+            players = listOf(player),
+            playerPositions = mapOf(player.name to forest),
+            currentPlayerIndex = 0,
+            gamePhase = GameState.GamePhase.OPEN,
+            selectedRoad = road,
             selectedCards = listOf(wandCard)
         )
 
         val action = strategy.evaluateNextAction(state)
+        assertNotNull("Action should not be null", action)
 
-        assertTrue(action is MoveAction)
+        assertTrue("Should return MoveAction", action is MoveAction)
         val moveAction = action as MoveAction
         assertEquals(MoveType.ADJACENT, moveAction.moveType)
         assertEquals(hills.name, moveAction.destination.name)
@@ -111,6 +147,7 @@ class ComputerPlayerTest {
 
     @Test
     fun `AI should discard entire hand at turn end`() {
+        val forest = Region(RegionName.FOREST, TowerName.QUEST)
         val p1 = createCard("P1", value = Symbol.FIRE)
         val p2 = createCard("P2", value = Symbol.WATER)
         
@@ -120,8 +157,9 @@ class ComputerPlayerTest {
         val state1 = GameState(
             board = Board(),
             players = listOf(player),
+            playerPositions = mapOf(player.name to forest),
             currentPlayerIndex = 0,
-            gamePhase = GameState.GamePhase.PLAYER_TURN,
+            gamePhase = GameState.GamePhase.OPEN,
             selectedCards = emptyList()
         )
         val action1 = strategy.evaluateNextAction(state1) as CardAction

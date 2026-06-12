@@ -29,8 +29,13 @@ class GameEngine {
         // 1. Check Free Action Constraints
         if (isFreeAction(action)) {
             if (phase != GameState.GamePhase.OPEN && phase != GameState.GamePhase.DISCARD_OPEN) {
-                // Exception: PLUS_CARD selection during TOWER phase
-                if (!(phase == GameState.GamePhase.TOWER && isTowerPlusCardSelection(currentState, action))) {
+                // Exceptions:
+                // - SELECT_CARDS during SUBDUE phase
+                // - PLUS_CARD selection during TOWER phase
+                val isSelectDuringSubdue = phase == GameState.GamePhase.SUBDUE && isSelectCardsAction(action)
+                val isPlusDuringTower = phase == GameState.GamePhase.TOWER && isTowerPlusCardSelection(currentState, action)
+                
+                if (!isSelectDuringSubdue && !isPlusDuringTower) {
                     return currentState
                 }
             }
@@ -47,7 +52,10 @@ class GameEngine {
             else -> currentState
         }
 
-        return checkWinConditions(newState)
+        val stateAfterWinCheck = checkWinConditions(stateAfterAction)
+
+        // 3. Automated Phase Transitions
+        return processAutomatedTransitions(stateAfterWinCheck)
     }
 
     private fun checkWinConditions(state: GameState): GameState {
@@ -59,9 +67,6 @@ class GameEngine {
         } else {
             state
         }
-
-        // 3. Automated Phase Transitions
-        return processAutomatedTransitions(stateAfterAction)
     }
 
     private fun isFreeAction(action: Action): Boolean {
@@ -83,6 +88,10 @@ class GameEngine {
         if (action !is CardAction || action.getActionType() != CardAction.ActionType.SELECT_CARDS) return false
         val card = action.getCards()?.firstOrNull() ?: return false
         return card is CreatureCard && card.ability == Ability.PLUS_CARD
+    }
+
+    private fun isSelectCardsAction(action: Action): Boolean {
+        return action is CardAction && action.actionType == CardAction.ActionType.SELECT_CARDS
     }
 
     private fun processAutomatedTransitions(state: GameState): GameState {
@@ -309,7 +318,7 @@ class GameEngine {
                             false // Must select cards to subdue
                         } else {
                             // NORMAL SUBDUE
-                            val validCombos = canSubdueSingle(theRoad.creature, selectedCards) + canSubdueDouble(theRoad.creature, selectedCards)
+                            val validCombos = canSubdue(theRoad.creature, selectedCards)
                             validCombos.any { it.size == selectedCards.size && it.containsAll(selectedCards) }
                         }
                     }
@@ -367,9 +376,8 @@ class GameEngine {
             players = updatedPlayers,
             playerPositions = updatedPositions,
             selectedCards = emptyList(),
+            selectedRoad = null,
             gamePhase = nextPhase
-            selectedCards = emptyList(),
-            selectedRoad = null
         )
     }
 
@@ -744,7 +752,8 @@ class GameEngine {
             bazaarDeck = updatedBazaarDeck,
             questDeck = updatedQuestDeck,
             artifactDeck = updatedArtifactDeck,
-            towerDrawnCards = emptyList()
+            towerDrawnCards = emptyList(),
+            gamePhase = GameState.GamePhase.DISCARD_OPEN
         )
     }
     private fun handleSelectCards(state: GameState, action: CardAction): GameState {
@@ -807,6 +816,18 @@ class GameEngine {
 
     private fun handleAdvancePhase(state: GameState, action: TurnAction): GameState = state
 
+    fun canSubdue(
+        aCreature: CreatureCard?,
+        aHand: List<Card>?
+    ): List<MutableSet<Card>> {
+        if (aCreature == null) return emptyList()
+        return if (aCreature.values.size > 1) {
+            canSubdueDouble(aCreature, aHand)
+        } else {
+            canSubdueSingle(aCreature, aHand)
+        }
+    }
+
     fun canSubdueSingle(
         aCreature: CreatureCard?,
         aHand: List<Card>?
@@ -817,24 +838,24 @@ class GameEngine {
         //Check hand for first symbol
         if (aHand != null) {
             for (aCard in aHand) {
-                if (aCard is CreatureCard && aCard.values.get(0) != Symbol.NONE) {
+                if (aCard is CreatureCard && aCard.values.isNotEmpty() && aCard.values[0] != Symbol.NONE) {
                     val handCreature = aCard
-                    if (aCreature?.subduedBy == handCreature.values.get(0)) {
+                    if (aCreature?.subduedBy == handCreature.values[0]) {
                         //symbol match
                         fullList.add(mutableSetOf<Card>(aCard))
                         continue
                     }
-                    if (handCreature.values.size > 1 && handCreature.values.get(0) == handCreature.values.get(1))
+                    if (handCreature.values.size > 1 && handCreature.values[0] == handCreature.values[1])
                     {
                         //Double symbol as wildcard
                         fullList.add(mutableSetOf<Card>(aCard))
                         continue
                     }
-                    if (handSymbols.contains(handCreature.values.get(0))) {
+                    if (handSymbols.contains(handCreature.values[0])) {
                         //this is at least second symbol in the hand so wildcard is in effect but
                         //add these cards later after we have completed this first walkthrough of the hand
                     } else {
-                        handSymbols.add(handCreature.values.get(0))
+                        handSymbols.add(handCreature.values[0])
                     }
                 }
             }
@@ -845,7 +866,8 @@ class GameEngine {
             if (aHand != null) {
                 for  (aCard in aHand) {
                     if (aCard is CreatureCard &&
-                        aCard.values.get(0) == match
+                        aCard.values.isNotEmpty() &&
+                        aCard.values[0] == match
                     ) {
                         matches.add(aCard)
                     }
@@ -876,27 +898,24 @@ class GameEngine {
         val singleNonMatch: MutableList<MutableList<Card>> = ArrayList<MutableList<Card>>()
         if (aHand != null)
           for (aCard in aHand) {
-            if (aCard is CreatureCard && aCard.values.get(0) != Symbol.NONE) {
+            if (aCard is CreatureCard && aCard.values.isNotEmpty() && aCard.values[0] != Symbol.NONE) {
                 val handCreature = aCard
-                if (handCreature.values.size > 1 && handCreature.values.get(0) == handCreature.values.get(
-                        1
-                    )
+                if (handCreature.values.size > 1 && handCreature.values[0] == handCreature.values[1]
                 ) {
                     //double symbol
-                    if (toSubdue?.subduedBy == handCreature.values.get(0)) {
+                    if (toSubdue?.subduedBy == handCreature.values[0]) {
                         fullList.add(mutableSetOf<Card>(aCard))
                     } else {
                         singleWildSets.add(mutableListOf<Card>(aCard))
                     }
-                } else if (toSubdue?.subduedBy == handCreature.values.get(0)) {
+                } else if (toSubdue?.subduedBy == handCreature.values[0]) {
                     //single symbol match
                     singleWildSets.add(mutableListOf<Card>(aCard))
                 } else {
                     //single miss
                     //is the symbol already in the list
                     for (singleSet in singleNonMatch) {
-                        if ((singleSet.iterator()
-                                .next() as CreatureCard).values.get(0) == handCreature.values.get(0)
+                        if (singleSet.isNotEmpty() && (singleSet[0] as CreatureCard).values[0] == handCreature.values[0]
                         ) {
                             singleSet.add(aCard)
                             continue
