@@ -910,20 +910,25 @@ class GameEngine {
                     }
                 } else if (toSubdue?.subduedBy == handCreature.values[0]) {
                     //single symbol match
+
                     singleWildSets.add(mutableListOf<Card>(aCard))
                 } else {
                     //single miss
                     //is the symbol already in the list
+                    var bInSingles = false
                     for (singleSet in singleNonMatch) {
                         if (singleSet.isNotEmpty() && (singleSet[0] as CreatureCard).values[0] == handCreature.values[0]
                         ) {
                             singleSet.add(aCard)
+                            bInSingles = true
                             continue
                         }
                     }
-                    val newSingle: MutableList<Card> = ArrayList<Card>()
-                    newSingle.add(aCard)
-                    singleNonMatch.add(newSingle)
+                    if (!bInSingles) {
+                        val newSingle: MutableList<Card> = ArrayList<Card>()
+                        newSingle.add(aCard)
+                        singleNonMatch.add(newSingle)
+                    }
                 }
             }
         }
@@ -944,19 +949,13 @@ class GameEngine {
                 }
             }
         }
-        var comboCardSet: MutableSet<Card>?
-        for (singleWilds in singleWildSets) {
-            if (singleWilds.size >= 2) {
-                combos = Combinations(singleWilds.size, 2)
-                for (pairing in combos) {
-                    comboCardSet = HashSet<Card>(2)
-                    Collections.addAll<Card>(
-                        comboCardSet,
-                        singleWilds.get(pairing[0]),
-                        singleWilds.get(pairing[1])
-                    )
-                    fullList.add(comboCardSet)
-                }
+        if (singleWildSets.size >= 2) {
+            combos = Combinations(singleWildSets.size, 2)
+            for (pairing in combos) {
+                val comboCardSet = HashSet<Card>()
+                comboCardSet.addAll(singleWildSets[pairing[0]])
+                comboCardSet.addAll(singleWildSets[pairing[1]])
+                fullList.add(comboCardSet)
             }
         }
 

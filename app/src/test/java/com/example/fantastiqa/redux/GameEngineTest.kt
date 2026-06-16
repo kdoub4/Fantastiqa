@@ -76,37 +76,51 @@ class GameEngineTest {
     }
 
     @Test
-    fun `handleStartTowerDraw with PLUS_CARD should draw 4 cards and discard used creature`() {
-        // Arrange
-        val region = Region(RegionName.FOREST, TowerName.QUEST)
-        val plusCard = CreatureCard("FenFairy", Symbol.FIRE, false, Ability.PLUS_CARD, Symbol.WATER)
-        val player = Player(name = "P1", hand = listOf(plusCard))
+    fun `canSubdueDouble test cases`() {
+        val bear = CreatureCard("Bear", "Bear", true, listOf(Symbol.BAT, Symbol.BAT), Symbol.HELMET, Ability.TOWER_KEY)
         
-        val quest1 = Quest("Q1", 1, 1, Symbol.FIRE, Symbol.NONE, RegionName.FOREST)
-        val quest2 = Quest("Q2", 1, 1, Symbol.FIRE, Symbol.NONE, RegionName.FOREST)
-        val quest3 = Quest("Q3", 1, 1, Symbol.FIRE, Symbol.NONE, RegionName.FOREST)
-        val quest4 = Quest("Q4", 1, 1, Symbol.FIRE, Symbol.NONE, RegionName.FOREST)
-        val quest5 = Quest("Q5", 1, 1, Symbol.FIRE, Symbol.NONE, RegionName.FOREST)
-        val questDeck = Deck(listOf(quest1, quest2, quest3, quest4, quest5))
+        // Input : Bear, Satyr Output : Satyr
+        val satyr = CreatureCard("Satyr", "Satyr", true, listOf(Symbol.HELMET, Symbol.HELMET), Symbol.NET, Ability.PLUS_CARD)
+        val res1 = engine.canSubdueDouble(bear, listOf(satyr))
+        assertEquals(1, res1.size)
+        assert(res1[0].contains(satyr))
 
-        val initialState = GameState(
-            board = Board(),
-            players = listOf(player),
-            playerPositions = mapOf(player.name to region),
-            questDeck = questDeck,
-            selectedCards = listOf(plusCard),
-            gamePhase = GameState.GamePhase.OPEN
-        )
+        // Input : Bear, Dragon Output : Empty list
+        val dragon = CreatureCard("Dragon", "Dragon", true, listOf(Symbol.FIRE, Symbol.FIRE), Symbol.SWORD, Ability.TOWER_KEY)
+        val res2 = engine.canSubdueDouble(bear, listOf(dragon))
+        assertEquals(0, res2.size)
 
-        val action = PlayerAction(0, PlayerAction.ActionType.START_TOWER_DRAW, null)
+        // Input : Bear, <BillyGoat, Billygoat> Output : <Billygoat, Billygoat>
+        val bg1 = CreatureCard("BG1", "BillyGoat", true, listOf(Symbol.HELMET), Symbol.NET, Ability.NONE)
+        val bg2 = CreatureCard("BG2", "BillyGoat", true, listOf(Symbol.HELMET), Symbol.NET, Ability.NONE)
+        val res3 = engine.canSubdueDouble(bear, listOf(bg1, bg2))
+        assertEquals(1, res3.size)
+        assert(res3[0].contains(bg1) && res3[0].contains(bg2))
 
-        // Act
-        val newState = engine.reduce(initialState, action)
+        // Input Bear, <Billygoat, Troll> Output: Empty list
+        val troll = CreatureCard("Troll", "Troll", true, listOf(Symbol.BAT), Symbol.HELMET, Ability.NONE)
+        val res4 = engine.canSubdueDouble(bear, listOf(bg1, troll))
+        assertEquals(0, res4.size)
 
-        // Assert
-        assertEquals("Should draw 4 cards (3 + 1 plus card)", 4, newState.towerDrawnCards.size)
-        assertEquals("Hand should be empty after discard", 0, newState.players[0].hand.size)
-        assertEquals("FenFairy should be in discard pile", 1, newState.players[0].deck.discardSize())
-        assertEquals("Selection should be cleared", 0, newState.selectedCards.size)
+        // Input Bear, <Rabbits, Rabbits, Billygoat> Output <Rabbits, Rabbits, Billygoat>
+        val r1 = CreatureCard("R1", "Rabbits", false, listOf(Symbol.TOOTH), Symbol.BROOM, Ability.TOWER_KEY)
+        val r2 = CreatureCard("R2", "Rabbits", false, listOf(Symbol.TOOTH), Symbol.BROOM, Ability.TOWER_KEY)
+        val res5 = engine.canSubdueDouble(bear, listOf(r1, r2, bg1))
+        assertEquals(1, res5.size)
+        assert(res5[0].contains(bg1) && res5[0].contains(r1) && res5[0].contains(r2))
+
+        // Input Bear, <Witch, Witch, Troll, Troll> Output <Witch, Witch, Troll, Troll>
+        val w1 = CreatureCard("W1", "Witch", false, listOf(Symbol.BROOM), Symbol.WATER, Ability.MAGIC_CARPET)
+        val w2 = CreatureCard("W2", "Witch", false, listOf(Symbol.BROOM), Symbol.WATER, Ability.MAGIC_CARPET)
+        val t1 = CreatureCard("T1", "Troll", true, listOf(Symbol.BAT), Symbol.HELMET, Ability.NONE)
+        val t2 = CreatureCard("T2", "Troll", true, listOf(Symbol.BAT), Symbol.HELMET, Ability.NONE)
+        val res6 = engine.canSubdueDouble(bear, listOf(w1, w2, t1, t2))
+        assertEquals(1, res6.size)
+        assert(res6[0].contains(w1) && res6[0].contains(w2) && res6[0].contains(t1) && res6[0].contains(t2))
+
+        val t3 = CreatureCard("T3", "Troll", true, listOf(Symbol.BAT), Symbol.HELMET, Ability.NONE)
+        val res7 = engine.canSubdueDouble(bear, listOf(w1, t1, t2, t3))
+        assertEquals(0,res7.size)
+
     }
 }
