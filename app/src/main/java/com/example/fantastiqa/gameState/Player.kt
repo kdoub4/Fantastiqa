@@ -161,8 +161,8 @@ data class Player(
             }
 
             // Special starter cards
-            deckSetup.add(CreatureCard(java.util.UUID.randomUUID().toString(),"Peaceful Dragon",  false, emptyList<Symbol>() , Symbol.NONE,Ability.DRAGON,))
-            deckSetup.add(CreatureCard(java.util.UUID.randomUUID().toString(),"Dog",  false,emptyList<Symbol>() , Symbol.NONE, Ability.GEM))
+            deckSetup.add(CreatureCard(java.util.UUID.randomUUID().toString(),"Peaceful Dragon",  false, listOf(Symbol.NONE) , Symbol.NONE,Ability.DRAGON,))
+            deckSetup.add(CreatureCard(java.util.UUID.randomUUID().toString(),"Dog",  false, listOf(Symbol.NONE) , Symbol.NONE, Ability.GEM))
             
             return Deck(deckSetup).shuffle(true)
         }

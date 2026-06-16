@@ -6,7 +6,6 @@ import com.example.fantastiqa.gameState.ArtifactCard
 import com.example.fantastiqa.gameState.Card
 import com.example.fantastiqa.gameState.CreatureCard
 import com.example.fantastiqa.gameState.Deck
-import com.example.fantastiqa.gameState.Player
 import com.example.fantastiqa.gameState.Quest
 import com.example.fantastiqa.gameState.Symbol
 import com.example.fantastiqa.pieces.TowerName
@@ -163,7 +162,11 @@ class GameEngine {
         val playerIndex = state.currentPlayerIndex
         var player = state.players.getOrNull(playerIndex) ?: return state
 
-        // Draw up to 5
+        // 1. Discard selected cards
+        val selectedCards = state.selectedCards.filterNotNull()
+        player = player.discardFromHand(selectedCards)
+
+        // 2. Draw up to 5
         val cardsToDraw = (5 - player.hand.size).coerceAtLeast(0)
         if (cardsToDraw > 0) {
             player = player.drawCards(cardsToDraw)
@@ -899,31 +902,34 @@ class GameEngine {
         if (aHand != null)
           for (aCard in aHand) {
             if (aCard is CreatureCard && aCard.values.isNotEmpty() && aCard.values[0] != Symbol.NONE) {
-                val handCreature = aCard
-                if (handCreature.values.size > 1 && handCreature.values[0] == handCreature.values[1]
+                if (aCard.values.size > 1 && aCard.values[0] == aCard.values[1]
                 ) {
                     //double symbol
-                    if (toSubdue?.subduedBy == handCreature.values[0]) {
+                    if (toSubdue?.subduedBy == aCard.values[0]) {
                         fullList.add(mutableSetOf<Card>(aCard))
                     } else {
                         singleWildSets.add(mutableListOf<Card>(aCard))
                     }
-                } else if (toSubdue?.subduedBy == handCreature.values[0]) {
+                } else if (toSubdue?.subduedBy == aCard.values[0]) {
                     //single symbol match
                     singleWildSets.add(mutableListOf<Card>(aCard))
                 } else {
                     //single miss
                     //is the symbol already in the list
+                    var bInSingle = false
                     for (singleSet in singleNonMatch) {
-                        if (singleSet.isNotEmpty() && (singleSet[0] as CreatureCard).values[0] == handCreature.values[0]
+                        if (singleSet.isNotEmpty() && (singleSet[0] as CreatureCard).values[0] == aCard.values[0]
                         ) {
                             singleSet.add(aCard)
+                            bInSingle = true
                             continue
                         }
                     }
-                    val newSingle: MutableList<Card> = ArrayList<Card>()
-                    newSingle.add(aCard)
-                    singleNonMatch.add(newSingle)
+                    if (bInSingle) {
+                        val newSingle: MutableList<Card> = ArrayList<Card>()
+                        newSingle.add(aCard)
+                        singleNonMatch.add(newSingle)
+                    }
                 }
             }
         }
