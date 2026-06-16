@@ -163,7 +163,11 @@ class GameEngine {
         val playerIndex = state.currentPlayerIndex
         var player = state.players.getOrNull(playerIndex) ?: return state
 
-        // Draw up to 5
+        // 1. Discard selected cards
+        val selectedCards = state.selectedCards.filterNotNull()
+        player = player.discardFromHand(selectedCards)
+
+        // 2. Draw up to 5
         val cardsToDraw = (5 - player.hand.size).coerceAtLeast(0)
         if (cardsToDraw > 0) {
             player = player.drawCards(cardsToDraw)
@@ -910,7 +914,6 @@ class GameEngine {
                     }
                 } else if (toSubdue?.subduedBy == handCreature.values[0]) {
                     //single symbol match
-
                     singleWildSets.add(mutableListOf<Card>(aCard))
                 } else {
                     //single miss
