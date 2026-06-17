@@ -151,9 +151,9 @@ data class Player(
                 if (aCard.value2 == Symbol.NONE) {
                     deckSetup.add(CreatureCard(
                         java.util.UUID.randomUUID().toString(),
-                        aCard.name,
+                        playerCardName(aCard),
                         false,
-                        listOf(aCard.value1, aCard.value2),
+                        if (aCard.value2== Symbol.NONE) listOf(aCard.value1) else listOf(aCard.value1, aCard.value2),
                         aCard.subduedBy,
                         Ability.NONE
                     ))

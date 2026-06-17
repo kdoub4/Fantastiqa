@@ -54,8 +54,7 @@ class ComputerPlayerMiddleware(
                         currentState = store.state
                         // If it's a TurnAction (NEXT_TURN), break the loop as game phase or player will change
                         if (action is com.example.fantastiqa.redux.actions.TurnAction && 
-                            (action.getActionType() == com.example.fantastiqa.redux.actions.TurnAction.ActionType.NEXT_TURN ||
-                             action.getActionType() == com.example.fantastiqa.redux.actions.TurnAction.ActionType.DONE_ADVENTURING)) {
+                            (action.getActionType() == com.example.fantastiqa.redux.actions.TurnAction.ActionType.NEXT_TURN )) {
                             break
                         }
                     } else {

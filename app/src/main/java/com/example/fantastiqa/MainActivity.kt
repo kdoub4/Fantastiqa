@@ -598,9 +598,13 @@ fun ActionControls(
             ) { Text("Quest") }
         }
 
+        val isLookingGlassCombo = selectedCards.size == 2 &&
+                selectedCards.any { (it as? Artifact)?.ability == Ability.LOOKING_GLASS } &&
+                selectedCards.any { it is CreatureCard }
+
         Button(
             onClick = { onAction(PlayerAction(state.currentPlayerIndex, PlayerAction.ActionType.USE_ABILITY, null)) },
-            enabled = canFreeAction && selectedCards.size == 1,
+            enabled = canFreeAction && (selectedCards.size == 1 || isLookingGlassCombo),
             modifier = Modifier.fillMaxWidth()
         ) { Text("Ability") }
 

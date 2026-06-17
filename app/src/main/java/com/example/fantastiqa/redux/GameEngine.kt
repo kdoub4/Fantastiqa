@@ -6,6 +6,7 @@ import com.example.fantastiqa.gameState.ArtifactCard
 import com.example.fantastiqa.gameState.Card
 import com.example.fantastiqa.gameState.CreatureCard
 import com.example.fantastiqa.gameState.Deck
+import com.example.fantastiqa.gameState.Game
 import com.example.fantastiqa.gameState.Player
 import com.example.fantastiqa.gameState.Quest
 import com.example.fantastiqa.gameState.Symbol
@@ -874,7 +875,15 @@ class GameEngine {
         )
     }
 
-    private fun handleAdvancePhase(state: GameState, action: TurnAction): GameState = state
+    private fun handleAdvancePhase(state: GameState, action: TurnAction): GameState {
+        return when (state.gamePhase) {
+            GameState.GamePhase.OPEN -> state.copy(gamePhase = GameState.GamePhase.DISCARD_OPEN)
+            GameState.GamePhase.SUBDUE -> state.copy(gamePhase = GameState.GamePhase.DISCARD_OPEN)
+            GameState.GamePhase.TOWER -> state.copy(gamePhase = GameState.GamePhase.DISCARD_OPEN)
+            GameState.GamePhase.QUEST -> state.copy(gamePhase = GameState.GamePhase.DISCARD_OPEN)
+            else -> state.copy(gamePhase = GameState.GamePhase.DISCARD_OPEN)
+        }
+    }
 
     fun canSubdue(
         aCreature: CreatureCard?,
@@ -888,6 +897,7 @@ class GameEngine {
         }
     }
 
+    //TODO multi symbol beasts
     fun canSubdueSingle(
         aCreature: CreatureCard?,
         aHand: List<Card>?
@@ -949,6 +959,8 @@ class GameEngine {
         }
         return fullList
     }
+
+    //TODO symbol list >2 eg. LookingGlass on a double symbol
     fun canSubdueDouble(
         toSubdue: CreatureCard?,
         aHand: List<Card>?

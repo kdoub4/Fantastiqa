@@ -176,4 +176,142 @@ class ComputerPlayerTest {
         assertTrue(action3 is TurnAction)
         assertEquals(TurnAction.ActionType.NEXT_TURN, (action3 as TurnAction).actionType)
     }
+
+    @Test
+    fun `AI should use Magic Carpet card to move towards quest if it can reach it`() {
+        val forest = Region(RegionName.FOREST, TowerName.QUEST)
+        val hills = Region(RegionName.HILLS, TowerName.BAZAAR)
+        val mountains = Region(RegionName.TUNDRA, TowerName.ARTIFACT)
+        
+        // Road from forest to hills, and hills to mountains
+        val board = Board()
+            .withRoad(forest, hills, Road())
+            .withRoad(hills, mountains, Road())
+
+        val carpetCard = createCard("Witch", Ability.MAGIC_CARPET)
+        val quest = Quest(UUID.randomUUID().toString(), "Mountain Quest", "Mountain Quest", 1, 3, Symbol.NONE, Symbol.NONE, RegionName.TUNDRA)
+        
+        val player = Player(name = "Computer", hand = listOf(carpetCard), isComputer = true)
+        
+        // Initial state: at forest, target is mountains
+        val state = GameState(
+            board = board,
+            players = listOf(player),
+            playerPositions = mapOf(player.name to forest),
+            currentPlayerIndex = 0,
+            gamePhase = GameState.GamePhase.OPEN,
+            selectedQuest = quest
+        )
+
+        // 1. Should select Magic Carpet card
+        val action1 = strategy.evaluateNextAction(state)
+        assertTrue("Should select Magic Carpet card", action1 is CardAction)
+        assertEquals(carpetCard.id, (action1 as CardAction).cards[0].id)
+
+        // 2. Should use MoveAction with ability
+        val state2 = state.copy(selectedCards = listOf(carpetCard))
+        val action2 = strategy.evaluateNextAction(state2)
+        assertTrue("Should use MoveAction with ability", action2 is MoveAction)
+        val moveAction = action2 as MoveAction
+        assertTrue(moveAction.useAbility)
+        assertEquals(hills.name, moveAction.destination.name)
+    }
+
+    @Test
+    fun `AI should use Flying Carpet token to move towards quest if it can reach it`() {
+        val forest = Region(RegionName.FOREST, TowerName.QUEST)
+        val hills = Region(RegionName.HILLS, TowerName.BAZAAR)
+        
+        val board = Board().withRoad(forest, hills, Road())
+        val quest = Quest(UUID.randomUUID().toString(), "Hills Quest", "Hills Quest", 1, 3, Symbol.NONE, Symbol.NONE, RegionName.HILLS)
+        
+        val player = Player(name = "Computer", hand = emptyList(), flyingCarpets = 1, isComputer = true)
+        
+        val state = GameState(
+            board = board,
+            players = listOf(player),
+            playerPositions = mapOf(player.name to forest),
+            currentPlayerIndex = 0,
+            gamePhase = GameState.GamePhase.OPEN,
+            selectedQuest = quest
+        )
+
+        val action = strategy.evaluateNextAction(state)
+        assertTrue("Should use MoveAction with flying carpet token", action is MoveAction)
+        val moveAction = action as MoveAction
+        assertEquals(MoveType.FLYING_CARPET, moveAction.moveType)
+        assertEquals(hills.name, moveAction.destination.name)
+    }
+
+    @Test
+    fun `AI should use Tower Key card to teleport if it helps reaching quest`() {
+        val forest = Region(RegionName.FOREST, TowerName.QUEST)
+        val wetlands = Region(RegionName.WETLANDS, TowerName.QUEST) // Same tower type
+        
+        val board = Board()
+            .withRoad(forest, Region(RegionName.HILLS, TowerName.BAZAAR), Road()) // Distant
+            .withRoad(wetlands, Region(RegionName.TUNDRA, TowerName.ARTIFACT), Road())
+        
+        val keyCard = createCard("Rabbits", Ability.TOWER_KEY)
+        val quest = Quest(UUID.randomUUID().toString(), "Wetlands Quest", "Wetlands Quest", 1, 3, Symbol.NONE, Symbol.NONE, RegionName.WETLANDS)
+        
+        val player = Player(name = "Computer", hand = listOf(keyCard), isComputer = true)
+        
+        val state = GameState(
+            board = board,
+            players = listOf(player),
+            playerPositions = mapOf(player.name to forest),
+            currentPlayerIndex = 0,
+            gamePhase = GameState.GamePhase.OPEN,
+            selectedQuest = quest
+        )
+
+        // 1. Should select Tower Key card
+        val action1 = strategy.evaluateNextAction(state)
+        assertTrue("Should select Tower Key card", action1 is CardAction)
+        assertEquals(keyCard.id, (action1 as CardAction).cards[0].id)
+
+        // 2. Should use USE_ABILITY
+        val state2 = state.copy(selectedCards = listOf(keyCard))
+        val action2 = strategy.evaluateNextAction(state2)
+        assertTrue("Should use ability", action2 is PlayerAction)
+        assertEquals(PlayerAction.ActionType.USE_ABILITY, (action2 as PlayerAction).actionType)
+
+        // 3. Should move to destination via TOWER_KEY
+        val state3 = state2.copy(isFreeTowerAction = true)
+        val action3 = strategy.evaluateNextAction(state3)
+        assertTrue("Should use MoveAction TOWER_KEY", action3 is MoveAction)
+        assertEquals(MoveType.TOWER_KEY, (action3 as MoveAction).moveType)
+        assertEquals(wetlands.name, action3.destination.name)
+    }
+
+    @Test
+    fun `AI should use turn action if target is not reachable via free actions alone`() {
+        val forest = Region(RegionName.FOREST, TowerName.QUEST)
+        val hills = Region(RegionName.HILLS, TowerName.QUEST)
+        
+        // Road requires subduing knight
+        val knight = CreatureCard(UUID.randomUUID().toString(), "Knight", true, listOf(Symbol.SWORD), Symbol.WAND, Ability.NONE)
+        val wandCard = createCard("WandCard", value = Symbol.WAND)
+        // Road requires subduing knight, and it's 2 steps away
+        val board = Board()
+            .withRoad(forest, Region(RegionName.WETLANDS, TowerName.QUEST), Road(knight))
+            .withRoad(Region(RegionName.WETLANDS, TowerName.QUEST), hills, Road(knight))
+        val quest = Quest(UUID.randomUUID().toString(), "Hills Quest", "Hills Quest", 1, 3, Symbol.NONE, Symbol.NONE, RegionName.HILLS)
+        
+        val player = Player(name = "Computer", hand = listOf(wandCard), gems = 2, isComputer = true)
+        
+        val state = GameState(
+            board = board,
+            players = listOf(player),
+            playerPositions = mapOf(player.name to forest),
+            currentPlayerIndex = 0,
+            gamePhase = GameState.GamePhase.OPEN,
+            selectedQuest = quest
+        )
+
+        val action = strategy.evaluateNextAction(state)
+        assertTrue("Should select road for subduing (turn action)", action is SubdueAction)
+        assertEquals(SubdueAction.ActionType.SELECT_ROAD, (action as SubdueAction).actionType)
+    }
 }
