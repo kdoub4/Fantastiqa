@@ -321,15 +321,35 @@ fun HandCard(card: Card, isSelected: Boolean, modifier: Modifier = Modifier, sho
                             )
                         }
                     }
+                } else if (card is Artifact) {
+                    // Show cost for Artifacts
+                    Row(
+                        modifier = Modifier.padding(top = 1.dp),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(text = "Cost: ${card.cost}", fontSize = 10.sp, fontWeight = FontWeight.Medium)
+                        Image(
+                            painter = painterResource(id = R.drawable.diamond),
+                            contentDescription = "Gem Cost",
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
                 }
             }
 
             // Ability Icon at the bottom right
-            if (showAbility && card is CreatureCard && card.ability != Ability.NONE) {
+            val ability = when (card) {
+                is CreatureCard -> card.ability
+                is Artifact -> card.ability
+                else -> Ability.NONE
+            }
+
+            if (showAbility && ability != Ability.NONE) {
                 Box(
                     modifier = Modifier.align(Alignment.BottomEnd).padding(2.dp)
                 ) {
-                    AbilityIcon(card.ability)
+                    AbilityIcon(ability)
                 }
             }
         }
@@ -344,6 +364,7 @@ fun AbilityIcon(ability: Ability) {
         Ability.MAGIC_CARPET -> Image(painter = painterResource(id = R.drawable.flyingc), contentDescription = "Flying Carpet", modifier = Modifier.size(25.dp))
         Ability.GEM -> Image(painter = painterResource(id = R.drawable.diamond), contentDescription = "Gem", modifier = Modifier.size(25.dp))
         Ability.DRAGON -> Image(painter = painterResource(id = R.drawable.stars), contentDescription = "Dragon", modifier = Modifier.size(25.dp))
+        Ability.LOOKING_GLASS -> Image(painter = painterResource(id = R.drawable.halloween), contentDescription = "Looking Glass", modifier = Modifier.size(25.dp))
         else -> {}
     }
 }

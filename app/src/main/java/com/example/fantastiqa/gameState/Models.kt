@@ -102,4 +102,4 @@ data class CreatureCard(
             this(name, name, gem, listOf(value1, value2), subduedBy, ability)
 }
 
-data class Artifact(val _id: String, val _name: String, @JvmField val cost: Int) : Card(_id, _name)
+data class Artifact(val _id: String, val _name: String, @JvmField val cost: Int, @JvmField val ability: Ability = Ability.NONE) : Card(_id, _name)

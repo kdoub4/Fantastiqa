@@ -121,6 +121,38 @@ class GameEngineTest {
         val t3 = CreatureCard("T3", "Troll", true, listOf(Symbol.BAT), Symbol.HELMET, Ability.NONE)
         val res7 = engine.canSubdueDouble(bear, listOf(w1, t1, t2, t3))
         assertEquals(0,res7.size)
+    }
 
+    @Test
+    fun `LookingGlass ability should double a card's symbols when used`() {
+        // Bear requires 2 HELMET symbols
+        val bear = CreatureCard("Bear", "Bear", true, listOf(Symbol.HELMET, Symbol.HELMET), Symbol.NONE, Ability.NONE)
+        
+        // BillyGoat has 1 HELMET
+        val bg1 = CreatureCard("BG1", "BillyGoat", true, listOf(Symbol.HELMET), Symbol.NET, Ability.NONE)
+        val lg = Artifact("LG1", "LookingGlass", 0, Ability.LOOKING_GLASS)
+        
+        val player = Player(name = "Adventurer", hand = listOf(bg1, lg))
+        val state = GameState(
+            board = Board(),
+            players = listOf(player),
+            playerPositions = mapOf(player.name to Region(RegionName.FOREST, TowerName.QUEST)),
+            gamePhase = GameState.GamePhase.OPEN,
+            selectedCards = listOf(bg1, lg)
+        )
+
+        // 1. Use the ability
+        val useAbilityAction = PlayerAction(0, PlayerAction.ActionType.USE_ABILITY, null)
+        val stateAfterAbility = engine.reduce(state, useAbilityAction)
+        
+        val updatedPlayer = stateAfterAbility.players[0]
+        val boostedBg = updatedPlayer.hand.find { it.id == bg1.id } as CreatureCard
+        
+        assertEquals("LookingGlass should be discarded", 1, updatedPlayer.hand.size)
+        assertEquals("Target card symbols should be doubled", listOf(Symbol.HELMET, Symbol.HELMET), boostedBg.values)
+
+        // 2. Now it should be able to subdue the bear
+        val res = engine.canSubdue(bear, updatedPlayer.hand)
+        assertEquals("Should be able to subdue with boosted card", 1, res.size)
     }
 }

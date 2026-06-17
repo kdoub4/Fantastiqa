@@ -9,6 +9,7 @@ import com.example.fantastiqa.gameState.Deck
 import com.example.fantastiqa.gameState.Player
 import com.example.fantastiqa.gameState.Quest
 import com.example.fantastiqa.gameState.Symbol
+import com.example.fantastiqa.pieces.CreatureCards
 import com.example.fantastiqa.pieces.TowerName
 import com.example.fantastiqa.redux.actions.*
 import org.apache.commons.math3.util.Combinations
@@ -159,15 +160,30 @@ class GameEngine {
         return state.copy(gamePhase = GameState.GamePhase.DISCARD_OPEN)
     }
 
-    private fun handleDrawPhase(state: GameState): GameState {
+    private fun handleDrawPhase(state: GameState, action: Action? = null): GameState {
         val playerIndex = state.currentPlayerIndex
         var player = state.players.getOrNull(playerIndex) ?: return state
 
-        // 1. Discard selected cards
+        // 1. Revert any boosted cards (LookingGlass effect)
+        val originalHand = player.hand.map { card ->
+            if (card is CreatureCard) {
+                // Find matching base creature template
+                val base = CreatureCards.entries.find { it.name == card.name }
+                if (base != null) {
+                    val baseValues = if (base.value2 == Symbol.NONE) listOf(base.value1) else listOf(base.value1, base.value2)
+                    if (card.values != baseValues) {
+                        card.copy(values = baseValues)
+                    } else card
+                } else card
+            } else card
+        }
+        player = player.copy(hand = originalHand)
+
+        // 2. Discard selected cards
         val selectedCards = state.selectedCards.filterNotNull()
         player = player.discardFromHand(selectedCards)
 
-        // 2. Draw up to 5
+        // 3. Draw up to 5
         val cardsToDraw = (5 - player.hand.size).coerceAtLeast(0)
         if (cardsToDraw > 0) {
             player = player.drawCards(cardsToDraw)
@@ -411,20 +427,28 @@ class GameEngine {
         val player = action.getCurrentPlayer(state) ?: return state
         val selectedCards = state.selectedCards.filterNotNull()
 
-        if (selectedCards.size != 1) return state
-        val card = selectedCards[0]
-        if (card !is CreatureCard) return state
+        if (selectedCards.isEmpty()) return state
+        
+        // Find the card being used as the "source" of the ability
+        val sourceCard = selectedCards.find { it is Artifact && it.ability != Ability.NONE } 
+                         ?: selectedCards.find { it is CreatureCard && it.ability != Ability.NONE }
+                         ?: return state
 
         // Storage cards cannot use abilities
-        if (player.storage.contains(card)) return state
+        if (player.storage.contains(sourceCard)) return state
 
         val updatedPlayers = state.players.toMutableList()
-        var updatedPlayer = player // Start with current player
+        var updatedPlayer = player 
 
-        // Execute ability
-        updatedPlayer = when (card.ability) {
+        val ability = when (sourceCard) {
+            is CreatureCard -> sourceCard.ability
+            is Artifact -> sourceCard.ability
+            else -> Ability.NONE
+        }
+
+        updatedPlayer = when (ability) {
             Ability.GEM -> {
-                player.discardFromHand(listOf(card)).withGems(player.gems + 1)
+                player.discardFromHand(listOf(sourceCard)).withGems(player.gems + 1)
             }
             Ability.DRAGON -> {
                 val currentRegion = state.playerPositions[player.name]
@@ -434,15 +458,31 @@ class GameEngine {
                 
                 if (otherPlayerIndex != -1) {
                     val otherPlayer = state.players[otherPlayerIndex]
-                    updatedPlayers[otherPlayerIndex] = otherPlayer.gainCard(card)
+                    updatedPlayers[otherPlayerIndex] = otherPlayer.gainCard(sourceCard)
                     // Remove from hand without discarding to own pile
-                    player.copy(hand = player.hand - card)
+                    player.copy(hand = player.hand - sourceCard)
                 } else {
                     // No other player, just discard normally
-                    player.discardFromHand(listOf(card))
+                    player.discardFromHand(listOf(sourceCard))
                 }
             }
-            else -> player.discardFromHand(listOf(card))
+            Ability.LOOKING_GLASS -> {
+                // Requires source (LookingGlass) AND target (CreatureCard) to be selected
+                val targetCard = selectedCards.find { it is CreatureCard && it != sourceCard } as? CreatureCard
+                if (targetCard != null) {
+                    // Double the values of the target card temporarily
+                    val boostedCard = targetCard.copy(values = targetCard.values + targetCard.values)
+                    
+                    // Replace targetCard with boostedCard in hand
+                    val newHand = player.hand.map { if (it.id == targetCard.id) boostedCard else it }
+                    
+                    // Discard the LookingGlass
+                    player.copy(hand = newHand).discardFromHand(listOf(sourceCard))
+                } else {
+                    player // Do nothing if no valid target
+                }
+            }
+            else -> player.discardFromHand(listOf(sourceCard))
         }
 
         updatedPlayers[action.playerIndex] = updatedPlayer

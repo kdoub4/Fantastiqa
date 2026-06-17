@@ -22,7 +22,7 @@ object GameInitializer {
         var creatureDeck = initializeCreatureDeck()
         val bazaarDeck = initializeBazaarDeck()
         var questDeck = initializeQuestDeck()
-        val artifactDeck = Deck<Artifact>(emptyList(), emptyList())
+        val artifactDeck = initializeArtifactDeck()
 
         // Set up initial quests on board
         val (initialQuests, remainingQuestDeck) = questDeck.draw(2)
@@ -183,5 +183,15 @@ object GameInitializer {
             Quest(java.util.UUID.randomUUID().toString(), "WAND Q", "WAND Q", 1, 3, Symbol.WAND, Symbol.NONE, RegionName.WETLANDS)
         )
         return Deck(quests).shuffle(true)
+    }
+
+    /**
+     * Initialize the artifact deck
+     */
+    private fun initializeArtifactDeck(): Deck<Artifact> {
+        val artifacts = List(6) {
+            Artifact(java.util.UUID.randomUUID().toString(), "LookingGlass", 2, Ability.LOOKING_GLASS)
+        }
+        return Deck(artifacts).shuffle(true)
     }
 }
