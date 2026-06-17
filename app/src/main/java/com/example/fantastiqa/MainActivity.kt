@@ -99,7 +99,6 @@ fun BoardGameScreen() {
 fun BoardGameContent(state: GameState, onAction: (Action) -> Unit) {
     // UI Local selections (keeping some local for non-permanent board/road focus)
     var selectedRegion by remember { mutableStateOf<Region?>(null) }
-    var towerMenuOpen by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = { TopAppBar(title = { Text("Fantastiqa - Redux Board") }) }
@@ -175,8 +174,8 @@ fun BoardGameContent(state: GameState, onAction: (Action) -> Unit) {
                         selectedRegion = selectedRegion,
                         selectedCards = state.selectedCards,
                         selectedQuest = state.selectedQuest,
-                        towerMenuOpen = towerMenuOpen,
-                        onTowerMenuToggle = { towerMenuOpen = it },
+                        towerMenuOpen = state.towerMenuOpen,
+                        onTowerMenuToggle = { onAction(PlayerAction(state.currentPlayerIndex, PlayerAction.ActionType.SET_TOWER_MENU, it)) },
                         onRegionClear = { selectedRegion = null },
                         onCardClear = { /* Handled by Redux */ },
                         onRoadClear = { onAction(SubdueAction(SubdueAction.ActionType.SELECT_ROAD, state.currentPlayerIndex, null, null, null)) },
@@ -205,7 +204,6 @@ fun BoardGameContent(state: GameState, onAction: (Action) -> Unit) {
             playerGems = state.currentPlayer?.gems ?: 0,
             onDone = { selected: List<Card> ->
                 onAction(PlayerAction(state.currentPlayerIndex, PlayerAction.ActionType.RESOLVE_TOWER_DRAW, selected))
-                towerMenuOpen = false
             }
         )
     }

@@ -39,6 +39,8 @@ data class GameState(
     val selectedQuest: Quest? = null,
     val selectedRoad: Road? = null,
     val towerDrawnCards: List<Card> = emptyList(),
+    val towerMenuOpen: Boolean = false,
+    val isFreeTowerAction: Boolean = false,
     
     // Game state flags
     @JvmField val gamePhase: GamePhase? = GamePhase.INITIALIZATION,

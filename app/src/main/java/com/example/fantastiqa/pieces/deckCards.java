@@ -1,4 +1,4 @@
-package com.example.fantastiqa.screens;
+package com.example.fantastiqa.pieces;
 
 public enum deckCards {
 	Knight,Enchantress,Troll,BillyGoat,Spiders,Rabbits,Witch,FenFairy,BabyDragon,

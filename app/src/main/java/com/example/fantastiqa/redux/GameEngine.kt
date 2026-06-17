@@ -225,6 +225,7 @@ class GameEngine {
             PlayerAction.ActionType.GAIN_CARD -> handleGainCardFromTower(state, action)
             PlayerAction.ActionType.START_TOWER_DRAW -> handleStartTowerDraw(state, action)
             PlayerAction.ActionType.RESOLVE_TOWER_DRAW -> handleResolveTowerDraw(state, action)
+            PlayerAction.ActionType.SET_TOWER_MENU -> state.copy(towerMenuOpen = action.payload as Boolean)
             else -> state
         }
     }
@@ -379,7 +380,7 @@ class GameEngine {
             }
             MoveType.TOWER_KEY -> {
                 updatedPlayer = player.withGems(player.gems - 2)
-                nextPhase = GameState.GamePhase.DISCARD_OPEN // Teleporting is a Turn Action
+                nextPhase = if (state.isFreeTowerAction) state.gamePhase else GameState.GamePhase.DISCARD_OPEN // Teleporting is a Turn Action normally
             }
             else -> {}
         }
@@ -397,7 +398,9 @@ class GameEngine {
             playerPositions = updatedPositions,
             selectedCards = emptyList(),
             selectedRoad = null,
-            gamePhase = nextPhase
+            gamePhase = nextPhase,
+            isFreeTowerAction = false,
+            towerMenuOpen = false
         )
     }
 
@@ -482,6 +485,9 @@ class GameEngine {
                     player // Do nothing if no valid target
                 }
             }
+            Ability.TOWER_KEY -> {
+                player.discardFromHand(listOf(sourceCard))
+            }
             else -> player.discardFromHand(listOf(sourceCard))
         }
 
@@ -489,7 +495,9 @@ class GameEngine {
 
         return state.copy(
             players = updatedPlayers,
-            selectedCards = emptyList()
+            selectedCards = emptyList(),
+            towerMenuOpen = if (ability == Ability.TOWER_KEY) true else state.towerMenuOpen,
+            isFreeTowerAction = if (ability == Ability.TOWER_KEY) true else state.isFreeTowerAction
         )
     }
 
@@ -671,7 +679,12 @@ class GameEngine {
         val updatedPlayers = state.players.toMutableList()
         updatedPlayers[action.playerIndex] = updatedPlayer
         
-        return state.copy(players = updatedPlayers, selectedCards = emptyList())
+        return state.copy(
+            players = updatedPlayers,
+            selectedCards = emptyList(),
+            isFreeTowerAction = false,
+            towerMenuOpen = false
+        )
     }
 
     private fun handleGainCardFromTower(state: GameState, action: PlayerAction): GameState {
@@ -740,7 +753,8 @@ class GameEngine {
             questDeck = if (tower == TowerName.QUEST) nextDeck as? Deck<Quest> else state.questDeck,
             artifactDeck = if (tower == TowerName.ARTIFACT) nextDeck as? Deck<Artifact> else state.artifactDeck,
             selectedCards = emptyList(), // Clear selection after use
-            gamePhase = GameState.GamePhase.TOWER
+            gamePhase = GameState.GamePhase.TOWER,
+            towerMenuOpen = false
         )
     }
 
@@ -797,7 +811,9 @@ class GameEngine {
             questDeck = updatedQuestDeck,
             artifactDeck = updatedArtifactDeck,
             towerDrawnCards = emptyList(),
-            gamePhase = GameState.GamePhase.DISCARD_OPEN
+            gamePhase = if (state.isFreeTowerAction) GameState.GamePhase.OPEN else GameState.GamePhase.DISCARD_OPEN,
+            isFreeTowerAction = false,
+            towerMenuOpen = false
         )
     }
     private fun handleSelectCards(state: GameState, action: CardAction): GameState {
@@ -979,17 +995,10 @@ class GameEngine {
         var combos: Combinations?
         var comboCards: MutableList<Card>?
         for (singles in singleNonMatch) {
-            if (singles.size >= 2) {
-                combos = Combinations(singles.size, 2)
-                for (pairing in combos) {
-                    comboCards = ArrayList<Card>(2)
-                    Collections.addAll<Card?>(
-                        comboCards,
-                        singles.get(pairing[0]),
-                        singles.get(pairing[1])
-                    )
-                    singleWildSets.add(comboCards)
-                }
+            for (i in 0 until (singles.size - 1) step 2) {
+                val comboCards = MutableList<Card>(1, { _ -> singles[i] })
+                comboCards.add(singles[i + 1])
+                singleWildSets.add(comboCards)
             }
         }
         if (singleWildSets.size >= 2) {

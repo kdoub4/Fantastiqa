@@ -55,6 +55,7 @@ class BasicComputerStrategy : ComputerPlayerStrategy {
             } else if (state.gamePhase == GameState.GamePhase.OPEN) {
                 // Not at region yet, move towards it
                 val usedTokenThisTurn = usedCarpetTokenTurn == state.turnCount && lastMovePlayerIndex == state.currentPlayerIndex
+
                 val nextMove = findNextActionTowards(selectedQuest.land, state, usedTokenThisTurn)
                 if (nextMove != null) return nextMove
             }
