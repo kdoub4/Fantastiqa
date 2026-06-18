@@ -51,19 +51,44 @@ fun GameHeader(state: GameState, selectedRoad: Road? = null, onAction: (Action) 
                 Box(modifier = Modifier.weight(1f)) {
                     if (selectedRoad?.creature != null) {
                         val creature = selectedRoad.creature
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                text = creature._name,
-                                fontWeight = FontWeight.Bold,
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                            Spacer(Modifier.width(8.dp))
-                            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                creature.values.forEach { symbol ->
-                                    Image(
-                                        painter = painterResource(id = getSymbolDrawable(symbol)),
-                                        contentDescription = symbol.name,
-                                        modifier = Modifier.size(26.dp)
+                        Column {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = creature._name,
+                                    fontWeight = FontWeight.Bold,
+                                    style = MaterialTheme.typography.titleMedium
+                                )
+                                Spacer(Modifier.width(8.dp))
+                                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                    creature.values.forEach { symbol ->
+                                        Image(
+                                            painter = painterResource(id = getSymbolDrawable(symbol)),
+                                            contentDescription = symbol.name,
+                                            modifier = Modifier.size(26.dp)
+                                        )
+                                    }
+                                }
+                            }
+                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                Text(
+                                    text = "Subdued by:",
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                                Image(
+                                    painter = painterResource(id = getSymbolDrawable(creature.subduedBy)),
+                                    contentDescription = "Subdued by ${creature.subduedBy.name}",
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                if (creature.ability != Ability.NONE) {
+                                    Text(
+                                        text = " | Ability: ${creature.ability.name}",
+                                        style = MaterialTheme.typography.bodySmall
+                                    )
+                                }
+                                if (creature.gem) {
+                                    Text(
+                                        text = " | Gem Creature",
+                                        style = MaterialTheme.typography.bodySmall
                                     )
                                 }
                             }
@@ -366,6 +391,7 @@ fun AbilityIcon(ability: Ability) {
         Ability.GEM -> Image(painter = painterResource(id = R.drawable.diamond), contentDescription = "Gem", modifier = Modifier.size(25.dp))
         Ability.DRAGON -> Image(painter = painterResource(id = R.drawable.stars), contentDescription = "Dragon", modifier = Modifier.size(25.dp))
         Ability.LOOKING_GLASS -> Image(painter = painterResource(id = R.drawable.halloween), contentDescription = "Looking Glass", modifier = Modifier.size(25.dp))
+        Ability.SUMMONING -> Image(painter = painterResource(id = R.drawable.halloween12), contentDescription = "Summoning", modifier = Modifier.size(25.dp))
         else -> {}
     }
 }

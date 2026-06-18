@@ -103,38 +103,72 @@ fun BoardGameContent(state: GameState, onAction: (Action) -> Unit) {
     Scaffold(
         topBar = { TopAppBar(title = { Text("Fantastiqa - Redux Board") }) }
     ) { padding ->
+        val isTowerPhase = state.gamePhase == GameState.GamePhase.TOWER
+        val isSummoningPhase = state.gamePhase == GameState.GamePhase.SUMMONING
+        val isSelectionActive = (isTowerPhase || isSummoningPhase) && state.towerDrawnCards.isNotEmpty()
+
         Column(modifier = Modifier.padding(padding).fillMaxSize().verticalScroll(rememberScrollState())) {
             // Top: Status Bar (stretches all the way across)
-            GameHeader(state, state.selectedRoad, onAction)
+            if (isSelectionActive) {
+                CardSelectionOverlay(
+                    title = if (isSummoningPhase) "Summoning Selection (Pick 1)" else "Tower Selection - ${state.playerPositions[state.currentPlayer?.name]?.tower ?: TowerName.QUEST}",
+                    cards = state.towerDrawnCards,
+                    minSelections = if (isSummoningPhase) 1 else 0,
+                    playerGems = state.currentPlayer?.gems ?: 0,
+                    costSelector = if (isSummoningPhase) null else { card ->
+                        when (state.playerPositions[state.currentPlayer?.name]?.tower) {
+                            TowerName.BAZAAR -> 3
+                            TowerName.ARTIFACT -> (card as? ArtifactCard)?.cost ?: (card as? Artifact)?.cost ?: 0
+                            else -> 0
+                        }
+                    },
+                    onConfirm = { selected: List<Card> ->
+                        if (isSummoningPhase && selected.size > 1) {
+                            // Only 1 allowed for summoning, but minSelections should handle it if set to exactly 1? 
+                            // Actually user said "selects 1". I should probably enforce exactly 1.
+                            onAction(PlayerAction(state.currentPlayerIndex, PlayerAction.ActionType.RESOLVE_TOWER_DRAW, selected.take(1)))
+                        } else {
+                            onAction(PlayerAction(state.currentPlayerIndex, PlayerAction.ActionType.RESOLVE_TOWER_DRAW, selected))
+                        }
+                    }
+                )
+            } else {
+                GameHeader(state, state.selectedRoad, onAction)
+            }
+
             BoardLayout(
                 state = state,
                 selectedRegion = selectedRegion,
                 selectedRoad = state.selectedRoad,
                 onRegionSelect = { region ->
-                    val currentRegion = state.playerPositions[state.currentPlayer?.name]
-                    val hasRoad = currentRegion?.let { state.board?.getRoad(it, region) } != null
+                    if (!isSelectionActive) {
+                        val currentRegion = state.playerPositions[state.currentPlayer?.name]
+                        val hasRoad = currentRegion?.let { state.board?.getRoad(it, region) } != null
 
-                    if (state.selectedCards.isEmpty()) {
-                        onAction(MoveAction(state.currentPlayerIndex, region, MoveType.FLYING_CARPET))
-                    } else if (hasRoad) {
-                        onAction(MoveAction(state.currentPlayerIndex, region, MoveType.ADJACENT, useAbility = true))
+                        if (state.selectedCards.isEmpty()) {
+                            onAction(MoveAction(state.currentPlayerIndex, region, MoveType.FLYING_CARPET))
+                        } else if (hasRoad) {
+                            onAction(MoveAction(state.currentPlayerIndex, region, MoveType.ADJACENT, useAbility = true))
+                        }
+
+                        selectedRegion = region
+                        onAction(SubdueAction(SubdueAction.ActionType.SELECT_ROAD, state.currentPlayerIndex, null, null, null))
+                        onAction(QuestAction(QuestAction.ActionType.SELECT_QUEST, state.currentPlayerIndex, null, emptyList()))
                     }
-
-                    selectedRegion = region
-                    onAction(SubdueAction(SubdueAction.ActionType.SELECT_ROAD, state.currentPlayerIndex, null, null, null))
-                    onAction(QuestAction(QuestAction.ActionType.SELECT_QUEST, state.currentPlayerIndex, null, emptyList()))
                 },
                 onRoadSelect = { road ->
-                    val currentRegion = state.playerPositions[state.currentPlayer?.name]
-                    val destination = currentRegion?.let { start ->
-                        state.board?.getAdjacentAreas(start)?.find { it.first == road }?.second
-                    }
+                    if (!isSelectionActive) {
+                        val currentRegion = state.playerPositions[state.currentPlayer?.name]
+                        val destination = currentRegion?.let { start ->
+                            state.board?.getAdjacentAreas(start)?.find { it.first == road }?.second
+                        }
 
-                    if (destination != null && (state.selectedCards.isNotEmpty() || road.creature == null)) {
-                        onAction(MoveAction(state.currentPlayerIndex, destination, MoveType.ADJACENT, useAbility = false))
-                    } else {
-                        onAction(SubdueAction(SubdueAction.ActionType.SELECT_ROAD, state.currentPlayerIndex, road, null, null))
-                        selectedRegion = null
+                        if (destination != null && (state.selectedCards.isNotEmpty() || road.creature == null)) {
+                            onAction(MoveAction(state.currentPlayerIndex, destination, MoveType.ADJACENT, useAbility = false))
+                        } else {
+                            onAction(SubdueAction(SubdueAction.ActionType.SELECT_ROAD, state.currentPlayerIndex, road, null, null))
+                            selectedRegion = null
+                        }
                     }
                 }
             )
@@ -146,16 +180,22 @@ fun BoardGameContent(state: GameState, onAction: (Action) -> Unit) {
                         player = state.currentPlayer,
                         selectedQuest = state.selectedQuest,
                         onQuestSelect = { quest ->
-                            onAction(QuestAction(QuestAction.ActionType.SELECT_QUEST, state.currentPlayerIndex, quest, emptyList()))
-                            selectedRegion = null
-                            onAction(SubdueAction(SubdueAction.ActionType.SELECT_ROAD, state.currentPlayerIndex, null, null, null))
+                            if (!isSelectionActive) {
+                                onAction(QuestAction(QuestAction.ActionType.SELECT_QUEST, state.currentPlayerIndex, quest, emptyList()))
+                                selectedRegion = null
+                                onAction(SubdueAction(SubdueAction.ActionType.SELECT_ROAD, state.currentPlayerIndex, null, null, null))
+                            }
                         }
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     StorageSection(
                         cards = state.currentPlayer?.storage ?: emptyList(),
                         selectedCards = state.selectedCards.filterNotNull(),
-                        onCardSelect = { onAction(CardAction(CardAction.ActionType.SELECT_CARDS, state.currentPlayerIndex, listOf(it))) }
+                        onCardSelect = { 
+                            if (!isSelectionActive) {
+                                onAction(CardAction(CardAction.ActionType.SELECT_CARDS, state.currentPlayerIndex, listOf(it))) 
+                            }
+                        }
                     )
                 }
 
@@ -179,7 +219,7 @@ fun BoardGameContent(state: GameState, onAction: (Action) -> Unit) {
                         onRegionClear = { selectedRegion = null },
                         onCardClear = { /* Handled by Redux */ },
                         onRoadClear = { onAction(SubdueAction(SubdueAction.ActionType.SELECT_ROAD, state.currentPlayerIndex, null, null, null)) },
-                        onAction = onAction,
+                        onAction = { if (!isSelectionActive) onAction(it) },
                         onTowerDraw = {
                             onAction(PlayerAction(state.currentPlayerIndex, PlayerAction.ActionType.START_TOWER_DRAW, null))
                         }
@@ -192,96 +232,100 @@ fun BoardGameContent(state: GameState, onAction: (Action) -> Unit) {
             HandSection(
                 cards = state.currentPlayer?.hand ?: emptyList(),
                 selectedCards = state.selectedCards.filterNotNull(),
-                onCardSelect = { onAction(CardAction(CardAction.ActionType.SELECT_CARDS, state.currentPlayerIndex, listOf(it))) }
+                onCardSelect = { 
+                    if (!isSelectionActive) {
+                        onAction(CardAction(CardAction.ActionType.SELECT_CARDS, state.currentPlayerIndex, listOf(it))) 
+                    }
+                }
             )
         }
-    }
-
-    if (state.towerDrawnCards.isNotEmpty()) {
-        TowerDrawDialog(
-            cards = state.towerDrawnCards,
-            tower = state.playerPositions[state.currentPlayer?.name]?.tower ?: TowerName.QUEST,
-            playerGems = state.currentPlayer?.gems ?: 0,
-            onDone = { selected: List<Card> ->
-                onAction(PlayerAction(state.currentPlayerIndex, PlayerAction.ActionType.RESOLVE_TOWER_DRAW, selected))
-            }
-        )
     }
 }
 
 @Composable
-fun TowerDrawDialog(
+fun CardSelectionOverlay(
+    title: String,
     cards: List<Card>,
-    tower: TowerName,
-    playerGems: Int,
-    onDone: (List<Card>) -> Unit
+    minSelections: Int = 0,
+    playerGems: Int = 0,
+    costSelector: ((Card) -> Int)? = null,
+    onConfirm: (List<Card>) -> Unit
 ) {
     var selectedCards by remember { mutableStateOf(setOf<Card>()) }
     var currentGems by remember { mutableStateOf(playerGems) }
 
-    AlertDialog(
-        onDismissRequest = { /* Modal - do nothing */ },
-        properties = DialogProperties(
-            dismissOnBackPress = false,
-            dismissOnClickOutside = false,
-            usePlatformDefaultWidth = false
-        ),
+    M3Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 16.dp, start = 16.dp, end = 16.dp),
-        title = { Text("Tower Draw - $tower") },
-        text = {
-            Column(modifier = Modifier.widthIn(min = 320.dp)) {
-                Text("Gems: $currentGems", style = MaterialTheme.typography.bodySmall)
-                Spacer(Modifier.height(8.dp))
-                LazyRow(
-                    modifier = Modifier.fillMaxWidth().height(140.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp)
-                ) {
-                    items(cards) { card ->
-                        val cost = when (tower) {
-                            TowerName.BAZAAR -> 3
-                            TowerName.ARTIFACT -> (card as? ArtifactCard)?.cost ?: (card as? Artifact)?.cost ?: 0
-                            else -> 0
-                        }
-                        val isSelected = selectedCards.contains(card)
-                        val canAfford = isSelected || currentGems >= cost
+            .padding(8.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (costSelector != null) {
+                        Text("Gems: $currentGems", style = MaterialTheme.typography.bodyMedium)
+                        Spacer(Modifier.width(16.dp))
+                    }
+                    Button(
+                        onClick = { onConfirm(selectedCards.toList()) },
+                        enabled = selectedCards.size >= minSelections,
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp)
+                    ) {
+                        Text("Confirm (${selectedCards.size})")
+                    }
+                }
+            }
+            
+            Spacer(Modifier.height(8.dp))
+            
+            LazyRow(
+                modifier = Modifier.fillMaxWidth().height(120.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                contentPadding = PaddingValues(vertical = 4.dp)
+            ) {
+                items(cards) { card ->
+                    val cost = costSelector?.invoke(card) ?: 0
+                    val isSelected = selectedCards.contains(card)
+                    val canAfford = isSelected || currentGems >= cost
 
-                        Box(modifier = Modifier.width(90.dp)) {
-                            HandCard(
-                                card = card,
-                                isSelected = isSelected,
-                                modifier = Modifier.fillMaxSize(),
-                                onClick = {
-                                    if (isSelected) {
-                                        selectedCards = selectedCards - card
-                                        currentGems += cost
-                                    } else if (canAfford) {
-                                        selectedCards = selectedCards + card
-                                        currentGems -= cost
-                                    }
+                    Box(modifier = Modifier.width(90.dp)) {
+                        HandCard(
+                            card = card,
+                            isSelected = isSelected,
+                            modifier = Modifier.fillMaxSize(),
+                            onClick = {
+                                if (isSelected) {
+                                    selectedCards = selectedCards - card
+                                    currentGems += cost
+                                } else if (canAfford) {
+                                    selectedCards = selectedCards + card
+                                    currentGems -= cost
                                 }
-                            )
-                            
-                            if (!canAfford && !isSelected) {
-                                Surface(
-                                    modifier = Modifier.fillMaxSize(),
-                                    color = Color.Gray.copy(alpha = 0.4f),
-                                    shape = RoundedCornerShape(8.dp)
-                                ) {}
                             }
+                        )
+                        
+                        if (!canAfford && !isSelected) {
+                            Surface(
+                                modifier = Modifier.fillMaxSize(),
+                                color = Color.Gray.copy(alpha = 0.4f),
+                                shape = RoundedCornerShape(8.dp)
+                            ) {}
                         }
                     }
                 }
             }
-        },
-        confirmButton = {
-            TextButton(onClick = { onDone(selectedCards.toList()) }) {
-                Text("Done")
-            }
         }
-    )
+    }
 }
 
 @Composable

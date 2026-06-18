@@ -54,10 +54,10 @@ data class Player(
     }
 
     /**
-     * Returns a new Player with a card added to their hand.
+     * Returns a new Player with a card added to their discard pile.
      */
     fun gainCard(card: Card): Player {
-        return copy(hand = hand + card)
+        return copy(deck = deck.discard(card))
     }
 
     /**
@@ -68,14 +68,15 @@ data class Player(
     }
 
     /**
-     * Returns a new Player with cards moved from hand to discard pile.
+     * Returns a new Player with cards moved from hand or storage to discard pile.
      */
-    fun discardFromHand(cards: List<Card>): Player {
-        val nextHand = hand - cards.toSet()
+    fun discard(cards: List<Card>): Player {
+        val set = cards.toSet()
         var nextDeck = deck
         cards.forEach { nextDeck = nextDeck.discard(it) }
         return copy(
-            hand = nextHand,
+            hand = hand - set,
+            storage = storage - set,
             deck = nextDeck
         )
     }
@@ -140,20 +141,80 @@ data class Player(
     companion object {
         private fun createInitialDeck(): Deck<Card> {
             val deckSetup = mutableListOf<Card>()
-            
+
             // Standard starter cards from enums
             CreatureCards.entries.forEach { aCard ->
-                if (aCard.name == "Knight") {
-                    repeat(2) {
-                        deckSetup.add(CreatureCard(java.util.UUID.randomUUID().toString(),"Knight",  false, listOf(Symbol.SWORD), Symbol.WAND, Ability.NONE))
-                    }
+                if (aCard.value2 == Symbol.NONE) {
+                    deckSetup.add(
+                        CreatureCard(
+                            java.util.UUID.randomUUID().toString(),
+                            playerCardName(aCard),
+                            false,
+                            if (aCard.value2 == Symbol.NONE) listOf(aCard.value1) else listOf(
+                                aCard.value1,
+                                aCard.value2
+                            ),
+                            aCard.subduedBy,
+                            Ability.NONE
+                        )
+                    )
                 }
             }
-            deckSetup.add(CreatureCard(java.util.UUID.randomUUID().toString(),"Peaceful Dragon",  false, listOf(Symbol.NONE), Symbol.NONE, Ability.NONE))
-            deckSetup.add(CreatureCard(java.util.UUID.randomUUID().toString(),"Dog",  false, listOf(Symbol.NONE), Symbol.NONE, Ability.NONE))
-            deckSetup.add(Artifact(java.util.UUID.randomUUID().toString(), "LookingGlass", 0, Ability.LOOKING_GLASS))
+            // Special starter cards
+            deckSetup.add(
+                CreatureCard(
+                    java.util.UUID.randomUUID().toString(),
+                    "Peaceful Dragon",
+                    false,
+                    listOf(Symbol.NONE),
+                    Symbol.NONE,
+                    Ability.DRAGON,
+                )
+            )
+            deckSetup.add(
+                CreatureCard(
+                    java.util.UUID.randomUUID().toString(),
+                    "Dog",
+                    false,
+                    listOf(Symbol.NONE),
+                    Symbol.NONE,
+                    Ability.GEM
+                )
+            )
 
-            return Deck<Card>(deckSetup).shuffle(true)
+            val randomArtifact = if (java.util.Random().nextBoolean()) {
+                Artifact(
+                    java.util.UUID.randomUUID().toString(),
+                    "LookingGlass",
+                    0,
+                    Ability.LOOKING_GLASS
+                )
+            } else {
+                Artifact(
+                    java.util.UUID.randomUUID().toString(),
+                    "BellOfSummoning",
+                    0,
+                    Ability.SUMMONING
+                )
+            }
+            deckSetup.add(randomArtifact)
+
+            return Deck(deckSetup).shuffle(true)
+
+        }
+        private fun playerCardName(card: CreatureCards): String {
+            return when (card) {
+                CreatureCards.Knight -> "Spatula"
+                CreatureCards.BabyDragon -> "Candle"
+                CreatureCards.FenFairy -> "Pail"
+                CreatureCards.Witch -> "Broom"
+                CreatureCards.Rabbits -> "Cat"
+                CreatureCards.Spiders -> "Net"
+                CreatureCards.BillyGoat -> "Helmet"
+                CreatureCards.Troll -> "Bat"
+                CreatureCards.Enchantress -> "Toothbrush"
+                else -> throw IllegalArgumentException("Unknown card: $card")
+            }
         }
     }
 }

@@ -43,7 +43,20 @@ data class BoardQuest(
     override val doubleReq: Symbol,
     override val tripleReq: Symbol,
     override val land: RegionName
-) : Quest(_id, _name, title, vps, gems, doubleReq, tripleReq, land)
+) : Quest(_id, _name, title, vps, gems, doubleReq, tripleReq, land) {
+    fun matchReq(card: Card): Boolean {
+        if (card !is CreatureCard) return false
+        val reqs = getRequirements()
+
+        // Check if card matches any requirement
+        for (i in reqs.indices) {
+            if (card.values.contains(reqs[i])) {
+                return true
+            }
+        }
+        return false
+    }
+}
 
 data class PlayerQuest(
     val _id: String,

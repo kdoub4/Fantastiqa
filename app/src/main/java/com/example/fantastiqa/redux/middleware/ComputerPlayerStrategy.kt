@@ -168,6 +168,44 @@ class BasicComputerStrategy : ComputerPlayerStrategy {
             }
         }
 
+        // Store cards for quests before discarding
+        val activeBoardQuests = board.quests.filterNotNull()
+        val activePersonalQuests = player.quests.filterIsInstance<PlayerQuest>()
+
+        for (card in hand) {
+            // Priority 1: Personal Quests
+            val matchingPersonal = activePersonalQuests.find { it.canStoreCard(card) }
+            if (matchingPersonal != null) {
+                return if (card in selectedCards) {
+                    QuestAction(QuestAction.ActionType.STORE_CARD_FOR_QUEST, state.currentPlayerIndex, matchingPersonal, listOf(card))
+                } else {
+                    CardAction(CardAction.ActionType.SELECT_CARDS, state.currentPlayerIndex, listOf(card))
+                }
+            }
+
+            // Priority 2: Board Quests
+            val matchingBoard = activeBoardQuests.find { it.matchReq(card) }
+            if (matchingBoard != null) {
+                if (storage.size < 5) {
+                    return if (card in selectedCards) {
+                        PlayerAction(state.currentPlayerIndex, PlayerAction.ActionType.STORE_FOR_BOARD_QUEST, null)
+                    } else {
+                        CardAction(CardAction.ActionType.SELECT_CARDS, state.currentPlayerIndex, listOf(card))
+                    }
+                } else {
+                    // Storage full, check for useless cards to discard to make room
+                    val uselessInStorage = storage.find { sCard -> activeBoardQuests.none { it.matchReq(sCard) } }
+                    if (uselessInStorage != null) {
+                        return if (uselessInStorage in selectedCards) {
+                            PlayerAction(state.currentPlayerIndex, PlayerAction.ActionType.DISCARD_FROM_HAND, listOf(uselessInStorage))
+                        } else {
+                            CardAction(CardAction.ActionType.SELECT_CARDS, state.currentPlayerIndex, listOf(uselessInStorage))
+                        }
+                    }
+                }
+            }
+        }
+
         if (hand.isEmpty())
             return TurnAction(TurnAction.ActionType.NEXT_TURN)
 

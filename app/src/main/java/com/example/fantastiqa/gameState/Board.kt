@@ -8,14 +8,14 @@ import java.util.*
  * Immutable Board representation.
  */
 data class Board(
-    @JvmField val quests: List<Quest?> = listOf(null, null),
+    @JvmField val quests: List<BoardQuest?> = listOf(null, null),
     @JvmField val adjacencies: Map<Region, Map<Region, Road>> = emptyMap()
 ) {
 
     /**
      * Returns a new board with the quest at [index] replaced.
      */
-    fun withQuest(index: Int, newQuest: Quest?): Board {
+    fun withQuest(index: Int, newQuest: BoardQuest?): Board {
         val newQuests = quests.toMutableList()
         newQuests[index] = newQuest
         return copy(quests = newQuests)

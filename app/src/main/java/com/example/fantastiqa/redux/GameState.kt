@@ -43,6 +43,7 @@ data class GameState(
     val towerDrawnCards: List<Card> = emptyList(),
     val towerMenuOpen: Boolean = false,
     val isFreeTowerAction: Boolean = false,
+    val previousPhase: GamePhase? = null,
     
     // Game state flags
     @JvmField val gamePhase: GamePhase? = GamePhase.INITIALIZATION,
@@ -62,6 +63,7 @@ data class GameState(
         MAIN_PHASE,
         PLAYER_TURN,
         CARD_SELECTION,
+        SUMMONING,
         GAME_END
     }
 

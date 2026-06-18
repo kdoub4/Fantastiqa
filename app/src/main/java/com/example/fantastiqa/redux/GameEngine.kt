@@ -27,8 +27,9 @@ class GameEngine {
                 // - PLUS_CARD selection during TOWER phase
                 val isSelectDuringSubdue = phase == GameState.GamePhase.SUBDUE && isSelectCardsAction(action)
                 val isPlusDuringTower = phase == GameState.GamePhase.TOWER && isTowerPlusCardSelection(currentState, action)
+                val isAbilityAction = isUseAbilityAction(action)
                 
-                if (!isSelectDuringSubdue && !isPlusDuringTower) {
+                if (!isSelectDuringSubdue && !isPlusDuringTower && !isAbilityAction) {
                     return currentState
                 }
             }
@@ -85,6 +86,10 @@ class GameEngine {
 
     private fun isSelectCardsAction(action: Action): Boolean {
         return action is CardAction && action.actionType == CardAction.ActionType.SELECT_CARDS
+    }
+
+    private fun isUseAbilityAction(action: Action): Boolean {
+        return action is PlayerAction && action.getActionType() == PlayerAction.ActionType.USE_ABILITY
     }
 
     private fun processAutomatedTransitions(state: GameState): GameState {
@@ -182,7 +187,7 @@ class GameEngine {
 
         // 2. Discard selected cards
         val selectedCards = state.selectedCards.filterNotNull()
-        player = player.discardFromHand(selectedCards)
+        player = player.discard(selectedCards)
 
         // 3. Draw up to 5
         val cardsToDraw = (5 - player.hand.size).coerceAtLeast(0)
@@ -324,7 +329,8 @@ class GameEngine {
         return state.copy(
             board = board,
             selectedRoads = emptyList(),
-            gamePhase = GameState.GamePhase.OPEN
+            gamePhase = state.previousPhase ?: GameState.GamePhase.OPEN,
+            previousPhase = null
         )
     }
 
@@ -432,12 +438,12 @@ class GameEngine {
                 val theRoad = state.board?.getRoad(currentRegion, action.destination) ?: return state
                 if (action.useAbility) {
                     // Just discard the card and move (don't remove creature from board)
-                    updatedPlayer = player.discardFromHand(selectedCards)
+                    updatedPlayer = player.discard(selectedCards)
                 } else if (theRoad.creature != null) {
                     // Normal subdue: remove creature and gain it
                     updatedBoard = state.board?.withRoad(currentRegion, action.destination, theRoad.copy(creature = null))
                     val gemBonus = if (theRoad.creature.gem) 1 else 0
-                    updatedPlayer = player.gainCard(theRoad.creature).discardFromHand(selectedCards).withGems(player.gems + gemBonus)
+                    updatedPlayer = player.gainCard(theRoad.creature).discard(selectedCards).withGems(player.gems + gemBonus)
                     nextPhase = GameState.GamePhase.SUBDUE
                 }
             }
@@ -514,7 +520,7 @@ class GameEngine {
 
         updatedPlayer = when (ability) {
             Ability.GEM -> {
-                player.discardFromHand(listOf(sourceCard)).withGems(player.gems + 1)
+                player.discard(listOf(sourceCard)).withGems(player.gems + 1)
             }
             Ability.DRAGON -> {
                 val currentRegion = state.playerPositions[player.name]
@@ -529,7 +535,7 @@ class GameEngine {
                     player.copy(hand = player.hand - sourceCard)
                 } else {
                     // No other player, just discard normally
-                    player.discardFromHand(listOf(sourceCard))
+                    player.discard(listOf(sourceCard))
                 }
             }
             Ability.LOOKING_GLASS -> {
@@ -543,13 +549,18 @@ class GameEngine {
                     val newHand = player.hand.map { if (it.id == targetCard.id) boostedCard else it }
                     
                     // Discard the LookingGlass
-                    player.copy(hand = newHand).discardFromHand(listOf(sourceCard))
+                    player.copy(hand = newHand).discard(listOf(sourceCard))
                 } else {
                     player // Do nothing if no valid target
                 }
             }
+            Ability.SUMMONING -> {
+                // Bell of Summoning: Draw 3, Pick 1, other 2 go to discard
+                // Handled in handleUseAbility to initiate the draw
+                player.discard(listOf(sourceCard))
+            }
             Ability.TOWER_KEY -> {
-                player.discardFromHand(listOf(sourceCard))
+                player.discard(listOf(sourceCard))
             }
             Ability.BITTER_BREW -> {
                 val targetCard = selectedCards.find { it != sourceCard }
@@ -567,9 +578,9 @@ class GameEngine {
                         } else {
                             player.copy(deck = player.deck.remove(targetCard))
                         }
-                        playerWithoutTarget.discardFromHand(listOf(sourceCard))
-                    } else player.discardFromHand(listOf(sourceCard))
-                } else player.discardFromHand(listOf(sourceCard))
+                        playerWithoutTarget.discard(listOf(sourceCard))
+                    } else player.discard(listOf(sourceCard))
+                } else player.discard(listOf(sourceCard))
             }
             Ability.ROGUES_PURSE -> {
                 val startingGems = player.gems
@@ -580,20 +591,35 @@ class GameEngine {
                         gemsGained++
                     }
                 }
-                player.discardFromHand(listOf(sourceCard)).withGems(player.gems + gemsGained)
+                player.discard(listOf(sourceCard)).withGems(player.gems + gemsGained)
             }
             Ability.WARDROBE -> {
-                player.discardFromHand(listOf(sourceCard))
+                player.discard(listOf(sourceCard))
             }
-            else -> player.discardFromHand(listOf(sourceCard))
+            else -> player.discard(listOf(sourceCard))
         }
 
         updatedPlayers[action.playerIndex] = updatedPlayer
+
+        // If Summoning, we need to trigger the draw phase
+        if (ability == Ability.SUMMONING) {
+            val (drawn, nextDeck) = updatedPlayer.deck.draw(3)
+            updatedPlayer = updatedPlayer.copy(deck = nextDeck)
+            updatedPlayers[action.playerIndex] = updatedPlayer
+            return state.copy(
+                players = updatedPlayers,
+                selectedCards = emptyList(),
+                towerDrawnCards = drawn,
+                gamePhase = GameState.GamePhase.SUMMONING,
+                previousPhase = state.gamePhase
+            )
+        }
 
         return state.copy(
             players = updatedPlayers,
             selectedCards = emptyList(),
             gamePhase = if (ability == Ability.WARDROBE) GameState.GamePhase.WARDROBE else state.gamePhase,
+            previousPhase = if (ability == Ability.WARDROBE) state.gamePhase else state.previousPhase,
             towerMenuOpen = if (ability == Ability.TOWER_KEY) true else state.towerMenuOpen,
             isFreeTowerAction = if (ability == Ability.TOWER_KEY) true else state.isFreeTowerAction
         )
@@ -671,7 +697,7 @@ class GameEngine {
             }
             updatedBoard = state.board.copy(quests = updatedQuests)
 
-            updatedPlayer = player.discardFromHand(selectedCards).copy(
+            updatedPlayer = player.discard(selectedCards).copy(
                 vps = player.vps + quest.vps,
                 gems = player.gems + quest.gems,
                 trophies = player.trophies + quest.vps
@@ -838,7 +864,7 @@ class GameEngine {
         // Discard the used plus cards
         var updatedPlayer = player
         if (plusCards.isNotEmpty()) {
-            updatedPlayer = player.discardFromHand(plusCards)
+            updatedPlayer = player.discard(plusCards)
         }
         
         val updatedPlayers = state.players.toMutableList()
@@ -852,6 +878,7 @@ class GameEngine {
             artifactDeck = if (tower == TowerName.ARTIFACT) nextDeck as? Deck<Artifact> else state.artifactDeck,
             selectedCards = emptyList(), // Clear selection after use
             gamePhase = GameState.GamePhase.TOWER,
+            previousPhase = state.gamePhase,
             towerMenuOpen = false
         )
     }
@@ -859,6 +886,34 @@ class GameEngine {
     private fun handleResolveTowerDraw(state: GameState, action: PlayerAction): GameState {
         val selectedCards = action.payload as? List<Card> ?: emptyList()
         val player = action.getCurrentPlayer(state) ?: return state
+        
+        if (state.gamePhase == GameState.GamePhase.SUMMONING) {
+            // Special handling for Bell of Summoning
+            val allDrawn = state.towerDrawnCards
+            val unselected = allDrawn.filter { card -> selectedCards.none { it.id == card.id } }
+            
+            var updatedPlayer = player
+            // Take the selected card (usually just 1) to hand
+            selectedCards.forEach { card ->
+                updatedPlayer = updatedPlayer.copy(hand = updatedPlayer.hand + card)
+            }
+            
+            // Unselected go to player's discard pile
+            unselected.forEach { card ->
+                updatedPlayer = updatedPlayer.copy(deck = updatedPlayer.deck.discard(card))
+            }
+            
+            val updatedPlayers = state.players.toMutableList()
+            updatedPlayers[action.playerIndex] = updatedPlayer
+            
+            return state.copy(
+                players = updatedPlayers,
+                towerDrawnCards = emptyList(),
+                gamePhase = state.previousPhase ?: GameState.GamePhase.DISCARD_OPEN,
+                previousPhase = null
+            )
+        }
+
         val playerPos = state.playerPositions[player.name] ?: return state
         val tower = playerPos.tower ?: return state
 
@@ -909,7 +964,8 @@ class GameEngine {
             questDeck = updatedQuestDeck,
             artifactDeck = updatedArtifactDeck,
             towerDrawnCards = emptyList(),
-            gamePhase = if (state.isFreeTowerAction) GameState.GamePhase.OPEN else GameState.GamePhase.DISCARD_OPEN,
+            gamePhase = if (state.isFreeTowerAction) (state.previousPhase ?: GameState.GamePhase.OPEN) else GameState.GamePhase.DISCARD_OPEN,
+            previousPhase = if (state.isFreeTowerAction) null else state.previousPhase,
             isFreeTowerAction = false,
             towerMenuOpen = false
         )
@@ -982,7 +1038,7 @@ class GameEngine {
         val playerIndex = action.playerIndex
         val player =  action.getCurrentPlayer(state) ?: return state
 
-        val updatedPlayer = player.discardFromHand(cardsToDiscard)
+        val updatedPlayer = player.discard(cardsToDiscard)
 
         val updatedPlayers = state.players.toMutableList()
         updatedPlayers[playerIndex] = updatedPlayer

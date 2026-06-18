@@ -188,8 +188,10 @@ object GameInitializer {
      * Initialize the artifact deck
      */
     private fun initializeArtifactDeck(): Deck<Artifact> {
-        val artifacts = List(6) {
-            Artifact(java.util.UUID.randomUUID().toString(), "LookingGlass", 2, Ability.LOOKING_GLASS)
+        val artifacts = mutableListOf<Artifact>()
+        repeat(3) {
+            artifacts.add(Artifact(java.util.UUID.randomUUID().toString(), "LookingGlass", 2, Ability.LOOKING_GLASS))
+            artifacts.add(Artifact(java.util.UUID.randomUUID().toString(), "BellOfSummoning", 2, Ability.SUMMONING))
         }
         return Deck(artifacts).shuffle(true)
     }
