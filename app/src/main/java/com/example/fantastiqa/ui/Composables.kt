@@ -170,7 +170,8 @@ fun StorageSection(cards: List<Card>, selectedCards: List<Card>, onCardSelect: (
 
 @Composable
 fun QuestCard(quest: Quest, modifier: Modifier = Modifier, isSelected: Boolean = false, onClick: (() -> Unit)? = null) {
-    val fulfilled = quest.getFulfilledIndices()
+    val playerQuest = quest as? PlayerQuest
+    val fulfilled = playerQuest?.getFulfilledIndices() ?: emptySet()
     val requirements = quest.getRequirements()
     
     M3Card(
@@ -259,9 +260,9 @@ fun QuestCard(quest: Quest, modifier: Modifier = Modifier, isSelected: Boolean =
             }
             
             // Stored Cards Names (Mini)
-            if (quest.stored.isNotEmpty()) {
+            if (playerQuest?.stored?.isNotEmpty() == true) {
                 Text(
-                    text = quest.stored.joinToString(", ") { it.name },
+                    text = playerQuest.stored.joinToString(", ") { it.name },
                     fontSize = 6.sp,
                     maxLines = 1,
                     color = Color.DarkGray

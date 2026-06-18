@@ -29,19 +29,18 @@ object GameInitializer {
         questDeck = remainingQuestDeck
 
         val boardQuests = initialQuests.map { q ->
-            Quest(
-                q._id,
-                q._name,
+            BoardQuest(
+                q.id,
+                q.name,
                 q.title,
                 q.vps + 1,
                 q.gems,
                 q.doubleReq,
                 q.tripleReq,
-                q.land,
-                q.stored
+                q.land
             )
         }
-        board = board.copy(quests = boardQuests, adjacencies = board.adjacencies)
+        board = board.copy(quests = boardQuests)
 
         // Place creatures on roads
         for (road in board.roads()) {
@@ -77,10 +76,10 @@ object GameInitializer {
 
         // Add one quest to each player immutably
         val (p1Quest, qDeck2) = questDeck.drawOne()
-        player1 = player1.copy(quests = player1.quests + listOfNotNull(p1Quest))
+        if (p1Quest != null) player1 = player1.drawQuest(p1Quest)
         
         val (p2Quest, qDeck3) = qDeck2.drawOne()
-        player2 = player2.copy(quests = player2.quests + listOfNotNull(p2Quest))
+        if (p2Quest != null) player2 = player2.drawQuest(p2Quest)
         
         questDeck = qDeck3
         val players = listOf(player1, player2)
@@ -170,17 +169,17 @@ object GameInitializer {
     /**
      * Initialize the quest deck
      */
-    private fun initializeQuestDeck(): Deck<Quest> {
+    private fun initializeQuestDeck(): Deck<BoardQuest> {
         val quests = listOf(
-            Quest(java.util.UUID.randomUUID().toString(), "FIRE Q", "FIRE Q", 1, 3, Symbol.FIRE, Symbol.NONE, RegionName.WETLANDS),
-            Quest(java.util.UUID.randomUUID().toString(), "WATER Q", "WATER Q", 1, 3, Symbol.WATER, Symbol.NONE, RegionName.FIELDS),
-            Quest(java.util.UUID.randomUUID().toString(), "BAT Q", "BAT Q", 1, 3, Symbol.BAT, Symbol.NONE, RegionName.HIGHLANDS),
-            Quest(java.util.UUID.randomUUID().toString(), "BROOM Q", "BROOM Q", 1, 3, Symbol.BROOM, Symbol.NONE, RegionName.FIELDS),
-            Quest(java.util.UUID.randomUUID().toString(), "NET Q", "NET Q", 1, 3, Symbol.NET, Symbol.NONE, RegionName.HILLS),
-            Quest(java.util.UUID.randomUUID().toString(), "HELMET Q", "HELMET Q", 1, 3, Symbol.HELMET, Symbol.NONE, RegionName.TUNDRA),
-            Quest(java.util.UUID.randomUUID().toString(), "SWORD Q", "SWORD Q", 1, 3, Symbol.SWORD, Symbol.NONE, RegionName.HILLS),
-            Quest(java.util.UUID.randomUUID().toString(), "TOOTH Q", "TOOTH Q", 1, 3, Symbol.TOOTH, Symbol.NONE, RegionName.TUNDRA),
-            Quest(java.util.UUID.randomUUID().toString(), "WAND Q", "WAND Q", 1, 3, Symbol.WAND, Symbol.NONE, RegionName.WETLANDS)
+            BoardQuest(java.util.UUID.randomUUID().toString(), "FIRE Q", "FIRE Q", 1, 3, Symbol.FIRE, Symbol.NONE, RegionName.WETLANDS),
+            BoardQuest(java.util.UUID.randomUUID().toString(), "WATER Q", "WATER Q", 1, 3, Symbol.WATER, Symbol.NONE, RegionName.FIELDS),
+            BoardQuest(java.util.UUID.randomUUID().toString(), "BAT Q", "BAT Q", 1, 3, Symbol.BAT, Symbol.NONE, RegionName.HIGHLANDS),
+            BoardQuest(java.util.UUID.randomUUID().toString(), "BROOM Q", "BROOM Q", 1, 3, Symbol.BROOM, Symbol.NONE, RegionName.FIELDS),
+            BoardQuest(java.util.UUID.randomUUID().toString(), "NET Q", "NET Q", 1, 3, Symbol.NET, Symbol.NONE, RegionName.HILLS),
+            BoardQuest(java.util.UUID.randomUUID().toString(), "HELMET Q", "HELMET Q", 1, 3, Symbol.HELMET, Symbol.NONE, RegionName.TUNDRA),
+            BoardQuest(java.util.UUID.randomUUID().toString(), "SWORD Q", "SWORD Q", 1, 3, Symbol.SWORD, Symbol.NONE, RegionName.HILLS),
+            BoardQuest(java.util.UUID.randomUUID().toString(), "TOOTH Q", "TOOTH Q", 1, 3, Symbol.TOOTH, Symbol.NONE, RegionName.TUNDRA),
+            BoardQuest(java.util.UUID.randomUUID().toString(), "WAND Q", "WAND Q", 1, 3, Symbol.WAND, Symbol.NONE, RegionName.WETLANDS)
         )
         return Deck(quests).shuffle(true)
     }

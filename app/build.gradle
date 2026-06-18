@@ -25,6 +25,7 @@ android {
     sourceSets {
         main {
             java {
+                exclude '**/screens/**'
                 exclude '**/MainActivity.java'
                 exclude '**/Game.java'
                 exclude '**/RootViewMvcImpl.java'

@@ -2,6 +2,7 @@ package com.example.fantastiqa.redux
 
 import com.example.fantastiqa.gameState.Artifact
 import com.example.fantastiqa.gameState.Board
+import com.example.fantastiqa.gameState.BoardQuest
 import com.example.fantastiqa.gameState.Card
 import com.example.fantastiqa.gameState.CreatureCard
 import com.example.fantastiqa.gameState.Deck
@@ -24,7 +25,7 @@ data class GameState(
     val creatureDeck: Deck<Card>? = null,
     val artifactDeck: Deck<Artifact>? = null,
     val bazaarDeck: Deck<CreatureCard>? = null,
-    val questDeck: Deck<Quest>? = null,
+    val questDeck: Deck<BoardQuest>? = null,
     
     // Players and turn management
     @JvmField val players: List<Player> = emptyList(),
@@ -38,6 +39,7 @@ data class GameState(
     val selectedCards: List<Card?> = emptyList(),
     val selectedQuest: Quest? = null,
     val selectedRoad: Road? = null,
+    val selectedRoads: List<Road> = emptyList(),
     val towerDrawnCards: List<Card> = emptyList(),
     val towerMenuOpen: Boolean = false,
     val isFreeTowerAction: Boolean = false,
@@ -53,6 +55,7 @@ data class GameState(
         SUBDUE,
         TOWER,
         QUEST,
+        WARDROBE,
         DISCARD_OPEN,
         DRAW,
         NEXT_TURN,

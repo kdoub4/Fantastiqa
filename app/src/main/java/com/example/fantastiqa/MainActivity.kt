@@ -366,7 +366,8 @@ fun BoardLayout(
                 )
                 if (index < topRow.size - 1) {
                     val road = state.board?.getRoad(region, topRow[index + 1])
-                    RoadCell(road, isVertical = false, modifier = Modifier.weight(0.6f), isSelected = selectedRoad == road) {
+                    val isSelected = selectedRoad == road || state.selectedRoads.any { it.id == road?.id }
+                    RoadCell(road, isVertical = false, modifier = Modifier.weight(0.6f), isSelected = isSelected) {
                         road?.let { onRoadSelect(it) }
                     }
                 }
@@ -382,7 +383,8 @@ fun BoardLayout(
                 val bottomRegion = bottomRow.getOrNull(index)
                 if (bottomRegion != null) {
                     val road = state.board?.getRoad(topRegion, bottomRegion)
-                    RoadCell(road, isVertical = true, modifier = Modifier.weight(1f), isSelected = selectedRoad == road) {
+                    val isSelected = selectedRoad == road || state.selectedRoads.any { it.id == road?.id }
+                    RoadCell(road, isVertical = true, modifier = Modifier.weight(1f), isSelected = isSelected) {
                         road?.let { onRoadSelect(it) }
                     }
                 } else {
@@ -410,7 +412,8 @@ fun BoardLayout(
                 )
                 if (index < bottomRow.size - 1) {
                     val road = state.board?.getRoad(region, bottomRow[index + 1])
-                    RoadCell(road, isVertical = false, modifier = Modifier.weight(0.5f), isSelected = selectedRoad == road) {
+                    val isSelected = selectedRoad == road || state.selectedRoads.any { it.id == road?.id }
+                    RoadCell(road, isVertical = false, modifier = Modifier.weight(0.5f), isSelected = isSelected) {
                         road?.let { onRoadSelect(it) }
                     }
                 }
@@ -562,7 +565,8 @@ fun ActionControls(
     val isSubduePhase = phase == GameState.GamePhase.SUBDUE
     val isTowerPhase = phase == GameState.GamePhase.TOWER
     val isQuestPhase = phase == GameState.GamePhase.QUEST
-    val isTurnActionPhase = isSubduePhase || isTowerPhase || isQuestPhase
+    val isWardrobePhase = phase == GameState.GamePhase.WARDROBE
+    val isTurnActionPhase = isSubduePhase || isTowerPhase || isQuestPhase || isWardrobePhase
     val canFreeAction = phase == GameState.GamePhase.OPEN || phase == GameState.GamePhase.DISCARD_OPEN
 
     if (!towerMenuOpen) {
@@ -579,7 +583,7 @@ fun ActionControls(
         val isBoardQuest = state.board?.quests?.any { it?.id == selectedQuest?.id } == true
 
         val questComplete = if (isPlayerQuest) {
-            selectedQuest?.let { it.getFulfilledIndices().size == it.getRequirements().size } == true
+            (selectedQuest as? PlayerQuest)?.let { it.getFulfilledIndices().size == it.getRequirements().size } == true
         } else if (isBoardQuest) {
             selectedQuest?.let { quest ->
                 val reqs = quest.getRequirements()

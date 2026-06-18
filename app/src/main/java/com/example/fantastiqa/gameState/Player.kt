@@ -15,7 +15,7 @@ data class Player(
     @JvmField val flyingCarpets: Int = 3,
     @JvmField val tents: Int = 3,
     @JvmField val hand: List<Card> = emptyList(),
-    @JvmField val quests: List<Card> = emptyList(),
+    @JvmField val quests: List<PlayerQuest> = emptyList(),
     @JvmField val storage: List<Card> = emptyList(),
     @JvmField val deck: Deck<Card> = Deck(),
     @JvmField val isComputer: Boolean = false
@@ -54,79 +54,64 @@ data class Player(
     }
 
     /**
-     * Returns a new Player with updated gem count.
-     */
-    fun withGems(newGems: Int): Player = copy(gems = newGems)
-
-    /**
-     * Returns a new Player with updated trophies.
-     */
-    fun withTrophies(newTrophies: Int): Player = copy(trophies = newTrophies)
-
-    /**
-     * Returns a new Player after using a flying carpet.
-     */
-    fun useFlyingCarpet(): Player {
-        if (flyingCarpets <= 0) return this
-        return copy(flyingCarpets = flyingCarpets - 1)
-    }
-
-    /**
-     * Returns a new Player after gaining a card (added to discard pile).
+     * Returns a new Player with a card added to their hand.
      */
     fun gainCard(card: Card): Player {
-        return copy(deck = deck.discard(card))
+        return copy(hand = hand + card)
     }
 
     /**
-     * Returns a new Player after discarding cards.
-     * Checks both hand and storage.
+     * Returns a new Player with cards removed from their hand.
+     */
+    fun removeFromHand(cards: List<Card>): Player {
+        return copy(hand = hand - cards.toSet())
+    }
+
+    /**
+     * Returns a new Player with cards moved from hand to discard pile.
      */
     fun discardFromHand(cards: List<Card>): Player {
-        val cardsToDiscard = cards.filter { hand.contains(it) || storage.contains(it) }
-        
-        if (cardsToDiscard.isEmpty()) return this
-        
+        val nextHand = hand - cards.toSet()
         var nextDeck = deck
-        cardsToDiscard.forEach { nextDeck = nextDeck.discard(it) }
-        
-        val handIds = hand.map { it.id }.toSet()
-        val storageIds = storage.map { it.id }.toSet()
-        val discardIds = cardsToDiscard.map { it.id }.toSet()
-
+        cards.forEach { nextDeck = nextDeck.discard(it) }
         return copy(
-            hand = hand.filter { it.id !in discardIds },
-            storage = storage.filter { it.id !in discardIds },
+            hand = nextHand,
             deck = nextDeck
         )
     }
 
     /**
-     * Returns a new Player after removing cards from hand permanently.
+     * Returns a new Player with one less flying carpet.
      */
-    fun removeFromHand(cards: List<Card>): Player {
-        val fromHand = cards.filter { hand.contains(it) }
-        if (fromHand.isEmpty()) return this
-        return copy(
-            hand = hand - fromHand.toSet()
-        )
+    fun useFlyingCarpet(): Player {
+        return copy(flyingCarpets = (flyingCarpets - 1).coerceAtLeast(0))
     }
 
     /**
-     * Helper to check for specific abilities in hand.
+     * Returns a new Player with updated gems.
      */
-    fun handContains(ability: Ability): List<Card> {
-        return hand.filter { it is CreatureCard && it.ability == ability }
+    fun withGems(newGems: Int): Player {
+        return copy(gems = newGems)
     }
 
-    fun subdue(road: Road?): Player {
-        if (road == null || road.creature == null || road.creature.values.isEmpty()) return this
-        for (card in hand) {
-            if (card is CreatureCard && card.subduedBy == road.creature.values[0]) {
-                return discardFromHand(listOf(card))
-            }
-        }
-        return this
+    /**
+     * Returns a new Player with updated trophies.
+     */
+    fun withTrophies(newTrophies: Int): Player {
+        return copy(trophies = newTrophies)
+    }
+
+    /**
+     * Helper to check if player has enough symbols of a certain type
+     */
+    fun countSymbols(symbol: Symbol): Int {
+        return hand.filterIsInstance<CreatureCard>()
+            .flatMap { it.values }
+            .count { it == symbol }
+    }
+
+    fun handContains(ability: Ability): List<Card> {
+        return hand.filter { it is CreatureCard && it.ability == ability }
     }
 
     fun storeForBoardQuest(cards: List<Card>): Player {
@@ -139,7 +124,17 @@ data class Player(
     }
 
     fun drawQuest(quest: Quest): Player {
-        return copy(quests = quests + quest)
+        val playerQuest = if (quest is PlayerQuest) quest else PlayerQuest(
+            _id = quest.id,
+            _name = quest.name,
+            title = quest.title,
+            vps = quest.vps,
+            gems = quest.gems,
+            doubleReq = quest.doubleReq,
+            tripleReq = quest.tripleReq,
+            land = quest.land
+        )
+        return copy(quests = quests + playerQuest)
     }
 
     companion object {
@@ -148,41 +143,17 @@ data class Player(
             
             // Standard starter cards from enums
             CreatureCards.entries.forEach { aCard ->
-                if (aCard.value2 == Symbol.NONE) {
-                    deckSetup.add(CreatureCard(
-                        java.util.UUID.randomUUID().toString(),
-                        playerCardName(aCard),
-                        false,
-                        if (aCard.value2== Symbol.NONE) listOf(aCard.value1) else listOf(aCard.value1, aCard.value2),
-                        aCard.subduedBy,
-                        Ability.NONE
-                    ))
+                if (aCard.name == "Knight") {
+                    repeat(2) {
+                        deckSetup.add(CreatureCard(java.util.UUID.randomUUID().toString(),"Knight",  false, listOf(Symbol.SWORD), Symbol.WAND, Ability.NONE))
+                    }
                 }
             }
-
-            // Special starter cards
-            deckSetup.add(CreatureCard(java.util.UUID.randomUUID().toString(),"Peaceful Dragon",  false, listOf(Symbol.NONE) , Symbol.NONE,Ability.DRAGON,))
-            deckSetup.add(CreatureCard(java.util.UUID.randomUUID().toString(),"Dog",  false, listOf(Symbol.NONE) , Symbol.NONE, Ability.GEM))
+            deckSetup.add(CreatureCard(java.util.UUID.randomUUID().toString(),"Peaceful Dragon",  false, listOf(Symbol.NONE), Symbol.NONE, Ability.NONE))
+            deckSetup.add(CreatureCard(java.util.UUID.randomUUID().toString(),"Dog",  false, listOf(Symbol.NONE), Symbol.NONE, Ability.NONE))
             deckSetup.add(Artifact(java.util.UUID.randomUUID().toString(), "LookingGlass", 0, Ability.LOOKING_GLASS))
-            
-            return Deck(deckSetup).shuffle(true)
-        }
 
-        private fun playerCardName(card: CreatureCards): String {
-            return when (card) {
-                CreatureCards.Knight -> "Spatula"
-                CreatureCards.BabyDragon -> "Candle"
-                CreatureCards.FenFairy -> "Pail"
-                CreatureCards.Witch -> "Broom"
-                CreatureCards.Rabbits -> "Cat"
-                CreatureCards.Spiders -> "Net"
-                CreatureCards.BillyGoat -> "Helmet"
-                CreatureCards.Troll -> "Bat"
-                CreatureCards.Enchantress -> "Toothbrush"
-                else -> throw IllegalArgumentException("Unknown card: $card")
-            }
+            return Deck<Card>(deckSetup).shuffle(true)
         }
     }
 }
-
-

@@ -1,15 +1,6 @@
 package com.example.fantastiqa.redux
 
-import com.example.fantastiqa.gameState.Ability
-import com.example.fantastiqa.gameState.Artifact
-import com.example.fantastiqa.gameState.ArtifactCard
-import com.example.fantastiqa.gameState.Card
-import com.example.fantastiqa.gameState.CreatureCard
-import com.example.fantastiqa.gameState.Deck
-import com.example.fantastiqa.gameState.Game
-import com.example.fantastiqa.gameState.Player
-import com.example.fantastiqa.gameState.Quest
-import com.example.fantastiqa.gameState.Symbol
+import com.example.fantastiqa.gameState.*
 import com.example.fantastiqa.pieces.CreatureCards
 import com.example.fantastiqa.pieces.TowerName
 import com.example.fantastiqa.redux.actions.*
@@ -140,7 +131,16 @@ class GameEngine {
             if (updatedQuests[i] == null) {
                 val (newQuest, nextDeck) = currentQuestDeck.drawOne()
                 if (newQuest != null) {
-                    updatedQuests[i] = newQuest.copy(vps = newQuest.vps + 1)
+                    updatedQuests[i] = BoardQuest(
+                        newQuest.id,
+                        newQuest.name,
+                        newQuest.title,
+                        newQuest.vps + 1,
+                        newQuest.gems,
+                        newQuest.doubleReq,
+                        newQuest.tripleReq,
+                        newQuest.land
+                    )
                     currentQuestDeck = nextDeck
                 }
             }
@@ -255,8 +255,25 @@ class GameEngine {
         if (selectedCards.size == 1 && currentQuest != null) {
             val player = newState.players.getOrNull(newState.currentPlayerIndex)
             val isPlayerQuest = player?.quests?.any { it.id == currentQuest.id } == true
-            if (isPlayerQuest && currentQuest.canStoreCard(selectedCards[0])) {
-                return handleStoreCardForQuest(newState, QuestAction(QuestAction.ActionType.STORE_CARD_FOR_QUEST, newState.currentPlayerIndex, currentQuest, listOf(selectedCards[0])))
+            
+            when (currentQuest) {
+                is PlayerQuest -> {
+                    if (currentQuest.canStoreCard(selectedCards[0])) {
+                        return handleStoreCardForQuest(
+                            newState,
+                            QuestAction(
+                                QuestAction.ActionType.STORE_CARD_FOR_QUEST,
+                                newState.currentPlayerIndex,
+                                currentQuest,
+                                listOf(selectedCards[0])
+                            )
+                        )
+                    }
+                }
+                is BoardQuest -> {
+                    // Selection for BoardQuest triggers store for board quest (subdue-like)
+                    return handleBoardQuest(newState, PlayerAction(newState.currentPlayerIndex, PlayerAction.ActionType.STORE_FOR_BOARD_QUEST, selectedCards))
+                }
             }
         }
 
@@ -266,15 +283,60 @@ class GameEngine {
     private fun handleSubdueAction(state: GameState, action: SubdueAction): GameState {
         return when (action.getActionType()) {
             SubdueAction.ActionType.SELECT_ROAD -> {
-                val road = action.road
-                if (state.selectedRoad == road) {
-                    state.copy(selectedRoad = null)
+                val road = action.road ?: return state
+                if (state.gamePhase == GameState.GamePhase.WARDROBE) {
+                    val currentSelection = state.selectedRoads.toMutableList()
+                    if (currentSelection.any { it.id == road.id }) {
+                        currentSelection.removeAll { it.id == road.id }
+                        state.copy(selectedRoads = currentSelection)
+                    } else {
+                        currentSelection.add(road)
+                        if (currentSelection.size == 2) {
+                            handleWardrobeComplete(state, currentSelection[0], currentSelection[1])
+                        } else {
+                            state.copy(selectedRoads = currentSelection)
+                        }
+                    }
                 } else {
-                    state.copy(selectedRoad = road, selectedQuest = null)
+                    if (state.selectedRoad == road) {
+                        state.copy(selectedRoad = null)
+                    } else {
+                        state.copy(selectedRoad = road, selectedQuest = null)
+                    }
                 }
             }
             else -> state
         }
+    }
+
+    private fun handleWardrobeComplete(state: GameState, road1: Road, road2: Road): GameState {
+        var board = state.board ?: return state
+        
+        val regions1 = findRegionsForRoad(board, road1) ?: return state
+        val regions2 = findRegionsForRoad(board, road2) ?: return state
+
+        val newRoad1 = road1.copy(creature = road2.creature)
+        val newRoad2 = road2.copy(creature = road1.creature)
+
+        board = board.withRoad(regions1.first, regions1.second, newRoad1)
+        board = board.withRoad(regions2.first, regions2.second, newRoad2)
+
+        return state.copy(
+            board = board,
+            selectedRoads = emptyList(),
+            gamePhase = GameState.GamePhase.OPEN
+        )
+    }
+
+    private fun findRegionsForRoad(board: Board, road: Road): Pair<Region, Region>? {
+        for ((r1, adj) in board.adjacencies) {
+            for ((r2, r) in adj) {
+                if (r.id == road.id) {
+                    return Pair(r1, r2)
+                }
+            }
+        }
+        return null
     }
 
     private fun handleCardAction(state: GameState, action: CardAction): GameState {
@@ -489,6 +551,40 @@ class GameEngine {
             Ability.TOWER_KEY -> {
                 player.discardFromHand(listOf(sourceCard))
             }
+            Ability.BITTER_BREW -> {
+                val targetCard = selectedCards.find { it != sourceCard }
+                if (targetCard != null) {
+                    val opponentIndex = (action.playerIndex + 1) % state.players.size
+                    val isInHand = player.hand.contains(targetCard)
+                    val isInDiscard = player.deck.discardPile.contains(targetCard)
+
+                    if (isInHand || isInDiscard) {
+                        updatedPlayers[opponentIndex] = updatedPlayers[opponentIndex].copy(
+                            deck = updatedPlayers[opponentIndex].deck.discard(targetCard)
+                        )
+                        val playerWithoutTarget = if (isInHand) {
+                            player.copy(hand = player.hand - targetCard)
+                        } else {
+                            player.copy(deck = player.deck.remove(targetCard))
+                        }
+                        playerWithoutTarget.discardFromHand(listOf(sourceCard))
+                    } else player.discardFromHand(listOf(sourceCard))
+                } else player.discardFromHand(listOf(sourceCard))
+            }
+            Ability.ROGUES_PURSE -> {
+                val startingGems = player.gems
+                var gemsGained = 0
+                state.players.forEachIndexed { index, opponent ->
+                    if (index != action.playerIndex && opponent.gems > startingGems) {
+                        updatedPlayers[index] = opponent.withGems((opponent.gems - 1).coerceAtLeast(0))
+                        gemsGained++
+                    }
+                }
+                player.discardFromHand(listOf(sourceCard)).withGems(player.gems + gemsGained)
+            }
+            Ability.WARDROBE -> {
+                player.discardFromHand(listOf(sourceCard))
+            }
             else -> player.discardFromHand(listOf(sourceCard))
         }
 
@@ -497,6 +593,7 @@ class GameEngine {
         return state.copy(
             players = updatedPlayers,
             selectedCards = emptyList(),
+            gamePhase = if (ability == Ability.WARDROBE) GameState.GamePhase.WARDROBE else state.gamePhase,
             towerMenuOpen = if (ability == Ability.TOWER_KEY) true else state.towerMenuOpen,
             isFreeTowerAction = if (ability == Ability.TOWER_KEY) true else state.isFreeTowerAction
         )
@@ -541,7 +638,7 @@ class GameEngine {
 
         if (isPlayerQuest) {
             val qIndex = player.quests.indexOfFirst { it.id == quest.id }
-            val targetQuest = player.quests[qIndex] as? Quest ?: return state
+            val targetQuest = player.quests[qIndex] as? PlayerQuest ?: return state
 
             // Check requirements
             val reqs = targetQuest.getRequirements()
@@ -620,7 +717,7 @@ class GameEngine {
         val qIndex = playerQuests.indexOfFirst { it.id == quest.id }
         if (qIndex == -1) return state
 
-        val targetQuest = playerQuests[qIndex] as? Quest ?: return state
+        val targetQuest = playerQuests[qIndex] as? PlayerQuest ?: return state
         if (!targetQuest.canStoreCard(card)) return state
 
         val updatedQuest = targetQuest.copy(stored = targetQuest.stored + card)
@@ -640,11 +737,11 @@ class GameEngine {
     private fun handleDrawQuest(state: GameState, action: QuestAction): GameState {
         val playerIndex = action.playerIndex
         val player = state.players.getOrNull(playerIndex) ?: return state
-        val quest = action.quest ?: return state
+        val quest = (action.quest as? BoardQuest) ?: return state
 
         val updatedPlayer = player.drawQuest(quest)
         val updatedPlayers = state.players.toMutableList()
-        updatedPlayers[playerIndex] = updatedPlayer
+        updatedPlayers[action.playerIndex] = updatedPlayer
 
         // Also remove the quest from the quest deck if it was drawn from there
         val updatedQuestDeck = state.questDeck?.remove(quest)
@@ -751,7 +848,7 @@ class GameEngine {
             players = updatedPlayers,
             towerDrawnCards = drawn,
             bazaarDeck = if (tower == TowerName.BAZAAR) nextDeck as? Deck<CreatureCard> else state.bazaarDeck,
-            questDeck = if (tower == TowerName.QUEST) nextDeck as? Deck<Quest> else state.questDeck,
+            questDeck = if (tower == TowerName.QUEST) nextDeck as? Deck<BoardQuest> else state.questDeck,
             artifactDeck = if (tower == TowerName.ARTIFACT) nextDeck as? Deck<Artifact> else state.artifactDeck,
             selectedCards = emptyList(), // Clear selection after use
             gamePhase = GameState.GamePhase.TOWER,
@@ -790,7 +887,7 @@ class GameEngine {
                 // Cannot afford, goes to bottom
                 when (tower) {
                     TowerName.BAZAAR -> if (card is CreatureCard) updatedBazaarDeck = updatedBazaarDeck?.putOnBottom(listOf(card))
-                    TowerName.QUEST -> if (card is Quest) updatedQuestDeck = updatedQuestDeck?.putOnBottom(listOf(card))
+                    TowerName.QUEST -> if (card is BoardQuest) updatedQuestDeck = updatedQuestDeck?.putOnBottom(listOf(card))
                     TowerName.ARTIFACT -> if (card is Artifact) updatedArtifactDeck = updatedArtifactDeck?.putOnBottom(listOf(card))
                 }
             }
@@ -799,7 +896,7 @@ class GameEngine {
         // Unselected go to bottom
         when (tower) {
             TowerName.BAZAAR -> updatedBazaarDeck = updatedBazaarDeck?.putOnBottom(unselected.filterIsInstance<CreatureCard>())
-            TowerName.QUEST -> updatedQuestDeck = updatedQuestDeck?.putOnBottom(unselected.filterIsInstance<Quest>())
+            TowerName.QUEST -> updatedQuestDeck = updatedQuestDeck?.putOnBottom(unselected.filterIsInstance<BoardQuest>())
             TowerName.ARTIFACT -> updatedArtifactDeck = updatedArtifactDeck?.putOnBottom(unselected.filterIsInstance<Artifact>())
         }
 
@@ -834,8 +931,30 @@ class GameEngine {
             val quest = newState.selectedQuest
             val player = newState.players.getOrNull(newState.currentPlayerIndex)
             val isPlayerQuest = player?.quests?.any { it.id == quest?.id } == true
-            if (isPlayerQuest && quest != null && quest.canStoreCard(currentSelection[0])) {
-                return handleStoreCardForQuest(newState, QuestAction(QuestAction.ActionType.STORE_CARD_FOR_QUEST, newState.currentPlayerIndex, quest, listOf(currentSelection[0])))
+            when (quest) {
+                is PlayerQuest -> {
+                    if (quest.canStoreCard(currentSelection[0])) {
+                        return handleStoreCardForQuest(
+                            newState,
+                            QuestAction(
+                                QuestAction.ActionType.STORE_CARD_FOR_QUEST,
+                                newState.currentPlayerIndex,
+                                quest,
+                                listOf(currentSelection[0])
+                            )
+                        )
+                    }
+                }
+
+                is BoardQuest -> {
+                    return handleStorePrivate(
+                        state, PlayerAction(
+                            newState.currentPlayerIndex,
+                            PlayerAction.ActionType.STORE_FOR_BOARD_QUEST,
+                            listOf(currentSelection[0])
+                        )
+                    )
+                }
             }
         }
 
@@ -1027,5 +1146,3 @@ class GameEngine {
     }
 
 }
-
-

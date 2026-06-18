@@ -33,7 +33,10 @@ class BasicComputerStrategy : ComputerPlayerStrategy {
         // 1. If a quest is selected, focus on reaching its region and completing it
         if (selectedQuest != null) {
             val isPlayerQuest = player.quests.any { it.id == selectedQuest.id }
-            val availablePool = if (isPlayerQuest) hand + selectedQuest.stored else hand + storage
+            val availablePool = when (selectedQuest) {
+                is PlayerQuest -> hand + selectedQuest.stored
+                is BoardQuest -> hand + storage
+            }
             val combo = findFulfillmentCombo(selectedQuest, availablePool)
 
             if (combo == null) {
@@ -120,7 +123,7 @@ class BasicComputerStrategy : ComputerPlayerStrategy {
             }
 
             // B. Check Personal Quests (Hand + Stored)
-            for (quest in player.quests.filterIsInstance<Quest>()) {
+            for (quest in player.quests.filterIsInstance<PlayerQuest>()) {
                 if (findFulfillmentCombo(quest, hand + quest.stored) != null) {
                     return QuestAction(QuestAction.ActionType.SELECT_QUEST, state.currentPlayerIndex, quest, emptyList())
                 }
