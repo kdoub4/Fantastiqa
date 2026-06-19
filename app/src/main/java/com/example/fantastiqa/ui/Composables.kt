@@ -100,10 +100,25 @@ fun GameHeader(state: GameState, selectedRoad: Road? = null, onAction: (Action) 
                                 fontWeight = FontWeight.Bold,
                                 style = MaterialTheme.typography.titleMedium
                             )
-                            Text(
-                                text = "Phase: ${state.gamePhase}",
-                                style = MaterialTheme.typography.bodySmall
-                            )
+                            if (state.gamePhase == GameState.GamePhase.WARDROBE) {
+                                Text(
+                                    text = "✦ Wardrobe: tap 2 creature roads to swap them",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = Color(0xFF9C27B0)
+                                )
+                            } else {
+                                Text(
+                                    text = "Phase: ${state.gamePhase}",
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
+                            if (state.statusMessage != null) {
+                                Text(
+                                    text = state.statusMessage,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = Color(0xFFF57F17)
+                                )
+                            }
                         }
                     }
                 }

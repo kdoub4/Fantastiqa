@@ -143,49 +143,34 @@ GameState state = store.getState();
 
 ---
 
-### 5. Middleware (Extensible Processing)
+### 5. Middleware (Deprecated)
 
-**Files**: `redux/middleware/*.java`
+> [!IMPORTANT]
+> The custom `Middleware` pattern is officially deprecated.
 
-Middleware intercepts actions for logging, validation, or side effects.
+In the active architecture implementation, the middleware interceptor pipeline (`Middleware.java`, `MiddlewarePipeline.java`, `LoggingMiddleware.java`, and `ValidationMiddleware.java`) is bypassed in [Store.kt](file:///d:/AndroidStudioProjects/Fantastiqa/app/src/main/java/com/example/fantastiqa/redux/Store.kt).
 
-```java
-Store store = new Store(initialState);
+Instead, utilize standard Kotlin **StateFlow operators** (such as `map`, `filter`, `combine`, `debounce`) or direct observers on the `stateFlow` to perform side-effects, logging, or custom asynchronous processing.
 
-// Add logging
-Middleware logging = new LoggingMiddleware();
-
-// Add validation
-Middleware validation = new ValidationMiddleware();
-
-// Chain them
-MiddlewarePipeline pipeline = new MiddlewarePipeline()
-    .use(logging)
-    .use(validation)
-    .build();
+#### Observing StateFlow Example (Kotlin):
+```kotlin
+// In your ViewModel or UI launch scope
+store.stateFlow
+    .map { it.currentPlayer }
+    .distinctUntilChanged()
+    .collect { player ->
+        // Handle side-effects of player change here
+        println("It is now ${player?.name}'s turn.")
+    }
 ```
 
-**Built-in Middleware**:
-- **LoggingMiddleware**: Logs all actions and state changes for debugging
-- **ValidationMiddleware**: Validates actions against game rules before reducing
-
-**Custom Middleware Example**:
+#### Event Listener Subscription:
+For legacy Java components or simple listeners, you can still subscribe to state updates directly:
 ```java
-public class AIMiddleware implements Middleware {
-    @Override
-    public void process(Store store, Next next, Action action) {
-        // Pre-process
-        if (action instanceof PlayerAction) {
-            PlayerAction playerAction = (PlayerAction) action;
-            // Could add AI decision-making here
-        }
-        
-        // Pass to next middleware
-        next.dispatch(action);
-        
-        // Post-process (could trigger AI moves)
-    }
-}
+store.subscribe((oldState, newState) -> {
+    // Perform logging or side-effects
+    System.out.println("State changed from " + oldState.gamePhase + " to " + newState.gamePhase);
+});
 ```
 
 ---
@@ -222,9 +207,7 @@ Action actionThatLedHere = timeTravel.getActionAt(4);
 
 ---
 
-## Data Flow Diagram
-
-```
+## Data Flow```
 ┌─────────────────────────────────────────────────────────────┐
 │                        UI Layer (Android)                    │
 │                    (Observes StateFlow)                      │
@@ -234,14 +217,7 @@ Action actionThatLedHere = timeTravel.getActionAt(4);
 ┌─────────────────────────────────────────────────────────────┐
 │                  store.dispatch(action)                      │
 └──────────────────────────┬──────────────────────────────────┘
-                           │ 2. Action flows through
-                           │    middleware pipeline
-                           ▼
-┌─────────────────────────────────────────────────────────────┐
-│              Middleware Pipeline                             │
-│  (Logging, Validation, Custom Processing)                   │
-└──────────────────────────┬──────────────────────────────────┘
-                           │ 3. After middleware
+                           │ 2. Direct Dispatch (Bypasses Middleware)
                            ▼
 ┌─────────────────────────────────────────────────────────────┐
 │            GameEngine.reduce(state, action)                 │
@@ -251,7 +227,26 @@ Action actionThatLedHere = timeTravel.getActionAt(4);
 │  ├─ No Android dependencies                                  │
 │  ├─ No I/O operations                                        │
 │  ├─ Fully testable                                           │
-└──────────────────────────┬─────────��────────────────────────┘
+└──────────────────────────┬──────────────────────────────────┘
+                           │ 3. New immutable state
+                           ▼
+┌─────────────────────────────────────────────────────────────┐
+│              Current GameState (Immutable)                   │
+│                                                              │
+│  ├─ Board configuration                                      │
+│  ├─ Player states                                            │
+│  ├─ Deck contents                                            │
+│  ├─ Game phase                                               │
+│  └─ All game data                                            │
+└──────────────────────────┬──────────────────────────────────┘
+                           │ 4. StateFlow emits
+                           │    new state
+                           ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    UI Recomposes                             │
+│                 (Observes new state)                         │
+└─────────────────────────────────────────────────────────────┘
+```��─────────┘
                            │ 4. New immutable state
                            ▼
 ┌─────────────────────────────────────────────────────────────┐
@@ -300,14 +295,14 @@ public void testDrawCards() {
 
 ### 4. Scalability
 ✅ **New features are isolated** - add new action types without affecting existing code
-✅ **Middleware for cross-cutting concerns** - logging, validation, async operations
+❌ **Middleware** - Deprecated in favor of Kotlin StateFlow operators for cross-cutting concerns (logging, async operations)
 
 ### 5. Separation of Concerns
 ✅ **Core logic decoupled from UI** - game engine doesn't know about Android
 ✅ **Easy to swap UI layers** - could use Compose, XML, or even a web client
 
 ### 6. Maintainability
-✅ **Data flow is explicit** - follow actions through middleware to engine to new state
+✅ **Data flow is explicit** - follow actions directly to the engine to new state
 ✅ **Immutability prevents bugs** - no hidden state mutations
 ✅ **Self-documenting actions** - action names describe what happened
 

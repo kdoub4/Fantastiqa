@@ -22,6 +22,10 @@ class Store(initialState: GameState) {
      */
     val stateFlow: StateFlow<GameState> = _stateFlow.asStateFlow()
 
+    private val history = mutableListOf<GameState>()
+    private val _canUndo = MutableStateFlow(false)
+    val canUndoStateFlow: StateFlow<Boolean> = _canUndo.asStateFlow()
+
     private val listeners = mutableListOf<StateChangeListener>()
 
     /**
@@ -50,8 +54,36 @@ class Store(initialState: GameState) {
 
         // Only update if state actually changed (Redux principle)
         if (newState !== currentState) {
+            history.add(currentState)
+            if (history.size > 100) {
+                history.removeAt(0)
+            }
+            _canUndo.value = history.any { it.currentPlayer?.isComputer != true }
             _stateFlow.value = newState
             notifyListeners(currentState, newState)
+        }
+    }
+
+    /**
+     * Revert to the last state where the current player was a human player.
+     */
+    fun undo() {
+        val currentState = state
+        var targetState: GameState? = null
+        
+        while (history.isNotEmpty()) {
+            val last = history.removeAt(history.size - 1)
+            val lastPlayer = last.currentPlayer
+            if (lastPlayer == null || !lastPlayer.isComputer) {
+                targetState = last
+                break
+            }
+        }
+        
+        if (targetState != null) {
+            _canUndo.value = history.any { it.currentPlayer?.isComputer != true }
+            _stateFlow.value = targetState
+            notifyListeners(currentState, targetState)
         }
     }
 

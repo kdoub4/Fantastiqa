@@ -189,7 +189,7 @@ class ComputerPlayerTest {
             .withRoad(hills, mountains, Road())
 
         val carpetCard = createCard("Witch", Ability.MAGIC_CARPET)
-        val quest = Quest(UUID.randomUUID().toString(), "Mountain Quest", "Mountain Quest", 1, 3, Symbol.NONE, Symbol.NONE, RegionName.TUNDRA)
+        val quest = BoardQuest(UUID.randomUUID().toString(), "Mountain Quest", "Mountain Quest", 1, 3, Symbol.NONE, Symbol.NONE, RegionName.TUNDRA)
         
         val player = Player(name = "Computer", hand = listOf(carpetCard), isComputer = true)
         
@@ -223,7 +223,7 @@ class ComputerPlayerTest {
         val hills = Region(RegionName.HILLS, TowerName.BAZAAR)
         
         val board = Board().withRoad(forest, hills, Road())
-        val quest = Quest(UUID.randomUUID().toString(), "Hills Quest", "Hills Quest", 1, 3, Symbol.NONE, Symbol.NONE, RegionName.HILLS)
+        val quest = BoardQuest(UUID.randomUUID().toString(), "Hills Quest", "Hills Quest", 1, 3, Symbol.NONE, Symbol.NONE, RegionName.HILLS)
         
         val player = Player(name = "Computer", hand = emptyList(), flyingCarpets = 1, isComputer = true)
         
@@ -253,7 +253,7 @@ class ComputerPlayerTest {
             .withRoad(wetlands, Region(RegionName.TUNDRA, TowerName.ARTIFACT), Road())
         
         val keyCard = createCard("Rabbits", Ability.TOWER_KEY)
-        val quest = Quest(UUID.randomUUID().toString(), "Wetlands Quest", "Wetlands Quest", 1, 3, Symbol.NONE, Symbol.NONE, RegionName.WETLANDS)
+        val quest = BoardQuest(UUID.randomUUID().toString(), "Wetlands Quest", "Wetlands Quest", 1, 3, Symbol.NONE, Symbol.NONE, RegionName.WETLANDS)
         
         val player = Player(name = "Computer", hand = listOf(keyCard), isComputer = true)
         
@@ -297,7 +297,7 @@ class ComputerPlayerTest {
         val board = Board()
             .withRoad(forest, Region(RegionName.WETLANDS, TowerName.QUEST), Road(knight))
             .withRoad(Region(RegionName.WETLANDS, TowerName.QUEST), hills, Road(knight))
-        val quest = Quest(UUID.randomUUID().toString(), "Hills Quest", "Hills Quest", 1, 3, Symbol.NONE, Symbol.NONE, RegionName.HILLS)
+        val quest = BoardQuest(UUID.randomUUID().toString(), "Hills Quest", "Hills Quest", 1, 3, Symbol.NONE, Symbol.NONE, RegionName.HILLS)
         
         val player = Player(name = "Computer", hand = listOf(wandCard), gems = 2, isComputer = true)
         

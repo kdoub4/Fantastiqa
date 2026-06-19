@@ -1,7 +1,5 @@
 package com.example.fantastiqa.redux;
 
-import com.example.fantastiqa.redux.middleware.LoggingMiddleware;
-import com.example.fantastiqa.redux.middleware.ValidationMiddleware;
 import com.example.fantastiqa.redux.utils.GameInitializer;
 
 /**
@@ -38,12 +36,11 @@ public class QuickStart {
         
         // Dispatch an action
         // The Store will:
-        // 1. Pass action through middleware
-        // 2. Call GameEngine.reduce(currentState, action)
-        // 3. Get back new GameState
-        // 4. Update StateFlow
-        // 5. Notify listeners
-        // 6. UI automatically recomposes
+        // 1. Call GameEngine.reduce(currentState, action)
+        // 2. Get back new GameState
+        // 3. Update StateFlow
+        // 4. Notify listeners
+        // 5. UI automatically recomposes
         
         store.dispatch(
             new com.example.fantastiqa.redux.actions.PlayerAction(

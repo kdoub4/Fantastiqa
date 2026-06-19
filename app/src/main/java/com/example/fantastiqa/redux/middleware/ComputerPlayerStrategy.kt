@@ -32,7 +32,6 @@ class BasicComputerStrategy : ComputerPlayerStrategy {
 
         // 1. If a quest is selected, focus on reaching its region and completing it
         if (selectedQuest != null) {
-            val isPlayerQuest = player.quests.any { it.id == selectedQuest.id }
             val availablePool = when (selectedQuest) {
                 is PlayerQuest -> hand + selectedQuest.stored
                 is BoardQuest -> hand + storage
@@ -173,17 +172,7 @@ class BasicComputerStrategy : ComputerPlayerStrategy {
         val activePersonalQuests = player.quests.filterIsInstance<PlayerQuest>()
 
         for (card in hand) {
-            // Priority 1: Personal Quests
-            val matchingPersonal = activePersonalQuests.find { it.canStoreCard(card) }
-            if (matchingPersonal != null) {
-                return if (card in selectedCards) {
-                    QuestAction(QuestAction.ActionType.STORE_CARD_FOR_QUEST, state.currentPlayerIndex, matchingPersonal, listOf(card))
-                } else {
-                    CardAction(CardAction.ActionType.SELECT_CARDS, state.currentPlayerIndex, listOf(card))
-                }
-            }
-
-            // Priority 2: Board Quests
+            // Priority 1: Board Quests
             val matchingBoard = activeBoardQuests.find { it.matchReq(card) }
             if (matchingBoard != null) {
                 if (storage.size < 5) {
@@ -204,6 +193,17 @@ class BasicComputerStrategy : ComputerPlayerStrategy {
                     }
                 }
             }
+            // Priority 2: Personal Quests
+            val matchingPersonal = activePersonalQuests.find { it.canStoreCard(card) }
+            if (matchingPersonal != null) {
+                return if (card in selectedCards) {
+                    QuestAction(QuestAction.ActionType.STORE_CARD_FOR_QUEST, state.currentPlayerIndex, matchingPersonal, listOf(card))
+                } else {
+                    CardAction(CardAction.ActionType.SELECT_CARDS, state.currentPlayerIndex, listOf(card))
+                }
+            }
+
+
         }
 
         if (hand.isEmpty())
@@ -281,9 +281,10 @@ class BasicComputerStrategy : ComputerPlayerStrategy {
             path.firstOrNull()
         } else {
             // Target is not reachable via free actions alone.
-            // Find the first turn action in the path, or the first free action if it helps progress towards it.
-            path.find { !it.isFree() } ?: path.firstOrNull()
-        } ?: return null
+            // Find the first turn action in the path, or the first free non token action if it helps progress towards it.
+            // Otherwise we can't move, just store and discard
+            path.find { !it.isFree() || it.isFreeNotToken() } ?: path.firstOrNull()
+        } ?: return TurnAction(TurnAction.ActionType.ADVANCE_PHASE)
 
         return when (nextStep.moveType) {
             MoveType.ADJACENT -> {
@@ -333,9 +334,17 @@ class BasicComputerStrategy : ComputerPlayerStrategy {
 
     private data class PathStep(val destination: Region, val moveType: MoveType, val useAbility: Boolean = false) {
         fun isFree(): Boolean = moveType == MoveType.FLYING_CARPET || (moveType == MoveType.ADJACENT && useAbility) || (moveType == MoveType.TOWER_KEY && useAbility)
+        fun isFreeNotToken(): Boolean = (moveType == MoveType.ADJACENT && useAbility) || (moveType == MoveType.TOWER_KEY && useAbility)
+
     }
 
-    private data class Node(val region: Region, val path: List<PathStep>, val turnActionUsed: Boolean, val carpetTokenUsed: Boolean) : Comparable<Node> {
+    private data class Node(
+        val region: Region,
+        val path: List<PathStep>,
+        val currentHand: List<Card>,
+        val turnActionUsed: Boolean,
+        val carpetTokenUsed: Boolean
+    ) : Comparable<Node> {
         // Priority: fewer turn actions, then shorter path
         override fun compareTo(other: Node): Int {
             if (this.turnActionUsed != other.turnActionUsed) {
@@ -347,22 +356,20 @@ class BasicComputerStrategy : ComputerPlayerStrategy {
 
     private fun findShortestPath(start: Region, targetName: RegionName, board: Board, hand: List<Card>, canUseToken: Boolean, canTeleport: Boolean): List<PathStep>? {
         val pq = PriorityQueue<Node>()
-        pq.add(Node(start, emptyList(), false, !canUseToken))
+        pq.add(Node(start, emptyList(), hand, false, !canUseToken))
         
-        // visited: Region -> turnActionUsed -> carpetTokenUsed -> shortest path size
-        val visited = mutableMapOf<Triple<Region, Boolean, Boolean>, Int>()
-
-        val hasMagicCarpetCard = hand.any { it is CreatureCard && it.ability == Ability.MAGIC_CARPET }
-        val hasTowerKeyCard = hand.any { it is CreatureCard && it.ability == Ability.TOWER_KEY }
+        // visited: Region -> turnActionUsed -> carpetTokenUsed -> handSize -> shortest path size
+        val visited = mutableMapOf<Int, Int>()
 
         while (pq.isNotEmpty()) {
             val node = pq.poll() ?: continue
-            val (current, path, turnActionUsed, carpetTokenUsed) = node
+            val (current, path, currentHand, turnActionUsed, carpetTokenUsed) = node
             if (current.name == targetName) return path
 
-            val stateKey = Triple(current, turnActionUsed, carpetTokenUsed)
-            if (visited.getOrDefault(stateKey, Int.MAX_VALUE) <= path.size) continue
-            visited[stateKey] = path.size
+            // State hash including hand size to distinguish paths using different resources
+            val stateHash = arrayOf(current, turnActionUsed, carpetTokenUsed, currentHand.size).contentHashCode()
+            if (visited.getOrDefault(stateHash, Int.MAX_VALUE) <= path.size) continue
+            visited[stateHash] = path.size
 
             // 1. Adjacent Regions via Roads
             for (pair in board.getAdjacentAreas(current)) {
@@ -370,20 +377,21 @@ class BasicComputerStrategy : ComputerPlayerStrategy {
                 val destination = pair.second
 
                 // Option A: Magic Carpet Card (Free Action)
-                if (hasMagicCarpetCard) {
-                    pq.add(Node(destination, path + PathStep(destination, MoveType.ADJACENT, useAbility = true), turnActionUsed, carpetTokenUsed))
+                val carpetCard = currentHand.find { it is CreatureCard && it.ability == Ability.MAGIC_CARPET }
+                if (carpetCard != null) {
+                    pq.add(Node(destination, path + PathStep(destination, MoveType.ADJACENT, useAbility = true), currentHand - carpetCard, turnActionUsed, carpetTokenUsed))
                 }
 
                 // Option B: Flying Carpet Token (Free Action, at most 1 per turn)
                 if (!carpetTokenUsed) {
-                    pq.add(Node(destination, path + PathStep(destination, MoveType.FLYING_CARPET), turnActionUsed, true))
+                    pq.add(Node(destination, path + PathStep(destination, MoveType.FLYING_CARPET), currentHand, turnActionUsed, true))
                 }
 
                 // Option C: Subdue (Turn Action, at most 1 per turn in OPEN phase)
                 if (!turnActionUsed) {
                     val roadCreature = road.creature
-                    if (roadCreature != null && engine.canSubdue(roadCreature, hand).isNotEmpty()) {
-                        pq.add(Node(destination, path + PathStep(destination, MoveType.ADJACENT, useAbility = false), true, carpetTokenUsed))
+                    if (roadCreature != null && engine.canSubdue(roadCreature, currentHand).isNotEmpty()) {
+                        pq.add(Node(destination, path + PathStep(destination, MoveType.ADJACENT, useAbility = false), currentHand, true, carpetTokenUsed))
                     }
                 }
             }
@@ -393,13 +401,14 @@ class BasicComputerStrategy : ComputerPlayerStrategy {
                 val destination = board.getTowerMatch(current)
                 if (destination != null) {
                     // Option A: Tower Key Card (Free Action)
-                    if (hasTowerKeyCard) {
-                        pq.add(Node(destination, path + PathStep(destination, MoveType.TOWER_KEY, useAbility = true), turnActionUsed, carpetTokenUsed))
+                    val keyCard = currentHand.find { it is CreatureCard && it.ability == Ability.TOWER_KEY }
+                    if (keyCard != null) {
+                        pq.add(Node(destination, path + PathStep(destination, MoveType.TOWER_KEY, useAbility = true), currentHand - keyCard, turnActionUsed, carpetTokenUsed))
                     }
-                    
+                    else
                     // Option B: Teleport (Turn Action, costs 2 gems)
                     if (!turnActionUsed && canTeleport) {
-                        pq.add(Node(destination, path + PathStep(destination, MoveType.TOWER_KEY, useAbility = false), true, carpetTokenUsed))
+                        pq.add(Node(destination, path + PathStep(destination, MoveType.TOWER_KEY, useAbility = false), currentHand, true, carpetTokenUsed))
                     }
                 }
             }

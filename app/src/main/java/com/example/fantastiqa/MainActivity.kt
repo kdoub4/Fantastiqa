@@ -35,6 +35,7 @@ import com.example.fantastiqa.redux.actions.*
 import com.example.fantastiqa.redux.middleware.BasicComputerStrategy
 import com.example.fantastiqa.redux.middleware.ComputerPlayerMiddleware
 import com.example.fantastiqa.redux.utils.GameInitializer
+import androidx.lifecycle.lifecycleScope
 import com.example.fantastiqa.ui.*
 
 class MainActivity : ComponentActivity() {
@@ -52,10 +53,10 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun BoardGameScreen() {
-    val store = remember { 
+    val activity = androidx.compose.ui.platform.LocalContext.current as androidx.activity.ComponentActivity
+    val store = remember {
         val s = Store(GameInitializer.initializeNewGame())
-        val middleware = ComputerPlayerMiddleware(s, BasicComputerStrategy())
-        s.subscribe(middleware)
+        ComputerPlayerMiddleware(s, BasicComputerStrategy(), activity.lifecycleScope)
         s
     }
     val state by store.stateFlow.collectAsState()
@@ -99,6 +100,26 @@ fun BoardGameScreen() {
 fun BoardGameContent(state: GameState, onAction: (Action) -> Unit) {
     // UI Local selections (keeping some local for non-permanent board/road focus)
     var selectedRegion by remember { mutableStateOf<Region?>(null) }
+    var bitterBrewPending by remember { mutableStateOf(false) }
+
+    // Show BITTER_BREW card picker when triggered
+    if (bitterBrewPending) {
+        val player = state.currentPlayer
+        if (player != null) {
+            val candidates = (player.hand + player.deck.discardPile)
+                .filter { it !in player.storage && it !in state.selectedCards }
+                .distinctBy { it.id }
+            BitterBrewDialog(
+                candidates = candidates,
+                onConfirm = { targetCard ->
+                    bitterBrewPending = false
+                    onAction(CardAction(CardAction.ActionType.SELECT_CARDS, state.currentPlayerIndex, listOf(targetCard)))
+                    onAction(PlayerAction(state.currentPlayerIndex, PlayerAction.ActionType.USE_ABILITY, null))
+                },
+                onDismiss = { bitterBrewPending = false }
+            )
+        }
+    }
 
     Scaffold(
         topBar = { TopAppBar(title = { Text("Fantastiqa - Redux Board") }) }
@@ -222,7 +243,8 @@ fun BoardGameContent(state: GameState, onAction: (Action) -> Unit) {
                         onAction = { if (!isSelectionActive) onAction(it) },
                         onTowerDraw = {
                             onAction(PlayerAction(state.currentPlayerIndex, PlayerAction.ActionType.START_TOWER_DRAW, null))
-                        }
+                        },
+                        onBitterBrew = { bitterBrewPending = true }
                     )
                 }
             }
@@ -598,7 +620,8 @@ fun ActionControls(
     onCardClear: () -> Unit,
     onRoadClear: () -> Unit,
     onAction: (Action) -> Unit,
-    onTowerDraw: () -> Unit
+    onTowerDraw: () -> Unit,
+    onBitterBrew: () -> Unit
 ) {
     Spacer(Modifier.height(8.dp))
 
@@ -646,12 +669,17 @@ fun ActionControls(
             ) { Text("Quest") }
         }
 
+        val isBitterBrew = selectedCards.size == 1 &&
+            (selectedCards[0] as? CreatureCard)?.ability == Ability.BITTER_BREW
         val isLookingGlassCombo = selectedCards.size == 2 &&
                 selectedCards.any { (it as? Artifact)?.ability == Ability.LOOKING_GLASS } &&
                 selectedCards.any { it is CreatureCard }
 
         Button(
-            onClick = { onAction(PlayerAction(state.currentPlayerIndex, PlayerAction.ActionType.USE_ABILITY, null)) },
+            onClick = {
+                if (isBitterBrew) onBitterBrew()
+                else onAction(PlayerAction(state.currentPlayerIndex, PlayerAction.ActionType.USE_ABILITY, null))
+            },
             enabled = canFreeAction && (selectedCards.size == 1 || isLookingGlassCombo),
             modifier = Modifier.fillMaxWidth()
         ) { Text("Ability") }
@@ -737,6 +765,43 @@ fun ActionControls(
     ) { 
         Text(if (isSubduePhase) "Done Adventuring" else "End Turn") 
     }
+}
+
+/** Dialog that lets the current player pick a card from hand+discard to give to the opponent. */
+@Composable
+fun BitterBrewDialog(candidates: List<Card>, onConfirm: (Card) -> Unit, onDismiss: () -> Unit) {
+    var picked by remember { mutableStateOf<Card?>(null) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+        modifier = Modifier.fillMaxWidth(0.9f),
+        title = { Text("Bitter Brew — choose a card to give away") },
+        text = {
+            LazyRow(
+                modifier = Modifier.fillMaxWidth().height(120.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                contentPadding = PaddingValues(vertical = 4.dp)
+            ) {
+                items(candidates) { card ->
+                    HandCard(
+                        card = card,
+                        isSelected = picked == card,
+                        modifier = Modifier.width(90.dp),
+                        onClick = { picked = if (picked == card) null else card }
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Button(onClick = { picked?.let(onConfirm) }, enabled = picked != null) {
+                Text("Give Away")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Cancel") }
+        }
+    )
 }
 
 @Preview(showBackground = false, device = "spec:parent=pixel_9,orientation=portrait")

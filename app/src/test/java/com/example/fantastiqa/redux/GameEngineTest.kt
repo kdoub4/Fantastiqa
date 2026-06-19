@@ -172,7 +172,7 @@ class GameEngineTest {
         val startRegion = Region(RegionName.FOREST, TowerName.QUEST)
         val keyCard = Artifact("K1", "TowerKey", 0, Ability.TOWER_KEY)
         val player = Player(name = "Adventurer", hand = listOf(keyCard))
-        val testQuest = Quest("Q1", "Q1", "Q1", 1, 3, Symbol.NET, Symbol.NONE, RegionName.HILLS)
+        val testQuest = BoardQuest("Q1", "Q1", "Q1", 1, 3, Symbol.NET, Symbol.NONE, RegionName.HILLS)
         val state = GameState(
             board = Board(),
             players = listOf(player),

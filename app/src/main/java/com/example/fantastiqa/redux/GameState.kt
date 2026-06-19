@@ -47,7 +47,10 @@ data class GameState(
     
     // Game state flags
     @JvmField val gamePhase: GamePhase? = GamePhase.INITIALIZATION,
-    @JvmField val isGameOver: Boolean = false
+    @JvmField val isGameOver: Boolean = false,
+
+    // Transient status message shown in the header (cleared on turn advance)
+    val statusMessage: String? = null
 ) {
     enum class GamePhase {
         INITIALIZATION,

@@ -5,7 +5,10 @@ import com.example.fantastiqa.redux.Store;
 
 /**
  * Validation middleware that checks if actions are valid before processing
+ *
+ * @deprecated Use validation logic inside GameEngine or observers/StateFlow flow operators.
  */
+@Deprecated
 public class ValidationMiddleware implements Middleware {
     
     @Override

@@ -213,7 +213,8 @@ class GameEngine {
             turnCount = nextTurnCount,
             selectedCards = emptyList(),
             selectedQuest = null,
-            gamePhase = GameState.GamePhase.START
+            gamePhase = GameState.GamePhase.START,
+            statusMessage = null
         )
     }
 
@@ -277,7 +278,7 @@ class GameEngine {
                 }
                 is BoardQuest -> {
                     // Selection for BoardQuest triggers store for board quest (subdue-like)
-                    return handleBoardQuest(newState, PlayerAction(newState.currentPlayerIndex, PlayerAction.ActionType.STORE_FOR_BOARD_QUEST, selectedCards))
+                    return newState //handleBoardQuest(newState, PlayerAction(newState.currentPlayerIndex, PlayerAction.ActionType.STORE_FOR_BOARD_QUEST, selectedCards))
                 }
             }
         }
@@ -498,6 +499,7 @@ class GameEngine {
     private fun handleUseAbility(state: GameState, action: PlayerAction): GameState {
         val player = action.getCurrentPlayer(state) ?: return state
         val selectedCards = state.selectedCards.filterNotNull()
+        var roguesPurseMessage: String? = null
 
         if (selectedCards.isEmpty()) return state
         
@@ -591,6 +593,8 @@ class GameEngine {
                         gemsGained++
                     }
                 }
+                // ponytail: statusMessage is transient; cleared on next turn advance
+                roguesPurseMessage = if (gemsGained > 0) "Rogue's Purse: stole $gemsGained gem(s)!" else "Rogue's Purse: no gems to steal."
                 player.discard(listOf(sourceCard)).withGems(player.gems + gemsGained)
             }
             Ability.WARDROBE -> {
@@ -621,7 +625,8 @@ class GameEngine {
             gamePhase = if (ability == Ability.WARDROBE) GameState.GamePhase.WARDROBE else state.gamePhase,
             previousPhase = if (ability == Ability.WARDROBE) state.gamePhase else state.previousPhase,
             towerMenuOpen = if (ability == Ability.TOWER_KEY) true else state.towerMenuOpen,
-            isFreeTowerAction = if (ability == Ability.TOWER_KEY) true else state.isFreeTowerAction
+            isFreeTowerAction = if (ability == Ability.TOWER_KEY) true else state.isFreeTowerAction,
+            statusMessage = roguesPurseMessage
         )
     }
 

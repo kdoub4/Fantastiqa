@@ -10,7 +10,10 @@ import java.util.List;
  * Middleware can intercept, log, validate, or transform actions before they reach the reducer.
  * 
  * This follows the Chain of Responsibility pattern.
+ *
+ * @deprecated Bypassed in Store.kt. Use standard Kotlin StateFlow operators or observers instead.
  */
+@Deprecated
 public class MiddlewarePipeline {
     private final List<Middleware> middlewares;
 

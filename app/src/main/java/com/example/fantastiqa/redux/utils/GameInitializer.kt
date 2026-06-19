@@ -127,10 +127,23 @@ object GameInitializer {
                 }
             }.shuffled()
 
-        val doubleSymbolCards = CreatureCards.entries
-            .filter { it.value2 != Symbol.NONE }
+        val doubleSymbolCards = (CreatureCards.entries
+            .filter { it.value2 == Symbol.NONE }
             .flatMap { aCard ->
                 List(2) {
+                    CreatureCard(
+                        java.util.UUID.randomUUID().toString(),
+                        aCard.name,
+                        aCard.isGem,
+                        listOf(aCard.value1),
+                        aCard.subduedBy,
+                        if (aCard.isGem) Ability.NONE else aCard.ability
+                    )
+                }
+            } + CreatureCards.entries
+            .filter { it.value2 != Symbol.NONE }
+            .flatMap { aCard ->
+                List(1) {
                     CreatureCard(
                         java.util.UUID.randomUUID().toString(),
                         aCard.name,
@@ -140,7 +153,7 @@ object GameInitializer {
                         if (aCard.isGem) Ability.NONE else aCard.ability
                     )
                 }
-            }.shuffled()
+            }).shuffled()
 
         return Deck<Card>(singleSymbolCards + doubleSymbolCards)
     }

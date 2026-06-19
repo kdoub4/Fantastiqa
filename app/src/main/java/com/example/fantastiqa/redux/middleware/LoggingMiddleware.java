@@ -6,7 +6,10 @@ import android.util.Log;
 
 /**
  * Logging middleware that logs all dispatched actions and state changes
+ *
+ * @deprecated Use standard Kotlin StateFlow operators or observers on Store.stateFlow instead.
  */
+@Deprecated
 public class LoggingMiddleware implements Middleware {
     private static final String TAG = "Redux";
 
