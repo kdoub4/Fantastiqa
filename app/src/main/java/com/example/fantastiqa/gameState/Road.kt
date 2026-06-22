@@ -11,7 +11,7 @@ data class Road(
     @JvmField val id: String = UUID.randomUUID().toString()
 ) : Area() {
     
-    fun getName(): String? = creature?._name
+    fun getName(): String? = creature?.name
 
     fun getConnectedRegion(starter: Region?, board: Board): Region? {
         val adjacent = board.getAdjacentAreas(starter!!)

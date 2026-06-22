@@ -11,7 +11,8 @@ import kotlinx.coroutines.launch
  */
 class ComputerPlayerMiddleware(
     private val store: Store,
-    private val strategy: ComputerPlayerStrategy,
+    private val standardStrategy: ComputerPlayerStrategy,
+    private val mouserStrategy: ComputerPlayerStrategy,
     private val scope: CoroutineScope
 ) {
 
@@ -34,7 +35,8 @@ class ComputerPlayerMiddleware(
                                isComputerActivePhase(currentState.gamePhase) &&
                                !currentState.isGameOver) {
                             
-                            delay(1000) // Simulate "thinking" time
+                            delay(700) // Simulate "thinking" time
+                            val strategy = if (currentState.currentPlayer?.isMouser == true) mouserStrategy else standardStrategy
                             val action = strategy.evaluateNextAction(currentState)
                             if (action != null) {
                                 store.dispatch(action)

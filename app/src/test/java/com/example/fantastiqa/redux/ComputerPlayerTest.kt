@@ -4,14 +4,14 @@ import com.example.fantastiqa.gameState.*
 import com.example.fantastiqa.pieces.RegionName
 import com.example.fantastiqa.pieces.TowerName
 import com.example.fantastiqa.redux.actions.*
-import com.example.fantastiqa.redux.middleware.BasicComputerStrategy
+import com.example.fantastiqa.redux.middleware.ComputerPlayer2Strategy
 import org.junit.Assert.*
 import org.junit.Test
 import java.util.UUID
 
 class ComputerPlayerTest {
 
-    private val strategy = BasicComputerStrategy()
+    private val strategy = ComputerPlayer2Strategy()
 
     private fun createCard(name: String, ability: Ability = Ability.NONE, value: Symbol = Symbol.NONE): CreatureCard {
         return CreatureCard(UUID.randomUUID().toString(), name, false, listOf(value), Symbol.NONE, ability)
@@ -178,7 +178,7 @@ class ComputerPlayerTest {
     }
 
     @Test
-    fun `AI should use Magic Carpet card to move towards quest if it can reach it`() {
+    fun `AI should use Witch Broom card to move towards quest if it can reach it`() {
         val forest = Region(RegionName.FOREST, TowerName.QUEST)
         val hills = Region(RegionName.HILLS, TowerName.BAZAAR)
         val mountains = Region(RegionName.TUNDRA, TowerName.ARTIFACT)
@@ -188,7 +188,7 @@ class ComputerPlayerTest {
             .withRoad(forest, hills, Road())
             .withRoad(hills, mountains, Road())
 
-        val carpetCard = createCard("Witch", Ability.MAGIC_CARPET)
+        val carpetCard = createCard("Witch", Ability.WITCH_BROOM)
         val quest = BoardQuest(UUID.randomUUID().toString(), "Mountain Quest", "Mountain Quest", 1, 3, Symbol.NONE, Symbol.NONE, RegionName.TUNDRA)
         
         val player = Player(name = "Computer", hand = listOf(carpetCard), isComputer = true)
@@ -203,9 +203,9 @@ class ComputerPlayerTest {
             selectedQuest = quest
         )
 
-        // 1. Should select Magic Carpet card
+        // 1. Should select Witch Broom card
         val action1 = strategy.evaluateNextAction(state)
-        assertTrue("Should select Magic Carpet card", action1 is CardAction)
+        assertTrue("Should select Witch Broom card", action1 is CardAction)
         assertEquals(carpetCard.id, (action1 as CardAction).cards[0].id)
 
         // 2. Should use MoveAction with ability

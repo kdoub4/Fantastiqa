@@ -10,11 +10,13 @@ import com.example.fantastiqa.redux.GameState
  * This is used to set up the initial GameState that will be used by the Store.
  */
 object GameInitializer {
+    enum class PlayerType { HUMAN, COMPUTER, MOUSER }
+
     /**
      * Create a new game with initialized state
      */
     @JvmStatic
-    fun initializeNewGame(): GameState {
+    fun initializeNewGame(p2Type: PlayerType = PlayerType.COMPUTER): GameState {
         // Create initial empty board structure
         var board = Board.createInitialBoard()
 
@@ -72,7 +74,11 @@ object GameInitializer {
         val startingRegion = board.regions().getOrElse(1) { board.regions().first() }
         
         var player1 = Player("Player 1").drawCards(5)
-        var player2 = Player("Computer", isComputer = true).drawCards(5)
+        var player2 = when(p2Type) {
+            PlayerType.HUMAN -> Player("Player 2")
+            PlayerType.COMPUTER -> Player("Computer", isComputer = true)
+            PlayerType.MOUSER -> Player("RogueMouser", isComputer = true, isMouser = true)
+        }.drawCards(5)
 
         // Add one quest to each player immutably
         val (p1Quest, qDeck2) = questDeck.drawOne()
@@ -86,10 +92,12 @@ object GameInitializer {
 
         // Initialize player positions
         //TODO random or select
-        val playerPositions = mapOf(
-            player1.name to startingRegion,
-            player2.name to startingRegion
+        val playerPositions = mutableMapOf(
+            player1.name to startingRegion
         )
+        if (!player2.isMouser) {
+            playerPositions[player2.name] = startingRegion
+        }
 
         // Build and return initial game state
         return GameState(
@@ -205,6 +213,8 @@ object GameInitializer {
         repeat(3) {
             artifacts.add(Artifact(java.util.UUID.randomUUID().toString(), "LookingGlass", 2, Ability.LOOKING_GLASS))
             artifacts.add(Artifact(java.util.UUID.randomUUID().toString(), "BellOfSummoning", 2, Ability.SUMMONING))
+            artifacts.add(Artifact(java.util.UUID.randomUUID().toString(), "BellOfSummoning", 2, Ability.ROGUES_PURSE))
+
         }
         return Deck(artifacts).shuffle(true)
     }

@@ -13,7 +13,7 @@ public class QuickStart {
      */
     public static Store initializeGameStore() {
         // Create initial game state
-        GameState initialState = GameInitializer.initializeNewGame();
+        GameState initialState = GameInitializer.initializeNewGame(GameInitializer.PlayerType.COMPUTER);
         
         // Create store
         Store store = new Store(initialState);

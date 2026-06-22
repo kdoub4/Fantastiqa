@@ -54,7 +54,7 @@ fun GameHeader(state: GameState, selectedRoad: Road? = null, onAction: (Action) 
                         Column {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
-                                    text = creature._name,
+                                    text = creature.name,
                                     fontWeight = FontWeight.Bold,
                                     style = MaterialTheme.typography.titleMedium
                                 )
@@ -402,7 +402,7 @@ fun AbilityIcon(ability: Ability) {
     when (ability) {
         Ability.TOWER_KEY -> Image(painter = painterResource(id = R.drawable.baseline_vpn_key_black_18dp), contentDescription = "Tower Key", modifier = Modifier.size(25.dp))
         Ability.PLUS_CARD -> Image(painter = painterResource(id = R.drawable.baseline_library_add_black_18dp), contentDescription = "Plus Card", modifier = Modifier.size(25.dp))
-        Ability.MAGIC_CARPET -> Image(painter = painterResource(id = R.drawable.flyingc), contentDescription = "Flying Carpet", modifier = Modifier.size(25.dp))
+        Ability.WITCH_BROOM -> Image(painter = painterResource(id = R.drawable.flyingc), contentDescription = "Witch Broom", modifier = Modifier.size(25.dp))
         Ability.GEM -> Image(painter = painterResource(id = R.drawable.diamond), contentDescription = "Gem", modifier = Modifier.size(25.dp))
         Ability.DRAGON -> Image(painter = painterResource(id = R.drawable.stars), contentDescription = "Dragon", modifier = Modifier.size(25.dp))
         Ability.LOOKING_GLASS -> Image(painter = painterResource(id = R.drawable.halloween), contentDescription = "Looking Glass", modifier = Modifier.size(25.dp))

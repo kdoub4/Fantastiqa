@@ -32,7 +32,7 @@ import com.example.fantastiqa.gameState.*
 import com.example.fantastiqa.pieces.TowerName
 import com.example.fantastiqa.redux.*
 import com.example.fantastiqa.redux.actions.*
-import com.example.fantastiqa.redux.middleware.BasicComputerStrategy
+import com.example.fantastiqa.redux.middleware.ComputerPlayer2Strategy
 import com.example.fantastiqa.redux.middleware.ComputerPlayerMiddleware
 import com.example.fantastiqa.redux.utils.GameInitializer
 import androidx.lifecycle.lifecycleScope
@@ -54,15 +54,28 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun BoardGameScreen() {
     val activity = androidx.compose.ui.platform.LocalContext.current as androidx.activity.ComponentActivity
-    val store = remember {
-        val s = Store(GameInitializer.initializeNewGame())
-        ComputerPlayerMiddleware(s, BasicComputerStrategy(), activity.lifecycleScope)
+    var playerType by remember { mutableStateOf<GameInitializer.PlayerType?>(null) }
+
+    if (playerType == null) {
+        PlayerSelectionDialog(onSelected = { playerType = it })
+        return
+    }
+
+    val store = remember(playerType) {
+        val s = Store(GameInitializer.initializeNewGame(playerType!!))
+        ComputerPlayerMiddleware(
+            s,
+            ComputerPlayer2Strategy(),
+            com.example.fantastiqa.redux.middleware.RogueMouserStrategy(),
+            activity.lifecycleScope
+        )
         s
     }
     val state by store.stateFlow.collectAsState()
     
     Box {
         BoardGameContent(state = state, onAction = { store.dispatch(it) })
+        // ... rest of the existing code
         
         if (state.isGameOver) {
             Surface(
@@ -514,7 +527,7 @@ fun RoadCell(road: Road?, isVertical: Boolean, modifier: Modifier = Modifier, is
         ) {
             if (road?.creature != null) {
                 Text(
-                    text = road.creature._name,
+                    text = road.creature.name,
                     fontSize = 7.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.Black,
@@ -765,6 +778,32 @@ fun ActionControls(
     ) { 
         Text(if (isSubduePhase) "Done Adventuring" else "End Turn") 
     }
+}
+
+@Composable
+fun PlayerSelectionDialog(onSelected: (GameInitializer.PlayerType) -> Unit) {
+    AlertDialog(
+        onDismissRequest = { },
+        title = { Text("Choose Player 2") },
+        text = {
+            Column {
+                Button(
+                    onClick = { onSelected(GameInitializer.PlayerType.HUMAN) },
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+                ) { Text("Human Player") }
+                Button(
+                    onClick = { onSelected(GameInitializer.PlayerType.COMPUTER) },
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+                ) { Text("Standard AI (Computer)") }
+                Button(
+                    onClick = { onSelected(GameInitializer.PlayerType.MOUSER) },
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+                ) { Text("Rogue Mouser AI") }
+            }
+        },
+        confirmButton = { },
+        dismissButton = { }
+    )
 }
 
 /** Dialog that lets the current player pick a card from hand+discard to give to the opponent. */

@@ -62,12 +62,12 @@ public class GameViewModel extends ViewModel {
     /**
      * Initialize the ViewModel with a new game
      */
-    public void initializeGame() {
+    public void initializeGame(GameInitializer.PlayerType p2Type) {
         uiStateLiveData.setValue(UIState.LOADING);
         
         try {
             // Create initial game state
-            GameState initialState = GameInitializer.initializeNewGame();
+            GameState initialState = GameInitializer.initializeNewGame(p2Type);
             
             // Create store
             gameStore = new Store(initialState);

@@ -117,8 +117,8 @@ class GameEngineTest {
         assert(res5[0].contains(bg1) && res5[0].contains(r1) && res5[0].contains(r2))
 
         // Input Bear, <Witch, Witch, Troll, Troll> Output <Witch, Witch, Troll, Troll>
-        val w1 = CreatureCard("W1", "Witch", false, listOf(Symbol.BROOM), Symbol.WATER, Ability.MAGIC_CARPET)
-        val w2 = CreatureCard("W2", "Witch", false, listOf(Symbol.BROOM), Symbol.WATER, Ability.MAGIC_CARPET)
+        val w1 = CreatureCard("W1", "Witch", false, listOf(Symbol.BROOM), Symbol.WATER, Ability.WITCH_BROOM)
+        val w2 = CreatureCard("W2", "Witch", false, listOf(Symbol.BROOM), Symbol.WATER, Ability.WITCH_BROOM)
         val t1 = CreatureCard("T1", "Troll", true, listOf(Symbol.BAT), Symbol.HELMET, Ability.NONE)
         val t2 = CreatureCard("T2", "Troll", true, listOf(Symbol.BAT), Symbol.HELMET, Ability.NONE)
         val res6 = engine.canSubdueDouble(bear, listOf(w1, w2, t1, t2))

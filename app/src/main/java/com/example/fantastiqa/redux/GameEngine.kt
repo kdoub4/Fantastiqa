@@ -114,6 +114,8 @@ class GameEngine {
         var currentBoard = state.board ?: return state
         var currentCreatureDeck = state.creatureDeck ?: return state
         var currentQuestDeck = state.questDeck ?: return state
+        var updatedPlayers = state.players.toMutableList()
+        var updatedPositions = state.playerPositions.toMutableMap()
 
         // Refill Empty Roads
         val regions = currentBoard.regions()
@@ -152,10 +154,30 @@ class GameEngine {
         }
         currentBoard = currentBoard.copy(quests = updatedQuests)
 
+        val player = state.currentPlayer ?: return state
+        if (player.isMouser) {
+            // 1. Remove Mouser from board
+            updatedPositions.remove(player.name)
+            
+            // 2. Gain a gem (disabled variant)
+            // val playerWithGem = player.withGems(player.gems + 1)
+            
+            // 3. Play first double symbol creature from hand to storage (In Play)
+            val doubleSymbol = player.hand.find { it is CreatureCard && it.values.size > 1 }
+            var nextPlayer = player
+            if (doubleSymbol != null) {
+                nextPlayer = player.removeFromHand(listOf(doubleSymbol))
+                    .copy(storage = player.storage + doubleSymbol)
+            }
+            updatedPlayers[state.currentPlayerIndex] = nextPlayer
+        }
+
         return state.copy(
             board = currentBoard,
             creatureDeck = currentCreatureDeck,
             questDeck = currentQuestDeck,
+            players = updatedPlayers,
+            playerPositions = updatedPositions,
             gamePhase = GameState.GamePhase.OPEN
         )
     }
@@ -262,24 +284,21 @@ class GameEngine {
             val player = newState.players.getOrNull(newState.currentPlayerIndex)
             val isPlayerQuest = player?.quests?.any { it.id == currentQuest.id } == true
             
-            when (currentQuest) {
-                is PlayerQuest -> {
-                    if (currentQuest.canStoreCard(selectedCards[0])) {
-                        return handleStoreCardForQuest(
-                            newState,
-                            QuestAction(
-                                QuestAction.ActionType.STORE_CARD_FOR_QUEST,
-                                newState.currentPlayerIndex,
-                                currentQuest,
-                                listOf(selectedCards[0])
-                            )
+            if (isPlayerQuest) {
+                if (currentQuest.canStoreCard(selectedCards[0])) {
+                    return handleStoreCardForQuest(
+                        newState,
+                        QuestAction(
+                            QuestAction.ActionType.STORE_CARD_FOR_QUEST,
+                            newState.currentPlayerIndex,
+                            currentQuest,
+                            listOf(selectedCards[0])
                         )
-                    }
+                    )
                 }
-                is BoardQuest -> {
-                    // Selection for BoardQuest triggers store for board quest (subdue-like)
-                    return newState //handleBoardQuest(newState, PlayerAction(newState.currentPlayerIndex, PlayerAction.ActionType.STORE_FOR_BOARD_QUEST, selectedCards))
-                }
+            } else {
+                // Selection for BoardQuest triggers store for board quest (subdue-like)
+                return newState // Selection only, human must click button OR AI uses STORE_FOR_BOARD_QUEST
             }
         }
 
@@ -304,7 +323,7 @@ class GameEngine {
                         }
                     }
                 } else {
-                    if (state.selectedRoad == road) {
+                    if (state.selectedRoad?.id == road.id) {
                         state.copy(selectedRoad = null)
                     } else {
                         state.copy(selectedRoad = road, selectedQuest = null)
@@ -393,11 +412,11 @@ class GameEngine {
             MoveType.ADJACENT -> {
                 val theRoad = state.board?.getRoad(currentRegion, action.destination) ?: return state
                 if (action.useAbility) {
-                    // Region selection: Must use Magic Carpet ability (Free Action)
+                    // Region selection: Must use Witch Broom ability (Free Action)
                     (state.gamePhase == GameState.GamePhase.OPEN || state.gamePhase == GameState.GamePhase.DISCARD_OPEN) &&
                     selectedCards.size == 1 &&
                             selectedCards[0] is CreatureCard &&
-                            (selectedCards[0] as CreatureCard).ability == Ability.MAGIC_CARPET
+                            (selectedCards[0] as CreatureCard).ability == Ability.WITCH_BROOM
                 } else {
                     // Road selection: Subdue or clear road (Turn Action)
                     if (theRoad.creature == null) {
@@ -532,7 +551,17 @@ class GameEngine {
                 
                 if (otherPlayerIndex != -1) {
                     val otherPlayer = state.players[otherPlayerIndex]
-                    updatedPlayers[otherPlayerIndex] = otherPlayer.gainCard(sourceCard)
+                    if (otherPlayer.isMouser) {
+                        // When another player "gives" a card to the Mouser, remove the first In Play card
+                        val updatedMouser = if (otherPlayer.storage.isNotEmpty()) {
+                            otherPlayer.copy(storage = otherPlayer.storage.drop(1) + sourceCard)
+                        } else {
+                            otherPlayer.copy(hand = otherPlayer.hand + sourceCard)
+                        }
+                        updatedPlayers[otherPlayerIndex] = updatedMouser
+                    } else {
+                        updatedPlayers[otherPlayerIndex] = otherPlayer.gainCard(sourceCard)
+                    }
                     // Remove from hand without discarding to own pile
                     player.copy(hand = player.hand - sourceCard)
                 } else {
@@ -976,15 +1005,17 @@ class GameEngine {
         )
     }
     private fun handleSelectCards(state: GameState, action: CardAction): GameState {
-        val card = action.cards.firstOrNull() ?: return state
         val currentSelection = state.selectedCards.filterNotNull().toMutableList()
-        
-        if (currentSelection.contains(card)) {
-            currentSelection.remove(card)
-        } else {
-            currentSelection.add(card)
+
+        // Toggle each card provided in the action payload.
+        for (card in action.cards) {
+            if (currentSelection.any { it.id == card.id }) {
+                currentSelection.removeAll { it.id == card.id }
+            } else {
+                currentSelection.add(card)
+            }
         }
-        
+
         val newState = state.copy(selectedCards = currentSelection)
 
         // Auto-trigger store if applicable
@@ -992,30 +1023,27 @@ class GameEngine {
             val quest = newState.selectedQuest
             val player = newState.players.getOrNull(newState.currentPlayerIndex)
             val isPlayerQuest = player?.quests?.any { it.id == quest?.id } == true
-            when (quest) {
-                is PlayerQuest -> {
-                    if (quest.canStoreCard(currentSelection[0])) {
-                        return handleStoreCardForQuest(
-                            newState,
-                            QuestAction(
-                                QuestAction.ActionType.STORE_CARD_FOR_QUEST,
-                                newState.currentPlayerIndex,
-                                quest,
-                                listOf(currentSelection[0])
-                            )
-                        )
-                    }
-                }
 
-                is BoardQuest -> {
-                    return handleStorePrivate(
-                        state, PlayerAction(
+            if (isPlayerQuest) {
+                if (quest.canStoreCard(currentSelection[0])) {
+                    return handleStoreCardForQuest(
+                        newState,
+                        QuestAction(
+                            QuestAction.ActionType.STORE_CARD_FOR_QUEST,
                             newState.currentPlayerIndex,
-                            PlayerAction.ActionType.STORE_FOR_BOARD_QUEST,
+                            quest,
                             listOf(currentSelection[0])
                         )
                     )
                 }
+            } else {
+                return handleStorePrivate(
+                    state, PlayerAction(
+                        newState.currentPlayerIndex,
+                        PlayerAction.ActionType.STORE_FOR_BOARD_QUEST,
+                        listOf(currentSelection[0])
+                    )
+                )
             }
         }
 

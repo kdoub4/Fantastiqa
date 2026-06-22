@@ -1,0 +1,20 @@
+Mouser
+Has a hand, in play area (use Storage area), no deck.  Cards gain go directly into hand, can have more than 5 cards, cards are not discarded at the end of the turn., their storage can have more than 5 cards. When completing a quest only cards In Play or in storage can be used not cards in hand.
+
+When another player "gives" a card to the Mouser, remove the first In Play card
+
+ Turn Sequence
+1. Refill board and Remove the Mouser from the board.
+2. Gain a gem. Code this but disable it for now as a variant
+3. Play the first double symbol creature from Hand to In Play
+4. Free Actions : change double symbol in Hand that matches a double symbol already In Play to a single symbol for the rest of the turn. Use all Peaceful Dragons in Hand against the adventurer. Each tower_Key and plus_one pair of cards in card are used to draw one card from Beast Bazaar to hand. Cards used are removed from play.
+
+5. Public Quests: Pick a public quest at random. Pick an unfulfilled requirement, create the single symbol creature card with that value and add it to storage.  Create and add a second card if a matching double symbol creature is In Play, the InPlay is removed from play. Play a single symbol Flying Carpet to complete a full quest, place Mouser in region. If a quest is completed go to 7.
+
+6. Roll 2d10.
+1-7: Subdue creature in that board position. If the Mouser subdues 2 adjacent creatures then reroll 2d10. Ignore any result except for more adjacent creatures on the board. Creatures with a gem are discarded and gems are claimed. Creatures with free action symbols are placed in Mouser's Hand.  spend three gems to place Mouser in adventurers region or pick a region adjacent to a vacant road at random.
+8: Personal quest. Create and add a creature card to a personal quest. Create and Add a second card if matching double symbol creature is In Play, remove the matching In Play card from play. If Mouser had no quests then draw one.  Play a Flying Carpet to complete a full quest, place Mouser in region.
+9: Visit Beast Bazaar. Draw one card from the Beast Bazaar and add it to the Mouser's hand. Spend three gems to repeat action.
+10: Rogue's Purse. Steal one gem from the adventurer.  Spend three gems to create and add a creature card on personal quest, do not spend if quest is full.
+
+7. If the Mouser is in the adventurer's region then give a Peaceful Dragon to the adventurer.

@@ -15,7 +15,7 @@ public class ReduxExample {
     public static void main(String[] args) {
         // Step 1: Initialize game state
         System.out.println("=== Initializing Game ===");
-        GameState initialState = GameInitializer.initializeNewGame();
+        GameState initialState = GameInitializer.initializeNewGame(GameInitializer.PlayerType.COMPUTER);
         System.out.println("Initial state: " + initialState);
 
         // Step 2: Create store with middleware

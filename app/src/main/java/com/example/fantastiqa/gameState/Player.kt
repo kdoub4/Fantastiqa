@@ -18,7 +18,8 @@ data class Player(
     @JvmField val quests: List<PlayerQuest> = emptyList(),
     @JvmField val storage: List<Card> = emptyList(),
     @JvmField val deck: Deck<Card> = Deck(),
-    @JvmField val isComputer: Boolean = false
+    @JvmField val isComputer: Boolean = false,
+    @JvmField val isMouser: Boolean = false
 ) {
     fun getGems(): Int = gems
     fun getVps(): Int = vps
@@ -29,15 +30,16 @@ data class Player(
     /**
      * Total cards owned by the player.
      */
-    fun totalCardCount(): Int = hand.size + storage.size + deck.size() + deck.discardSize()
+    fun totalCardCount(): Int = if (isMouser) hand.size + storage.size else hand.size + storage.size + deck.size() + deck.discardSize()
 
     /**
      * Secondary constructor for initial setup
      */
-    constructor(thename: String, isComputer: Boolean = false) : this(
+    constructor(thename: String, isComputer: Boolean = false, isMouser: Boolean = false) : this(
         name = thename,
-        deck = createInitialDeck(),
-        isComputer = isComputer
+        deck = createInitialDeck(isComputer),
+        isComputer = isComputer,
+        isMouser = isMouser
     )
 
     override fun toString(): String = name
@@ -57,7 +59,7 @@ data class Player(
      * Returns a new Player with a card added to their discard pile.
      */
     fun gainCard(card: Card): Player {
-        return copy(deck = deck.discard(card))
+        return if (isMouser) copy(hand = hand + card) else copy(deck = deck.discard(card))
     }
 
     /**
@@ -125,21 +127,12 @@ data class Player(
     }
 
     fun drawQuest(quest: Quest): Player {
-        val playerQuest = if (quest is PlayerQuest) quest else PlayerQuest(
-            _id = quest.id,
-            _name = quest.name,
-            title = quest.title,
-            vps = quest.vps,
-            gems = quest.gems,
-            doubleReq = quest.doubleReq,
-            tripleReq = quest.tripleReq,
-            land = quest.land
-        )
+        val playerQuest = quest.copy(isPersonal = true)
         return copy(quests = quests + playerQuest)
     }
 
     companion object {
-        private fun createInitialDeck(): Deck<Card> {
+        private fun createInitialDeck(isComputer: Boolean): Deck<Card> {
             val deckSetup = mutableListOf<Card>()
 
             // Standard starter cards from enums
@@ -182,23 +175,47 @@ data class Player(
                 )
             )
 
-            val randomArtifact = if (java.util.Random().nextBoolean()) {
+            if (isComputer) deckSetup.add(
                 Artifact(
                     java.util.UUID.randomUUID().toString(),
-                    "LookingGlass",
+                    "Rogue's Purse",
                     0,
-                    Ability.LOOKING_GLASS
+                    Ability.ROGUES_PURSE
                 )
-            } else {
-                Artifact(
-                    java.util.UUID.randomUUID().toString(),
-                    "BellOfSummoning",
-                    0,
-                    Ability.SUMMONING
+            )
+            else {
+                val startingArtifacts =
+                    listOf(Ability.ROGUES_PURSE, Ability.LOOKING_GLASS, Ability.SUMMONING)
+                deckSetup.add(
+                    when (startingArtifacts.random()) {
+                        Ability.LOOKING_GLASS ->
+                            Artifact(
+                                java.util.UUID.randomUUID().toString(),
+                                "LookingGlass",
+                                0,
+                                Ability.LOOKING_GLASS
+                            )
+
+                        Ability.SUMMONING ->
+                            Artifact(
+                                java.util.UUID.randomUUID().toString(),
+                                "BellOfSummoning",
+                                0,
+                                Ability.SUMMONING
+                            )
+
+                        Ability.ROGUES_PURSE ->
+                            Artifact(
+                                java.util.UUID.randomUUID().toString(),
+                                "Rogue's Purse",
+                                0,
+                                Ability.ROGUES_PURSE
+                            )
+
+                        else -> throw IllegalArgumentException("Unknown ability")
+                    }
                 )
             }
-            deckSetup.add(randomArtifact)
-
             return Deck(deckSetup).shuffle(true)
 
         }

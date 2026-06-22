@@ -4,122 +4,85 @@ import com.example.fantastiqa.pieces.*
 
 /**
  * Open Base Class representing a general game card with basic attributes.
- * Allows inheritance for specialized game components like Creatures.
  */
-sealed class Card(
-    @JvmField val id: String,
-    @JvmField val name: String
-)
-
-sealed class Quest(
-    id: String,
-    name: String,
-    open val title: String,
-    open val vps: Int,
-    open val gems: Int,
-    open val doubleReq: Symbol,
-    open val tripleReq: Symbol,
-    open val land: RegionName
-) : Card(id, name) {
-
-    fun getRequirements(): List<Symbol> {
-        val list = mutableListOf<Symbol>()
-        if (doubleReq != Symbol.NONE) {
-            repeat(2) { list.add(doubleReq) }
-        }
-        if (tripleReq != Symbol.NONE) {
-            repeat(3) { list.add(tripleReq) }
-        }
-        return list
-    }
+sealed class Card {
+    abstract val id: String
+    abstract val name: String
 }
 
-data class BoardQuest(
-    val _id: String,
-    val _name: String,
-    override val title: String,
-    override val vps: Int,
-    override val gems: Int,
-    override val doubleReq: Symbol,
-    override val tripleReq: Symbol,
-    override val land: RegionName
-) : Quest(_id, _name, title, vps, gems, doubleReq, tripleReq, land) {
-    fun matchReq(card: Card): Boolean {
-        if (card !is CreatureCard) return false
-        val reqs = getRequirements()
-
-        // Check if card matches any requirement
-        for (i in reqs.indices) {
-            if (card.values.contains(reqs[i])) {
-                return true
-            }
-        }
-        return false
-    }
-}
-
-data class PlayerQuest(
-    val _id: String,
-    val _name: String,
-    override val title: String,
-    override val vps: Int,
-    override val gems: Int,
-    override val doubleReq: Symbol,
-    override val tripleReq: Symbol,
-    override val land: RegionName,
+/**
+ * ponytail: merged Quest, BoardQuest, and PlayerQuest into a single class.
+ * uses isPersonal flag to distinguish board vs player state.
+ */
+data class Quest(
+    override val id: String,
+    override val name: String,
+    val title: String,
+    val vps: Int,
+    val gems: Int,
+    val doubleReq: Symbol,
+    val tripleReq: Symbol,
+    val land: RegionName,
+    val isPersonal: Boolean = false,
     val stored: List<CreatureCard> = emptyList()
-) : Quest(_id, _name, title, vps, gems, doubleReq, tripleReq, land) {
+) : Card() {
+
+    init {
+        // ponytail: invariant check - board quests never hold stored cards.
+        if (!isPersonal) require(stored.isEmpty()) { "Board quests cannot have stored cards" }
+    }
+
+    fun getRequirements(): List<Symbol> = buildList {
+        if (doubleReq != Symbol.NONE) repeat(2) { add(doubleReq) }
+        if (tripleReq != Symbol.NONE) repeat(3) { add(tripleReq) }
+    }
 
     fun getFulfilledIndices(): Set<Int> {
-        val reqs = getRequirements()
+        if (!isPersonal) return emptySet()
         val fulfilled = mutableSetOf<Int>()
         val providedSymbols = stored.flatMap { it.values }.toMutableList()
-
-        for (i in reqs.indices) {
-            val req = reqs[i]
-            if (providedSymbols.remove(req)) {
-                fulfilled.add(i)
-            }
+        val requirements = getRequirements()
+        requirements.forEachIndexed { i, req ->
+            if (providedSymbols.remove(req)) fulfilled.add(i)
         }
         return fulfilled
     }
 
-    fun canStoreCard(card: Card): Boolean {
+    fun canAccept(card: Card): Boolean {
         if (card !is CreatureCard) return false
         val reqs = getRequirements()
+        if (!isPersonal) return reqs.any { it in card.values }
+        
         val fulfilled = getFulfilledIndices()
-
         if (fulfilled.size >= reqs.size) return false
-
-        // Check if card matches any unmet requirement
-        for (i in reqs.indices) {
-            if (i !in fulfilled && card.values.contains(reqs[i])) {
-                return true
-            }
-        }
-        return false
+        return reqs.indices.any { i -> i !in fulfilled && card.values.contains(reqs[i]) }
     }
+
+    // Compatibility aliases
+    fun matchReq(card: Card) = canAccept(card)
+    fun canStoreCard(card: Card) = canAccept(card)
 }
+
+// Typealiases for compatibility with existing code
+typealias BoardQuest = Quest
+typealias PlayerQuest = Quest
 
 interface HasValues { val values: List<Symbol> }
 
-class ArtifactCard(id: String, name: String, val cost: Int) : Card(id, name)
-class PlayerCard(id: String, name: String) : Card(id, name)
-class EventCard(id: String, name: String) : Card(id, name)
+class ArtifactCard(override val id: String, override val name: String, val cost: Int) : Card()
+class PlayerCard(override val id: String, override val name: String) : Card()
+class EventCard(override val id: String, override val name: String) : Card()
 
 data class CreatureCard(
-    val _id: String,
-    val _name: String,
+    override val id: String,
+    override val name: String,
     @JvmField val gem: Boolean,
     override val values: List<Symbol>,
     @JvmField val subduedBy: Symbol,
     @JvmField val ability: Ability
-) : Card(_id, _name), HasValues {
-    constructor(name: String, subduedBy: Symbol, gem: Boolean, ability: Ability, value1: Symbol) :
-            this(name, name, gem, listOf(value1), subduedBy, ability)
-
-    constructor(name: String, subduedBy: Symbol, gem: Boolean, ability: Ability, value1: Symbol, value2: Symbol) :
-            this(name, name, gem, listOf(value1, value2), subduedBy, ability)
+) : Card(), HasValues {
+    constructor(name: String, subduedBy: Symbol, gem: Boolean, ability: Ability, vararg value: Symbol) :
+            this(name, name, gem, value.toList(), subduedBy, ability)
 }
 
-data class Artifact(val _id: String, val _name: String, @JvmField val cost: Int, @JvmField val ability: Ability = Ability.NONE) : Card(_id, _name)
+data class Artifact(override val id: String, override val name: String, @JvmField val cost: Int, @JvmField val ability: Ability = Ability.NONE) : Card()
